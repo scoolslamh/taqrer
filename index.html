@@ -552,6 +552,10 @@ select {
   font-size: 13px;
 }
 
+.report-number {
+  display: none;
+}
+
 .report-item:last-child {
   border-bottom: 0;
 }
@@ -760,7 +764,60 @@ select {
 
   .report-item {
     grid-template-columns: 1fr;
-    gap: 5px;
+    gap: 0;
+    overflow: hidden;
+    margin-bottom: 14px;
+    padding: 0;
+    border: 1px solid #dce5e1;
+    border-radius: 13px;
+    background: #fff;
+  }
+
+  .report-number {
+    display: block;
+    width: auto;
+    height: auto;
+    padding: 8px 12px;
+    border-radius: 0;
+    background: #0d6b57;
+    color: #fff;
+    font-size: 14px;
+  }
+
+  .report-number::before {
+    content: "التقرير رقم ";
+  }
+
+  .report-name,
+  .report-cell,
+  .report-status-cell {
+    display: grid;
+    grid-template-columns: minmax(105px, 38%) 1fr;
+    align-items: center;
+    min-height: 44px;
+    padding: 9px 12px;
+    border-bottom: 1px solid #edf1ef;
+  }
+
+  .report-status-cell {
+    border-bottom: 0;
+  }
+
+  .report-name::before,
+  .report-cell::before,
+  .report-status-cell::before {
+    content: attr(data-label);
+    color: #6b7974;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .report-status {
+    justify-self: start;
+  }
+
+  .report-inline-label {
+    display: none;
   }
 
   .report-form-grid {
@@ -4570,7 +4627,7 @@ function renderReports(reports) {
   }
 
   reportsList.innerHTML =
-    reports.map(report => {
+    reports.map((report, index) => {
 
       const type =
         escapeHtml(
@@ -4594,10 +4651,13 @@ function renderReports(reports) {
 
       return `
         <div class="report-item">
-          <div class="report-name">${type}</div>
-          <div>تاريخ التنفيذ: ${executionDate}</div>
-          <div>تاريخ الرفع: ${uploadDate}</div>
-          <div class="report-status">${status}</div>
+          <div class="report-number" aria-label="التقرير رقم ${index + 1}">${index + 1}</div>
+          <div class="report-name" data-label="نوع التقرير">${type}</div>
+          <div class="report-cell" data-label="تاريخ التنفيذ"><span class="report-inline-label">تاريخ التنفيذ: </span>${executionDate}</div>
+          <div class="report-cell" data-label="تاريخ الرفع"><span class="report-inline-label">تاريخ الرفع: </span>${uploadDate}</div>
+          <div class="report-status-cell" data-label="الحالة">
+            <span class="report-status">${status}</span>
+          </div>
         </div>
       `;
     }).join("");
