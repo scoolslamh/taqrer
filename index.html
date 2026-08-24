@@ -1,0 +1,4859 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
+
+<title>نظام تقارير الأمن والسلامة المدرسية</title>
+
+<style>
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Tahoma, Arial, sans-serif;
+  background: #f4f7f6;
+  color: #263631;
+}
+
+button,
+input,
+select {
+  font-family: inherit;
+}
+
+.container {
+  width: min(100% - 28px, 950px);
+  margin: 0 auto;
+}
+
+
+/* =========================
+   LOGIN
+========================= */
+
+#loginPage {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+.login-card {
+  width: min(100%, 440px);
+  background: white;
+  border-radius: 24px;
+  padding: 38px 30px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.08);
+}
+
+.logo {
+  width: min(100%, 240px);
+  margin: 0 auto 18px;
+}
+
+.logo img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.login-card h1 {
+  text-align: center;
+  margin: 0;
+  color: #153c32;
+  font-size: 22px;
+  line-height: 1.7;
+}
+
+.subtitle {
+  text-align: center;
+  color: #74817d;
+  line-height: 1.8;
+  margin: 8px 0 28px;
+  font-size: 14px;
+}
+
+.login-footer {
+  margin: 16px 0 0;
+  color: #68736f;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+}
+
+
+/* =========================
+   FORM
+========================= */
+
+.field {
+  margin-bottom: 18px;
+}
+
+.field label {
+  display: block;
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  height: 52px;
+  border: 1px solid #d6dfdc;
+  border-radius: 12px;
+  padding: 0 14px;
+  font-size: 16px;
+  outline: none;
+  background: white;
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: #0d6b57;
+  box-shadow: 0 0 0 4px rgba(13,107,87,.09);
+}
+
+.login-number {
+  direction: ltr;
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 18px !important;
+}
+
+.readonly {
+  background: #f3f5f4 !important;
+  color: #68736f;
+  cursor: not-allowed;
+}
+
+.hint {
+  color: #8a9490;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+
+/* =========================
+   BUTTONS
+========================= */
+
+.btn {
+  min-height: 50px;
+  border: 0;
+  border-radius: 12px;
+  padding: 0 20px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.btn-primary {
+  width: 100%;
+  background: #0d6b57;
+  color: white;
+}
+
+.btn-secondary {
+  background: white;
+  color: #42514c;
+  border: 1px solid #d6dfdc;
+}
+
+.btn:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+
+/* =========================
+   MESSAGES
+========================= */
+
+.message {
+  display: none;
+  padding: 13px 15px;
+  margin-top: 18px;
+  border-radius: 11px;
+  line-height: 1.7;
+  font-size: 14px;
+}
+
+.message.error {
+  display: block;
+  color: #9d2929;
+  background: #fff0f0;
+  border: 1px solid #f2cccc;
+}
+
+.message.success {
+  display: block;
+  color: #17654f;
+  background: #edf9f4;
+  border: 1px solid #cbe9dd;
+}
+
+
+/* =========================
+   DASHBOARD
+========================= */
+
+#dashboardPage {
+  display: none;
+  min-height: 100vh;
+  padding-bottom: 50px;
+}
+
+.topbar {
+  background: #0d6b57;
+  color: white;
+  padding: 18px 0;
+  box-shadow: 0 3px 14px rgba(0,0,0,.08);
+}
+
+.topbar-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.system-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: bold;
+  font-size: 17px;
+}
+
+.topbar-logo {
+  display: block;
+  width: 90px;
+  height: auto;
+  padding: 5px 7px;
+  border-radius: 9px;
+  background: white;
+  flex-shrink: 0;
+}
+
+.logout {
+  border: 1px solid rgba(255,255,255,.45);
+  background: transparent;
+  color: white;
+  border-radius: 9px;
+  padding: 9px 15px;
+  cursor: pointer;
+}
+
+.welcome {
+  margin-top: 30px;
+  background: linear-gradient(135deg,#0d6b57,#16846c);
+  color: white;
+  padding: 28px;
+  border-radius: 20px;
+}
+
+.welcome-small {
+  opacity: .85;
+  font-size: 13px;
+}
+
+.welcome h2 {
+  margin: 7px 0 4px;
+  font-size: 24px;
+}
+
+.welcome p {
+  margin: 0;
+  opacity: .9;
+}
+
+
+/* =========================
+   ACHIEVEMENT
+========================= */
+
+.achievement-card {
+  overflow: hidden;
+}
+
+.achievement-card.complete {
+  border: 1px solid #c9a227;
+  background: linear-gradient(135deg,#fff,#fffaf0);
+}
+
+.achievement-header,
+.achievement-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.achievement-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: #173e34;
+  font-size: 20px;
+}
+
+.achievement-score {
+  color: #173e34;
+  font-size: 26px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.achievement-percentage {
+  color: #0d6b57;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.achievement-progress-track {
+  height: 12px;
+  margin-top: 18px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e6eeeb;
+}
+
+.achievement-progress-bar {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg,#0d6b57,#22a07f);
+  transition: width .35s ease;
+}
+
+.achievement-stars {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 14px;
+  direction: ltr;
+  color: #d6dfdc;
+  font-size: 25px;
+}
+
+.achievement-star.completed {
+  color: #e0ad20;
+}
+
+.achievement-reports {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.achievement-report {
+  padding: 15px;
+  border: 1px solid #e1e8e5;
+  border-radius: 12px;
+  background: #f8faf9;
+}
+
+.achievement-report-name {
+  min-height: 40px;
+  color: #173e34;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 1.6;
+}
+
+.achievement-report-count {
+  margin-top: 7px;
+  font-weight: bold;
+}
+
+.achievement-report-status {
+  margin-top: 5px;
+  color: #74817d;
+  font-size: 12px;
+}
+
+.achievement-report-status.completed {
+  color: #17654f;
+}
+
+.achievement-message,
+.achievement-state {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #edf9f4;
+  color: #17654f;
+  line-height: 1.7;
+}
+
+.achievement-state.error {
+  background: #fff7ed;
+  color: #80501e;
+}
+
+.achievement-retry {
+  min-height: 38px;
+  margin-top: 10px;
+  padding: 0 14px;
+  font-size: 13px;
+}
+
+
+/* =========================
+   DATA CARD
+========================= */
+
+.card {
+  margin-top: 22px;
+  background: white;
+  border-radius: 18px;
+  padding: 26px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.05);
+}
+
+.card-title {
+  margin: 0 0 5px;
+  color: #173e34;
+  font-size: 20px;
+}
+
+.card-description {
+  margin: 0 0 25px;
+  color: #7a8682;
+  font-size: 13px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 4px 20px;
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+.actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.actions .btn {
+  min-width: 180px;
+}
+
+
+
+/* =========================
+   REPORTS
+========================= */
+
+.reports-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.btn-add-report {
+  background: #0d6b57;
+  color: white;
+  white-space: nowrap;
+}
+
+.report-types {
+  display: none;
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid #e1e8e5;
+  border-radius: 15px;
+  background: #f8faf9;
+}
+
+.report-types.show {
+  display: block;
+}
+
+.report-types-title {
+  margin: 0 0 14px;
+  font-size: 15px;
+  color: #173e34;
+}
+
+.report-type-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.report-type-btn {
+  min-height: 62px;
+  border: 1px solid #d6dfdc;
+  border-radius: 12px;
+  background: white;
+  padding: 12px 14px;
+  text-align: right;
+  cursor: pointer;
+  color: #263631;
+  font-weight: bold;
+  font-family: inherit;
+}
+
+.report-type-btn:hover {
+  border-color: #0d6b57;
+  background: #f3fbf8;
+}
+
+.reports-list {
+  margin-top: 24px;
+}
+
+.reports-list-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+  color: #173e34;
+}
+
+.empty-state {
+  padding: 24px;
+  text-align: center;
+  border: 1px dashed #cfd9d5;
+  border-radius: 14px;
+  color: #7a8682;
+  background: #fafcfb;
+}
+
+.report-item {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid #edf1ef;
+  font-size: 13px;
+}
+
+.report-item:last-child {
+  border-bottom: 0;
+}
+
+.report-name {
+  font-weight: bold;
+  color: #173e34;
+}
+
+.report-status {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #edf9f4;
+  color: #17654f;
+  white-space: nowrap;
+}
+
+
+.evacuation-form {
+  display: none;
+  margin-top: 20px;
+  padding: 22px;
+  border: 1px solid #e1e8e5;
+  border-radius: 16px;
+  background: #fbfcfc;
+}
+
+.evacuation-form.show {
+  display: block;
+}
+
+.evacuation-form-title {
+  margin: 0 0 6px;
+  color: #173e34;
+  font-size: 18px;
+}
+
+.evacuation-form-description {
+  margin: 0 0 20px;
+  color: #7a8682;
+  font-size: 13px;
+}
+
+.report-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px 24px;
+}
+
+.report-form-full {
+  grid-column: 1 / -1;
+}
+
+.report-file {
+  padding: 16px;
+  border: 1px dashed #cbd8d3;
+  border-radius: 12px;
+  background: white;
+}
+
+.report-file input[type="file"] {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.declaration-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #f4f8f6;
+}
+
+.declaration-box input {
+  margin-top: 4px;
+}
+
+.program-types-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.program-type-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 12px;
+  border: 1px solid #d6dfdc;
+  border-radius: 10px;
+  background: white;
+}
+
+.program-type-option input {
+  width: auto;
+  margin: 0;
+}
+
+.report-submit-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-start;
+}
+
+.btn-secondary {
+  background: white;
+  color: #42504b;
+  border: 1px solid #d2dcda;
+}
+
+.upload-progress {
+  display: none;
+  margin-top: 14px;
+  color: #0d6b57;
+  font-size: 13px;
+}
+
+.upload-progress.show {
+  display: block;
+}
+
+/* =========================
+   LOADER
+========================= */
+
+.loader {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  vertical-align: middle;
+  border: 3px solid rgba(255,255,255,.35);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 700px) {
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .full {
+    grid-column: auto;
+  }
+
+  .card {
+    padding: 20px 16px;
+  }
+
+  .achievement-summary {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .achievement-reports {
+    grid-template-columns: repeat(2,1fr);
+  }
+
+  .achievement-stars {
+    font-size: 21px;
+  }
+
+  .welcome {
+    padding: 22px 18px;
+  }
+
+  .welcome h2 {
+    font-size: 20px;
+  }
+
+  .system-title {
+    font-size: 14px;
+  }
+
+  .topbar-logo {
+    width: 72px;
+  }
+
+  .login-card {
+    padding: 30px 20px;
+  }
+
+  .reports-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .report-type-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .report-item {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .report-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .report-form-full {
+    grid-column: auto;
+  }
+
+  .program-types-options {
+    grid-template-columns: 1fr;
+  }
+
+  .report-submit-actions {
+    flex-direction: column;
+  }
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<!-- =========================
+     صفحة الدخول
+========================= -->
+
+<section id="loginPage">
+
+  <div class="login-card">
+
+    <div class="logo">
+      <img
+        src="logo.png"
+        alt="شعار وزارة التعليم"
+      >
+    </div>
+
+    <h1>
+      نظام رَصْد لرفع تقارير السلامة المدرسية
+    </h1>
+
+    <p class="subtitle">
+      أدخل الرقم الإحصائي أو الوزاري لأي مرحلة في المدرسة
+      للدخول إلى النظام
+    </p>
+
+
+    <form id="loginForm">
+
+      <div class="field">
+
+        <label for="schoolNumber">
+          الرقم الإحصائي / الوزاري
+        </label>
+
+        <input
+          id="schoolNumber"
+          class="login-number"
+          type="text"
+          maxlength="30"
+          autocomplete="off"
+          autocapitalize="characters"
+          spellcheck="false"
+          placeholder="مثال: 61302 أو M3961854"
+          required
+        >
+
+      </div>
+
+
+      <button
+        id="loginButton"
+        class="btn btn-primary"
+        type="submit"
+      >
+        دخول
+      </button>
+
+    </form>
+
+
+    <div
+      id="loginMessage"
+      class="message"
+    ></div>
+
+  </div>
+
+  <p class="login-footer">
+    الأمن والسلامة والمرافق بعسير
+  </p>
+
+</section>
+
+
+<!-- =========================
+     لوحة المدرسة
+========================= -->
+
+<section id="dashboardPage">
+
+
+  <header class="topbar">
+
+    <div class="container topbar-inner">
+
+      <div class="system-title">
+        <img
+          class="topbar-logo"
+          src="logo.png"
+          alt="شعار وزارة التعليم"
+        >
+        <span>
+          نظام رَصْد لتقارير الأمن والسلامة المدرسية
+        </span>
+      </div>
+
+      <button
+        id="logoutButton"
+        class="logout"
+        type="button"
+      >
+        خروج
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <main class="container">
+
+
+    <section class="welcome">
+
+      <div class="welcome-small">
+        مرحبًا بكم
+      </div>
+
+      <h2 id="welcomeSchoolName">
+        —
+      </h2>
+
+      <p id="welcomeLocation">
+        —
+      </p>
+
+    </section>
+
+
+    <section
+      id="achievementCard"
+      class="card achievement-card"
+    >
+
+      <div class="achievement-header">
+        <h3 class="achievement-title">
+          <span aria-hidden="true">🏆</span>
+          <span id="achievementTitle">مؤشر الإنجاز</span>
+        </h3>
+      </div>
+
+      <div id="achievementContent">
+
+        <div
+          id="achievementLoading"
+          class="achievement-state"
+        >
+          جاري تحميل مؤشر الإنجاز...
+        </div>
+
+        <div id="achievementDetails" hidden>
+
+          <div class="achievement-summary">
+            <div>
+              <div class="hint">الدرجة</div>
+              <div
+                id="achievementScore"
+                class="achievement-score"
+              >0 / 0</div>
+            </div>
+
+            <div>
+              <div class="hint">النسبة</div>
+              <div
+                id="achievementPercentage"
+                class="achievement-percentage"
+              >0%</div>
+            </div>
+          </div>
+
+          <div
+            class="achievement-progress-track"
+            role="progressbar"
+            aria-label="نسبة الإنجاز"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+          >
+            <div
+              id="achievementProgress"
+              class="achievement-progress-bar"
+            ></div>
+          </div>
+
+          <div
+            id="achievementStars"
+            class="achievement-stars"
+            aria-label="نجوم الإنجاز"
+          ></div>
+
+          <div class="achievement-reports">
+            <div class="achievement-report">
+              <div class="achievement-report-name">خطط الإخلاء</div>
+              <div id="achievementEvacuationCount" class="achievement-report-count">0 من 0</div>
+              <div id="achievementEvacuationStatus" class="achievement-report-status"></div>
+            </div>
+
+            <div class="achievement-report">
+              <div class="achievement-report-name">لحظة سلامة</div>
+              <div id="achievementSafetyMomentCount" class="achievement-report-count">0 من 0</div>
+              <div id="achievementSafetyMomentStatus" class="achievement-report-status"></div>
+            </div>
+
+            <div class="achievement-report">
+              <div class="achievement-report-name">اليوم العالمي للدفاع المدني</div>
+              <div id="achievementCivilDefenseCount" class="achievement-report-count">0 من 0</div>
+              <div id="achievementCivilDefenseStatus" class="achievement-report-status"></div>
+            </div>
+
+            <div class="achievement-report">
+              <div class="achievement-report-name">أسبوع المرور</div>
+              <div id="achievementTrafficWeekCount" class="achievement-report-count">0 من 0</div>
+              <div id="achievementTrafficWeekStatus" class="achievement-report-status"></div>
+            </div>
+          </div>
+
+          <div
+            id="achievementMessage"
+            class="achievement-message"
+          ></div>
+
+        </div>
+
+        <div
+          id="achievementError"
+          class="achievement-state error"
+          hidden
+        >
+          <div>تعذر تحميل مؤشر الإنجاز حاليًا.</div>
+          <button
+            id="achievementRetryButton"
+            class="btn btn-secondary achievement-retry"
+            type="button"
+          >
+            إعادة المحاولة
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <section class="card">
+
+      <h3 class="card-title">
+        بيانات المدرسة
+      </h3>
+
+      <p class="card-description">
+        يمكنك استكمال أو تحديث البيانات المتاحة.
+        البيانات الأساسية للمدرسة غير قابلة للتعديل.
+      </p>
+
+
+      <form id="schoolForm">
+
+        <div class="grid">
+
+
+          <div class="field">
+
+            <label>
+              الأرقام الإحصائية / الوزارية
+            </label>
+
+            <input
+              id="statisticalNumbers"
+              class="readonly"
+              type="text"
+              readonly
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              اسم المدرسة
+            </label>
+
+            <input
+              id="schoolName"
+              class="readonly"
+              type="text"
+              readonly
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              المحافظة
+            </label>
+
+            <input
+              id="governorate"
+              class="readonly"
+              type="text"
+              readonly
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label for="city">
+              المدينة
+            </label>
+
+            <input
+              id="city"
+              type="text"
+              maxlength="100"
+              placeholder="أدخل المدينة"
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label for="principalName">
+              اسم مدير/ة المدرسة
+            </label>
+
+            <input
+              id="principalName"
+              type="text"
+              maxlength="150"
+              placeholder="أدخل اسم مدير/ة المدرسة"
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label for="principalPhone">
+              جوال مدير/ة المدرسة
+            </label>
+
+            <input
+              id="principalPhone"
+              type="tel"
+              inputmode="numeric"
+              maxlength="15"
+              placeholder="05xxxxxxxx"
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label for="coordinatorName">
+              اسم منسق/ة الأمن والسلامة
+            </label>
+
+            <input
+              id="coordinatorName"
+              type="text"
+              maxlength="150"
+              placeholder="أدخل اسم المنسق/ة"
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label for="coordinatorPhone">
+              جوال منسق/ة الأمن والسلامة
+            </label>
+
+            <input
+              id="coordinatorPhone"
+              type="tel"
+              inputmode="numeric"
+              maxlength="15"
+              placeholder="05xxxxxxxx"
+            >
+
+          </div>
+
+
+          <div class="field full">
+
+            <label for="staffType">
+              الكادر
+            </label>
+
+            <select id="staffType">
+
+              <option value="">
+                اختر الكادر
+              </option>
+
+              <option value="تعليمي">
+                تعليمي
+              </option>
+
+              <option value="إداري">
+                إداري
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+        <div
+          id="saveMessage"
+          class="message"
+        ></div>
+
+
+        <div class="actions">
+
+  <button
+    id="saveButton"
+    class="btn btn-primary"
+    type="submit"
+  >
+    حفظ البيانات
+  </button>
+
+</div>
+
+      </form>
+
+    </section>
+
+
+    <section class="card" id="reportsCard">
+
+      <div class="reports-header">
+
+        <div>
+          <h3 class="card-title">التقارير</h3>
+          <p class="card-description" style="margin-bottom:0;">
+            يمكنك إضافة تقرير جديد ومتابعة التقارير المرفوعة سابقًا.
+          </p>
+        </div>
+
+        <button
+          id="addReportButton"
+          class="btn btn-add-report"
+          type="button"
+        >
+          + إضافة تقرير
+        </button>
+
+      </div>
+
+      <div id="reportsMessage" class="message"></div>
+
+      <div id="reportTypes" class="report-types">
+
+        <p class="report-types-title">
+          اختر نوع التقرير
+        </p>
+
+        <div class="report-type-grid">
+
+          <button class="report-type-btn" type="button"
+            data-report-type="تقرير خطة إخلاء">
+            تقرير خطة إخلاء
+          </button>
+
+          <button class="report-type-btn" type="button"
+            data-report-type="تقرير لحظة سلامة">
+            تقرير لحظة سلامة
+          </button>
+
+          <button class="report-type-btn" type="button"
+            data-report-type="تقرير اليوم العالمي للدفاع المدني">
+            تقرير اليوم العالمي للدفاع المدني
+          </button>
+
+          <button class="report-type-btn" type="button"
+            data-report-type="تقرير أسبوع المرور">
+            تقرير أسبوع المرور
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <form
+        id="evacuationForm"
+        class="evacuation-form"
+        novalidate
+      >
+
+        <h4 class="evacuation-form-title">
+          تقرير خطة إخلاء
+        </h4>
+
+        <p class="evacuation-form-description">
+          أدخل بيانات الفرضية وارفق التقرير المعتمد بصيغة PDF.
+        </p>
+
+        <div class="report-form-grid">
+
+          <div class="field">
+            <label for="evacuationPlanNumber">
+              خطة الإخلاء
+            </label>
+            <select
+              id="evacuationPlanNumber"
+              required
+            >
+              <option value="">
+                اختر خطة الإخلاء
+              </option>
+              <option value="1">
+                خطة الإخلاء الأولى
+              </option>
+              <option value="2">
+                خطة الإخلاء الثانية
+              </option>
+              <option value="3">
+                خطة الإخلاء الثالثة
+              </option>
+              <option value="4">
+                خطة الإخلاء الرابعة
+              </option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="evacuationDate">
+              تاريخ تنفيذ الفرضية
+            </label>
+            <input
+              id="evacuationDate"
+              type="date"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="evacuationStudents">
+              عدد الطلاب
+            </label>
+            <input
+              id="evacuationStudents"
+              type="number"
+              min="0"
+              step="1"
+              inputmode="numeric"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="evacuationStaff">
+              عدد المنسوبين
+            </label>
+            <input
+              id="evacuationStaff"
+              type="number"
+              min="0"
+              step="1"
+              inputmode="numeric"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label>
+              منسق/ة الأمن والسلامة
+            </label>
+            <input
+              id="evacuationCoordinator"
+              type="text"
+              readonly
+            >
+          </div>
+
+          <div class="field report-form-full">
+            <label for="evacuationNotes">
+              ملاحظات
+            </label>
+            <textarea
+              id="evacuationNotes"
+              rows="4"
+              maxlength="1000"
+              placeholder="اكتب الملاحظات إن وجدت"
+            ></textarea>
+          </div>
+
+          <div class="field report-form-full report-file">
+            <label for="evacuationFile">
+              التقرير المعتمد PDF
+            </label>
+            <input
+              id="evacuationFile"
+              type="file"
+              accept="application/pdf,.pdf"
+              required
+            >
+            <div class="hint">
+              الحد الأقصى لحجم الملف: 10 ميجابايت.
+            </div>
+          </div>
+
+          <label class="declaration-box report-form-full">
+            <input
+              id="evacuationDeclaration"
+              type="checkbox"
+              required
+            >
+            <span>
+              أقر بصحة البيانات المدخلة وأن الملف المرفوع هو التقرير المعتمد للفرضية.
+            </span>
+          </label>
+
+        </div>
+
+        <div
+          id="evacuationMessage"
+          class="message"
+        ></div>
+
+        <div
+          id="evacuationProgress"
+          class="upload-progress"
+        >
+          جاري رفع التقرير، يرجى عدم إغلاق الصفحة...
+        </div>
+
+        <div class="report-submit-actions">
+          <button
+            id="evacuationSubmitButton"
+            class="btn btn-primary"
+            type="submit"
+          >
+            رفع التقرير
+          </button>
+
+          <button
+            id="evacuationCancelButton"
+            class="btn btn-secondary"
+            type="button"
+          >
+            إلغاء
+          </button>
+        </div>
+
+      </form>
+
+      <form
+        id="safetyMomentForm"
+        class="evacuation-form"
+        novalidate
+      >
+
+        <h4 class="evacuation-form-title">
+          تقرير لحظة سلامة
+        </h4>
+
+        <p class="evacuation-form-description">
+          أدخل بيانات البرنامج وارفق التقرير المعتمد بصيغة PDF.
+        </p>
+
+        <div class="report-form-grid">
+
+          <div class="field report-form-full">
+            <label for="safetyMomentProgramName">
+              اسم البرنامج
+            </label>
+            <input
+              id="safetyMomentProgramName"
+              type="text"
+              maxlength="200"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="safetyMomentDate">
+              تاريخ التنفيذ
+            </label>
+            <input
+              id="safetyMomentDate"
+              type="date"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="safetyMomentStudents">
+              عدد المستفيدين من الطلاب
+            </label>
+            <input
+              id="safetyMomentStudents"
+              type="number"
+              min="0"
+              step="1"
+              inputmode="numeric"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="safetyMomentParents">
+              عدد المستفيدين من أولياء الأمور
+            </label>
+            <input
+              id="safetyMomentParents"
+              type="number"
+              min="0"
+              step="1"
+              inputmode="numeric"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="safetyMomentStaff">
+              عدد المستفيدين من منسوبي المدرسة
+            </label>
+            <input
+              id="safetyMomentStaff"
+              type="number"
+              min="0"
+              step="1"
+              inputmode="numeric"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="safetyMomentTotal">
+              إجمالي المستفيدين
+            </label>
+            <input
+              id="safetyMomentTotal"
+              type="number"
+              value="0"
+              readonly
+            >
+          </div>
+
+          <div class="field report-form-full report-file">
+            <label for="safetyMomentFile">
+              التقرير المعتمد PDF
+            </label>
+            <input
+              id="safetyMomentFile"
+              type="file"
+              accept="application/pdf,.pdf"
+              required
+            >
+            <div class="hint">
+              الحد الأقصى لحجم الملف: 10 ميجابايت.
+            </div>
+          </div>
+
+          <label class="declaration-box report-form-full">
+            <input
+              id="safetyMomentDeclaration"
+              type="checkbox"
+              required
+            >
+            <span>
+              أقر بصحة البيانات المدخلة وأن الملف المرفوع هو التقرير المعتمد للبرنامج.
+            </span>
+          </label>
+
+        </div>
+
+        <div
+          id="safetyMomentMessage"
+          class="message"
+        ></div>
+
+        <div
+          id="safetyMomentProgress"
+          class="upload-progress"
+        >
+          جاري رفع التقرير، يرجى عدم إغلاق الصفحة...
+        </div>
+
+        <div class="report-submit-actions">
+          <button
+            id="safetyMomentSubmitButton"
+            class="btn btn-primary"
+            type="submit"
+          >
+            رفع تقرير لحظة سلامة
+          </button>
+
+          <button
+            id="safetyMomentCancelButton"
+            class="btn btn-secondary"
+            type="button"
+          >
+            إلغاء
+          </button>
+        </div>
+
+      </form>
+
+      <form
+        id="civilDefenseForm"
+        class="evacuation-form"
+        novalidate
+      >
+
+        <h4 class="evacuation-form-title">
+          تقرير اليوم العالمي للدفاع المدني
+        </h4>
+
+        <p class="evacuation-form-description">
+          أدخل بيانات البرنامج وارفق التقرير المعتمد بصيغة PDF.
+        </p>
+
+        <div class="report-form-grid">
+
+          <div class="field report-form-full">
+            <label for="civilDefenseProgramName">
+              اسم البرنامج
+            </label>
+            <input
+              id="civilDefenseProgramName"
+              type="text"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="civilDefenseDate">
+              تاريخ التنفيذ
+            </label>
+            <input
+              id="civilDefenseDate"
+              type="date"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="civilDefenseProgramsCount">
+              عدد البرامج المقدمة
+            </label>
+            <input
+              id="civilDefenseProgramsCount"
+              type="number"
+              min="1"
+              step="1"
+              inputmode="numeric"
+              required
+            >
+          </div>
+
+          <div class="field report-form-full">
+            <label>
+              نوع البرنامج
+            </label>
+            <div class="program-types-options">
+              <label class="program-type-option">
+                <input type="checkbox" name="civilDefenseProgramType" value="إذاعة">
+                <span>إذاعة</span>
+              </label>
+              <label class="program-type-option">
+                <input type="checkbox" name="civilDefenseProgramType" value="مسابقة">
+                <span>مسابقة</span>
+              </label>
+              <label class="program-type-option">
+                <input type="checkbox" name="civilDefenseProgramType" value="محاضرة">
+                <span>محاضرة</span>
+              </label>
+              <label class="program-type-option">
+                <input type="checkbox" name="civilDefenseProgramType" value="رسائل توعوية">
+                <span>رسائل توعوية</span>
+              </label>
+              <label class="program-type-option">
+                <input type="checkbox" name="civilDefenseProgramType" value="زيارة">
+                <span>زيارة</span>
+              </label>
+              <label class="program-type-option">
+                <input id="civilDefenseOtherCheckbox" type="checkbox" name="civilDefenseProgramType" value="أخرى">
+                <span>أخرى</span>
+              </label>
+            </div>
+          </div>
+
+          <div
+            id="civilDefenseOtherField"
+            class="field report-form-full"
+            hidden
+          >
+            <label for="civilDefenseOtherType">
+              حدد النوع الآخر
+            </label>
+            <input
+              id="civilDefenseOtherType"
+              type="text"
+            >
+          </div>
+
+          <div class="field">
+            <label for="civilDefenseStudents">
+              عدد المستفيدين من الطلاب
+            </label>
+            <input
+              id="civilDefenseStudents"
+              type="number"
+              min="0"
+              step="1"
+              inputmode="numeric"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="civilDefenseStaff">
+              عدد المستفيدين من المنسوبين
+            </label>
+            <input
+              id="civilDefenseStaff"
+              type="number"
+              min="0"
+              step="1"
+              inputmode="numeric"
+              required
+            >
+          </div>
+
+          <div class="field report-form-full report-file">
+            <label for="civilDefenseFile">
+              التقرير المعتمد PDF
+            </label>
+            <input
+              id="civilDefenseFile"
+              type="file"
+              accept="application/pdf,.pdf"
+              required
+            >
+            <div class="hint">
+              الحد الأقصى لحجم الملف: 10 ميجابايت.
+            </div>
+          </div>
+
+          <label class="declaration-box report-form-full">
+            <input
+              id="civilDefenseDeclaration"
+              type="checkbox"
+              required
+            >
+            <span>
+              أقر بصحة البيانات المدخلة وأن الملف المرفوع هو التقرير المعتمد للبرنامج.
+            </span>
+          </label>
+
+        </div>
+
+        <div
+          id="civilDefenseMessage"
+          class="message"
+        ></div>
+
+        <div
+          id="civilDefenseProgress"
+          class="upload-progress"
+        >
+          جاري رفع التقرير، يرجى عدم إغلاق الصفحة...
+        </div>
+
+        <div class="report-submit-actions">
+          <button
+            id="civilDefenseSubmitButton"
+            class="btn btn-primary"
+            type="submit"
+          >
+            رفع التقرير
+          </button>
+
+          <button
+            id="civilDefenseCancelButton"
+            class="btn btn-secondary"
+            type="button"
+          >
+            إلغاء
+          </button>
+        </div>
+
+      </form>
+
+      <form
+        id="trafficWeekForm"
+        class="evacuation-form"
+        novalidate
+      >
+
+        <h4 class="evacuation-form-title">
+          تقرير أسبوع المرور
+        </h4>
+
+        <p class="evacuation-form-description">
+          أدخل بيانات البرنامج وارفق التقرير المعتمد بصيغة PDF.
+        </p>
+
+        <div class="report-form-grid">
+
+          <div class="field report-form-full">
+            <label for="trafficWeekProgramName">
+              اسم البرنامج
+            </label>
+            <input
+              id="trafficWeekProgramName"
+              type="text"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="trafficWeekExecutionDate">
+              تاريخ التنفيذ
+            </label>
+            <input
+              id="trafficWeekExecutionDate"
+              type="date"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="trafficWeekProgramsCount">
+              عدد البرامج المقدمة
+            </label>
+            <input
+              id="trafficWeekProgramsCount"
+              type="number"
+              min="1"
+              step="1"
+              inputmode="numeric"
+              required
+            >
+          </div>
+
+          <div class="field report-form-full">
+            <label>
+              نوع البرنامج
+            </label>
+            <div class="program-types-options">
+              <label class="program-type-option">
+                <input type="checkbox" name="trafficWeekProgramType" value="إذاعة">
+                <span>إذاعة</span>
+              </label>
+              <label class="program-type-option">
+                <input type="checkbox" name="trafficWeekProgramType" value="مسابقة">
+                <span>مسابقة</span>
+              </label>
+              <label class="program-type-option">
+                <input type="checkbox" name="trafficWeekProgramType" value="محاضرة">
+                <span>محاضرة</span>
+              </label>
+              <label class="program-type-option">
+                <input type="checkbox" name="trafficWeekProgramType" value="رسائل توعوية">
+                <span>رسائل توعوية</span>
+              </label>
+              <label class="program-type-option">
+                <input type="checkbox" name="trafficWeekProgramType" value="زيارة">
+                <span>زيارة</span>
+              </label>
+              <label class="program-type-option">
+                <input id="trafficWeekOtherCheckbox" type="checkbox" name="trafficWeekProgramType" value="أخرى">
+                <span>أخرى</span>
+              </label>
+            </div>
+          </div>
+
+          <div
+            id="trafficWeekOtherField"
+            class="field report-form-full"
+            hidden
+          >
+            <label for="trafficWeekOtherType">
+              حدد النوع الآخر
+            </label>
+            <input
+              id="trafficWeekOtherType"
+              type="text"
+            >
+          </div>
+
+          <div class="field">
+            <label for="trafficWeekStudentsCount">
+              عدد المستفيدين من الطلاب
+            </label>
+            <input
+              id="trafficWeekStudentsCount"
+              type="number"
+              min="0"
+              step="1"
+              inputmode="numeric"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="trafficWeekStaffCount">
+              عدد المستفيدين من المنسوبين
+            </label>
+            <input
+              id="trafficWeekStaffCount"
+              type="number"
+              min="0"
+              step="1"
+              inputmode="numeric"
+              required
+            >
+          </div>
+
+          <div class="field report-form-full report-file">
+            <label for="trafficWeekFile">
+              التقرير المعتمد PDF
+            </label>
+            <input
+              id="trafficWeekFile"
+              type="file"
+              accept="application/pdf,.pdf"
+              required
+            >
+            <div class="hint">
+              الحد الأقصى لحجم الملف: 10 ميجابايت.
+            </div>
+          </div>
+
+          <label class="declaration-box report-form-full">
+            <input
+              id="trafficWeekDeclaration"
+              type="checkbox"
+              required
+            >
+            <span>
+              أقر بصحة البيانات المدخلة وأن الملف المرفوع هو التقرير المعتمد للبرنامج.
+            </span>
+          </label>
+
+        </div>
+
+        <div
+          id="trafficWeekMessage"
+          class="message"
+        ></div>
+
+        <div
+          id="trafficWeekProgress"
+          class="upload-progress"
+        >
+          جاري رفع التقرير، يرجى عدم إغلاق الصفحة...
+        </div>
+
+        <div class="report-submit-actions">
+          <button
+            id="trafficWeekSubmitButton"
+            class="btn btn-primary"
+            type="submit"
+          >
+            رفع التقرير
+          </button>
+
+          <button
+            id="trafficWeekCancelButton"
+            class="btn btn-secondary"
+            type="button"
+          >
+            إلغاء
+          </button>
+        </div>
+
+      </form>
+
+      <div class="reports-list">
+        <h4 class="reports-list-title">
+          سجل التقارير
+        </h4>
+
+        <div id="reportsList">
+          <div class="empty-state">
+            جاري تحميل سجل التقارير...
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+</section>
+
+
+<script>
+
+/*
+ * =========================================================
+ * إعداد API
+ * =========================================================
+ */
+
+const API_URL =
+  "https://script.google.com/macros/s/AKfycbyeXO-JWKmd-7EUjO6x45iRzV5yM04yJTODRzar_ACxZ4Y4Y-caphasKjXZlks5Kf3t/exec";
+
+
+let currentSchool = null;
+
+
+/*
+ * =========================================================
+ * العناصر
+ * =========================================================
+ */
+
+const loginPage =
+  document.getElementById("loginPage");
+
+const dashboardPage =
+  document.getElementById("dashboardPage");
+
+const loginForm =
+  document.getElementById("loginForm");
+
+const schoolForm =
+  document.getElementById("schoolForm");
+
+const schoolNumber =
+  document.getElementById("schoolNumber");
+
+const loginButton =
+  document.getElementById("loginButton");
+
+const saveButton =
+  document.getElementById("saveButton");
+
+const loginMessage =
+  document.getElementById("loginMessage");
+
+const saveMessage =
+  document.getElementById("saveMessage");
+
+const addReportButton =
+  document.getElementById("addReportButton");
+
+const reportTypes =
+  document.getElementById("reportTypes");
+
+const reportsList =
+  document.getElementById("reportsList");
+
+const reportsMessage =
+  document.getElementById("reportsMessage");
+
+const evacuationForm =
+  document.getElementById("evacuationForm");
+
+const evacuationMessage =
+  document.getElementById("evacuationMessage");
+
+const evacuationProgress =
+  document.getElementById("evacuationProgress");
+
+const evacuationSubmitButton =
+  document.getElementById("evacuationSubmitButton");
+
+const evacuationCancelButton =
+  document.getElementById("evacuationCancelButton");
+
+const safetyMomentForm =
+  document.getElementById("safetyMomentForm");
+
+const safetyMomentMessage =
+  document.getElementById("safetyMomentMessage");
+
+const safetyMomentProgress =
+  document.getElementById("safetyMomentProgress");
+
+const safetyMomentSubmitButton =
+  document.getElementById("safetyMomentSubmitButton");
+
+const safetyMomentCancelButton =
+  document.getElementById("safetyMomentCancelButton");
+
+const safetyMomentBeneficiaryInputs = [
+  document.getElementById("safetyMomentStudents"),
+  document.getElementById("safetyMomentParents"),
+  document.getElementById("safetyMomentStaff")
+];
+
+const safetyMomentTotal =
+  document.getElementById("safetyMomentTotal");
+
+const civilDefenseForm =
+  document.getElementById("civilDefenseForm");
+
+const civilDefenseMessage =
+  document.getElementById("civilDefenseMessage");
+
+const civilDefenseProgress =
+  document.getElementById("civilDefenseProgress");
+
+const civilDefenseSubmitButton =
+  document.getElementById("civilDefenseSubmitButton");
+
+const civilDefenseCancelButton =
+  document.getElementById("civilDefenseCancelButton");
+
+const civilDefenseOtherCheckbox =
+  document.getElementById("civilDefenseOtherCheckbox");
+
+const civilDefenseOtherField =
+  document.getElementById("civilDefenseOtherField");
+
+const civilDefenseOtherType =
+  document.getElementById("civilDefenseOtherType");
+
+const trafficWeekForm =
+  document.getElementById("trafficWeekForm");
+
+const trafficWeekMessage =
+  document.getElementById("trafficWeekMessage");
+
+const trafficWeekProgress =
+  document.getElementById("trafficWeekProgress");
+
+const trafficWeekSubmitButton =
+  document.getElementById("trafficWeekSubmitButton");
+
+const trafficWeekCancelButton =
+  document.getElementById("trafficWeekCancelButton");
+
+const trafficWeekOtherCheckbox =
+  document.getElementById("trafficWeekOtherCheckbox");
+
+const trafficWeekOtherField =
+  document.getElementById("trafficWeekOtherField");
+
+const trafficWeekOtherType =
+  document.getElementById("trafficWeekOtherType");
+
+const achievementCard =
+  document.getElementById("achievementCard");
+
+const achievementTitle =
+  document.getElementById("achievementTitle");
+
+const achievementLoading =
+  document.getElementById("achievementLoading");
+
+const achievementDetails =
+  document.getElementById("achievementDetails");
+
+const achievementError =
+  document.getElementById("achievementError");
+
+const achievementScore =
+  document.getElementById("achievementScore");
+
+const achievementPercentage =
+  document.getElementById("achievementPercentage");
+
+const achievementProgress =
+  document.getElementById("achievementProgress");
+
+const achievementStars =
+  document.getElementById("achievementStars");
+
+const achievementMessage =
+  document.getElementById("achievementMessage");
+
+const achievementRetryButton =
+  document.getElementById("achievementRetryButton");
+
+
+/*
+ * =========================================================
+ * تحويل الإدخال أثناء الكتابة
+ * =========================================================
+ */
+
+schoolNumber.addEventListener(
+  "input",
+  function () {
+
+    this.value =
+      convertArabicDigitsToEnglish(
+        this.value
+      ).toUpperCase();
+  }
+);
+
+
+/*
+ * =========================================================
+ * تسجيل الدخول
+ * =========================================================
+ */
+
+loginForm.addEventListener(
+  "submit",
+  async function(event) {
+
+    event.preventDefault();
+
+    clearMessage(loginMessage);
+
+    const number =
+      normalizeSchoolNumber(
+        schoolNumber.value
+      );
+
+    if (!number) {
+
+      showMessage(
+        loginMessage,
+        "يرجى إدخال الرقم الإحصائي أو الوزاري.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (!/^[A-Z0-9]+$/.test(number)) {
+
+      showMessage(
+        loginMessage,
+        "الرقم الإحصائي أو الوزاري غير صحيح.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    setLoginLoading(true);
+
+
+    try {
+
+      const url =
+        `${API_URL}?action=getSchool&number=${
+          encodeURIComponent(number)
+        }`;
+
+      const response =
+        await fetch(
+          url,
+          {
+            method: "GET",
+            cache: "no-store"
+          }
+        );
+
+
+      if (!response.ok) {
+        throw new Error(
+          "HTTP Error"
+        );
+      }
+
+
+      const result =
+        await response.json();
+
+
+      if (!result.success) {
+
+        showMessage(
+          loginMessage,
+          result.message ||
+          "تعذر تسجيل الدخول.",
+          "error"
+        );
+
+        return;
+      }
+
+
+      currentSchool =
+        result.data;
+
+
+      sessionStorage.setItem(
+        "schoolData",
+        JSON.stringify(currentSchool)
+      );
+
+
+      openDashboard(
+        currentSchool
+      );
+
+    }
+
+    catch (error) {
+
+      console.error(error);
+
+      showMessage(
+        loginMessage,
+        "تعذر الاتصال بالنظام. يرجى المحاولة مرة أخرى.",
+        "error"
+      );
+
+    }
+
+    finally {
+
+      setLoginLoading(false);
+
+    }
+
+  }
+);
+
+
+/*
+ * =========================================================
+ * فتح لوحة المدرسة
+ * =========================================================
+ */
+
+function openDashboard(data) {
+
+  document.getElementById(
+    "welcomeSchoolName"
+  ).textContent =
+    data.schoolName || "—";
+
+
+  document.getElementById(
+    "welcomeLocation"
+  ).textContent =
+    [
+      data.governorate,
+      data.city
+    ]
+    .filter(Boolean)
+    .join(" - ") || "—";
+
+
+  document.getElementById(
+    "statisticalNumbers"
+  ).value =
+    data.statisticalNumbers || "";
+
+
+  document.getElementById(
+    "schoolName"
+  ).value =
+    data.schoolName || "";
+
+
+  document.getElementById(
+    "governorate"
+  ).value =
+    data.governorate || "";
+
+
+  document.getElementById(
+    "city"
+  ).value =
+    data.city || "";
+
+
+  document.getElementById(
+    "principalName"
+  ).value =
+    data.principalName || "";
+
+
+  document.getElementById(
+    "principalPhone"
+  ).value =
+    data.principalPhone || "";
+
+
+  document.getElementById(
+    "coordinatorName"
+  ).value =
+    data.coordinatorName || "";
+
+
+  document.getElementById(
+    "coordinatorPhone"
+  ).value =
+    data.coordinatorPhone || "";
+
+
+  document.getElementById(
+    "staffType"
+  ).value =
+    data.staffType || "";
+
+
+  loginPage.style.display =
+    "none";
+
+  dashboardPage.style.display =
+    "block";
+
+  loadReports();
+
+  loadAchievement();
+
+
+  window.scrollTo({
+    top: 0,
+    behavior: "instant"
+  });
+}
+
+
+/*
+ * =========================================================
+ * حفظ بيانات المدرسة
+ * =========================================================
+ */
+
+schoolForm.addEventListener(
+  "submit",
+  async function(event) {
+
+    event.preventDefault();
+
+    clearMessage(saveMessage);
+
+
+    if (!currentSchool) {
+
+      showMessage(
+        saveMessage,
+        "انتهت جلسة المدرسة. يرجى تسجيل الدخول مرة أخرى.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    const principalPhone =
+      normalizePhoneInput(
+        document.getElementById(
+          "principalPhone"
+        ).value
+      );
+
+
+    const coordinatorPhone =
+      normalizePhoneInput(
+        document.getElementById(
+          "coordinatorPhone"
+        ).value
+      );
+
+
+    if (
+      principalPhone &&
+      !/^05\d{8}$/.test(
+        principalPhone
+      )
+    ) {
+
+      showMessage(
+        saveMessage,
+        "رقم جوال مدير المدرسة غير صحيح.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (
+      coordinatorPhone &&
+      !/^05\d{8}$/.test(
+        coordinatorPhone
+      )
+    ) {
+
+      showMessage(
+        saveMessage,
+        "رقم جوال منسق الأمن والسلامة غير صحيح.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    const payload = {
+
+      action:
+        "updateSchool",
+
+      loginNumber:
+        currentSchool.loginNumber,
+
+      city:
+        document.getElementById(
+          "city"
+        ).value.trim(),
+
+      principalName:
+        document.getElementById(
+          "principalName"
+        ).value.trim(),
+
+      principalPhone:
+        principalPhone,
+
+      coordinatorName:
+        document.getElementById(
+          "coordinatorName"
+        ).value.trim(),
+
+      coordinatorPhone:
+        coordinatorPhone,
+
+      staffType:
+        document.getElementById(
+          "staffType"
+        ).value
+    };
+
+
+    setSaveLoading(true);
+
+
+    try {
+
+      const response =
+        await fetch(
+          API_URL,
+          {
+            method: "POST",
+
+            /*
+             * text/plain يقلل مشاكل CORS
+             * مع Apps Script Web App.
+             */
+            headers: {
+              "Content-Type":
+                "text/plain;charset=utf-8"
+            },
+
+            body:
+              JSON.stringify(payload)
+          }
+        );
+
+
+      if (!response.ok) {
+        throw new Error(
+          "HTTP Error"
+        );
+      }
+
+
+      const result =
+        await response.json();
+
+
+      if (!result.success) {
+
+        showMessage(
+          saveMessage,
+          result.message ||
+          "تعذر حفظ البيانات.",
+          "error"
+        );
+
+        return;
+      }
+
+
+      /*
+       * تحديث بيانات الجلسة
+       */
+      currentSchool =
+        result.data;
+
+
+      sessionStorage.setItem(
+        "schoolData",
+        JSON.stringify(
+          currentSchool
+        )
+      );
+
+
+      /*
+       * إعادة تعبئة الصفحة
+       * بالقيم القادمة من الخادم.
+       */
+      openDashboard(
+        currentSchool
+      );
+
+
+      showMessage(
+        saveMessage,
+        "تم حفظ بيانات المدرسة بنجاح.",
+        "success"
+      );
+
+    }
+
+    catch (error) {
+
+      console.error(error);
+
+      showMessage(
+        saveMessage,
+        "تعذر الاتصال بالنظام أثناء الحفظ. يرجى المحاولة مرة أخرى.",
+        "error"
+      );
+
+    }
+
+    finally {
+
+      setSaveLoading(false);
+
+    }
+
+  }
+);
+
+
+/*
+ * =========================================================
+ * التقارير
+ * =========================================================
+ */
+
+addReportButton.addEventListener(
+  "click",
+  function() {
+
+    clearMessage(reportsMessage);
+
+    if (!currentSchool) {
+      showMessage(
+        reportsMessage,
+        "يرجى تسجيل الدخول أولًا.",
+        "error"
+      );
+      return;
+    }
+
+    const missingFields = [];
+
+    if (!document.getElementById(
+      "coordinatorName"
+    ).value.trim()) {
+      missingFields.push(
+        "اسم منسق/ة الأمن والسلامة"
+      );
+    }
+
+    const coordinatorPhone =
+      normalizePhoneInput(
+        document.getElementById(
+          "coordinatorPhone"
+        ).value
+      );
+
+    if (
+      !coordinatorPhone ||
+      !/^05\d{8}$/.test(
+        coordinatorPhone
+      )
+    ) {
+      missingFields.push(
+        "رقم جوال المنسق/ة"
+      );
+    }
+
+    if (!document.getElementById(
+      "staffType"
+    ).value) {
+      missingFields.push(
+        "الكادر"
+      );
+    }
+
+    if (missingFields.length) {
+      showMessage(
+        reportsMessage,
+        "قبل إضافة تقرير، يرجى استكمال وحفظ: " +
+        missingFields.join("، "),
+        "error"
+      );
+      return;
+    }
+
+    reportTypes.classList.toggle(
+      "show"
+    );
+  }
+);
+
+
+document.querySelectorAll(
+  ".report-type-btn"
+).forEach(button => {
+
+  button.addEventListener(
+    "click",
+    function() {
+
+      const reportType =
+        this.dataset.reportType;
+
+      if (
+        reportType ===
+        "تقرير خطة إخلاء"
+      ) {
+
+        clearMessage(
+          reportsMessage
+        );
+
+        document.getElementById(
+          "evacuationCoordinator"
+        ).value =
+          document.getElementById(
+            "coordinatorName"
+          ).value.trim();
+
+        safetyMomentForm.classList.remove(
+          "show"
+        );
+
+        civilDefenseForm.classList.remove(
+          "show"
+        );
+
+        trafficWeekForm.classList.remove(
+          "show"
+        );
+
+        evacuationForm.classList.add(
+          "show"
+        );
+
+        evacuationForm.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+
+      } else if (
+        reportType ===
+        "تقرير لحظة سلامة"
+      ) {
+
+        clearMessage(
+          reportsMessage
+        );
+
+        evacuationForm.classList.remove(
+          "show"
+        );
+
+        civilDefenseForm.classList.remove(
+          "show"
+        );
+
+        trafficWeekForm.classList.remove(
+          "show"
+        );
+
+        safetyMomentForm.classList.add(
+          "show"
+        );
+
+        safetyMomentForm.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+
+      } else if (
+        reportType ===
+        "تقرير اليوم العالمي للدفاع المدني"
+      ) {
+
+        clearMessage(
+          reportsMessage
+        );
+
+        evacuationForm.classList.remove(
+          "show"
+        );
+
+        safetyMomentForm.classList.remove(
+          "show"
+        );
+
+        trafficWeekForm.classList.remove(
+          "show"
+        );
+
+        civilDefenseForm.classList.add(
+          "show"
+        );
+
+        civilDefenseForm.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+
+      } else if (
+        reportType ===
+        "تقرير أسبوع المرور"
+      ) {
+
+        clearMessage(
+          reportsMessage
+        );
+
+        evacuationForm.classList.remove(
+          "show"
+        );
+
+        safetyMomentForm.classList.remove(
+          "show"
+        );
+
+        civilDefenseForm.classList.remove(
+          "show"
+        );
+
+        trafficWeekForm.classList.add(
+          "show"
+        );
+
+        trafficWeekForm.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+
+      } else {
+        showMessage(
+          reportsMessage,
+          "تم اختيار " +
+          reportType +
+          ". سيتم تجهيز نموذجه في المراحل القادمة.",
+          "success"
+        );
+      }
+
+      reportTypes.classList.remove(
+        "show"
+      );
+    }
+  );
+});
+
+
+
+evacuationCancelButton.addEventListener(
+  "click",
+  function() {
+
+    evacuationForm.reset();
+
+    clearMessage(
+      evacuationMessage
+    );
+
+    evacuationProgress.classList.remove(
+      "show"
+    );
+
+    evacuationForm.classList.remove(
+      "show"
+    );
+  }
+);
+
+
+safetyMomentBeneficiaryInputs.forEach(
+  input => {
+    input.addEventListener(
+      "input",
+      updateSafetyMomentTotal
+    );
+  }
+);
+
+
+function updateSafetyMomentTotal() {
+
+  safetyMomentTotal.value =
+    safetyMomentBeneficiaryInputs.reduce(
+      (total, input) => {
+        const value = Number(input.value);
+
+        return total + (
+          Number.isFinite(value) &&
+          value >= 0
+            ? value
+            : 0
+        );
+      },
+      0
+    );
+}
+
+
+safetyMomentCancelButton.addEventListener(
+  "click",
+  function() {
+
+    safetyMomentForm.reset();
+
+    updateSafetyMomentTotal();
+
+    clearMessage(
+      safetyMomentMessage
+    );
+
+    safetyMomentProgress.classList.remove(
+      "show"
+    );
+
+    safetyMomentForm.classList.remove(
+      "show"
+    );
+  }
+);
+
+
+function updateCivilDefenseOtherType() {
+
+  const isOtherSelected =
+    civilDefenseOtherCheckbox.checked;
+
+  civilDefenseOtherField.hidden =
+    !isOtherSelected;
+
+  civilDefenseOtherType.required =
+    isOtherSelected;
+
+  if (!isOtherSelected) {
+    civilDefenseOtherType.value = "";
+  }
+}
+
+
+civilDefenseOtherCheckbox.addEventListener(
+  "change",
+  updateCivilDefenseOtherType
+);
+
+
+civilDefenseCancelButton.addEventListener(
+  "click",
+  function() {
+
+    civilDefenseForm.reset();
+
+    updateCivilDefenseOtherType();
+
+    clearMessage(
+      civilDefenseMessage
+    );
+
+    civilDefenseProgress.classList.remove(
+      "show"
+    );
+
+    civilDefenseForm.classList.remove(
+      "show"
+    );
+  }
+);
+
+
+function updateTrafficWeekOtherType() {
+
+  const isOtherSelected =
+    trafficWeekOtherCheckbox.checked;
+
+  trafficWeekOtherField.hidden =
+    !isOtherSelected;
+
+  trafficWeekOtherType.required =
+    isOtherSelected;
+
+  if (!isOtherSelected) {
+    trafficWeekOtherType.value = "";
+  }
+}
+
+
+trafficWeekOtherCheckbox.addEventListener(
+  "change",
+  updateTrafficWeekOtherType
+);
+
+
+trafficWeekCancelButton.addEventListener(
+  "click",
+  function() {
+
+    trafficWeekForm.reset();
+
+    updateTrafficWeekOtherType();
+
+    clearMessage(
+      trafficWeekMessage
+    );
+
+    trafficWeekProgress.classList.remove(
+      "show"
+    );
+
+    trafficWeekForm.classList.remove(
+      "show"
+    );
+  }
+);
+
+
+evacuationForm.addEventListener(
+  "submit",
+  async function(event) {
+
+    event.preventDefault();
+
+    clearMessage(
+      evacuationMessage
+    );
+
+    if (!currentSchool) {
+      showMessage(
+        evacuationMessage,
+        "انتهت جلسة المدرسة. يرجى تسجيل الدخول مرة أخرى.",
+        "error"
+      );
+      return;
+    }
+
+    const evacuationPlanNumber =
+      document.getElementById(
+        "evacuationPlanNumber"
+      );
+
+    const selectedPlanNumber =
+      Number(
+        evacuationPlanNumber.value
+      );
+
+    const executionDate =
+      document.getElementById(
+        "evacuationDate"
+      ).value;
+
+    const studentsValue =
+      document.getElementById(
+        "evacuationStudents"
+      ).value;
+
+    const staffValue =
+      document.getElementById(
+        "evacuationStaff"
+      ).value;
+
+    const notes =
+      document.getElementById(
+        "evacuationNotes"
+      ).value.trim();
+
+    const declaration =
+      document.getElementById(
+        "evacuationDeclaration"
+      ).checked;
+
+    const file =
+      document.getElementById(
+        "evacuationFile"
+      ).files[0];
+
+    if (
+      ![1, 2, 3, 4].includes(
+        selectedPlanNumber
+      )
+    ) {
+      showMessage(
+        evacuationMessage,
+        "يرجى اختيار خطة الإخلاء.",
+        "error"
+      );
+      return;
+    }
+
+    if (
+      !executionDate ||
+      studentsValue === "" ||
+      staffValue === ""
+    ) {
+      showMessage(
+        evacuationMessage,
+        "يرجى استكمال تاريخ التنفيذ وعدد الطلاب والمنسوبين.",
+        "error"
+      );
+      return;
+    }
+
+    const studentsCount =
+      Number(studentsValue);
+
+    const staffCount =
+      Number(staffValue);
+
+    if (
+      !Number.isInteger(studentsCount) ||
+      studentsCount < 0 ||
+      !Number.isInteger(staffCount) ||
+      staffCount < 0
+    ) {
+      showMessage(
+        evacuationMessage,
+        "عدد الطلاب والمنسوبين يجب أن يكون رقمًا صحيحًا.",
+        "error"
+      );
+      return;
+    }
+
+    if (!file) {
+      showMessage(
+        evacuationMessage,
+        "يرجى إرفاق التقرير المعتمد بصيغة PDF.",
+        "error"
+      );
+      return;
+    }
+
+    if (
+      file.type !== "application/pdf" &&
+      !file.name.toLowerCase().endsWith(".pdf")
+    ) {
+      showMessage(
+        evacuationMessage,
+        "المرفق يجب أن يكون ملف PDF.",
+        "error"
+      );
+      return;
+    }
+
+    if (
+      file.size >
+      10 * 1024 * 1024
+    ) {
+      showMessage(
+        evacuationMessage,
+        "حجم ملف PDF يجب ألا يتجاوز 10 ميجابايت.",
+        "error"
+      );
+      return;
+    }
+
+    if (!declaration) {
+      showMessage(
+        evacuationMessage,
+        "يجب الإقرار بصحة البيانات قبل رفع التقرير.",
+        "error"
+      );
+      return;
+    }
+
+    evacuationSubmitButton.disabled =
+      true;
+
+    evacuationSubmitButton.textContent =
+      "جاري الرفع...";
+
+    evacuationProgress.classList.add(
+      "show"
+    );
+
+    try {
+
+      const base64Data =
+        await fileToBase64(file);
+
+      const response =
+        await fetch(
+          API_URL,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "text/plain;charset=utf-8"
+            },
+            body: JSON.stringify({
+              action:
+                "uploadEvacuationReport",
+              loginNumber:
+                currentSchool.loginNumber,
+              evacuationPlanNumber:
+                Number(
+                  evacuationPlanNumber.value
+                ),
+              executionDate:
+                executionDate,
+              studentsCount:
+                studentsCount,
+              staffCount:
+                staffCount,
+              notes:
+                notes,
+              declaration:
+                declaration,
+              fileName:
+                file.name,
+              mimeType:
+                "application/pdf",
+              base64Data:
+                base64Data
+            })
+          }
+        );
+
+      if (!response.ok) {
+        throw new Error(
+          "HTTP Error"
+        );
+      }
+
+      const result =
+        await response.json();
+
+      if (!result.success) {
+        showMessage(
+          evacuationMessage,
+          result.message ||
+          "تعذر رفع التقرير.",
+          "error"
+        );
+        return;
+      }
+
+      evacuationForm.reset();
+
+      document.getElementById(
+        "evacuationCoordinator"
+      ).value =
+        document.getElementById(
+          "coordinatorName"
+        ).value.trim();
+
+      showMessage(
+        evacuationMessage,
+        "تم رفع تقرير خطة الإخلاء بنجاح.",
+        "success"
+      );
+
+      await loadReports();
+
+      await loadAchievement();
+
+    } catch (error) {
+
+      console.error(error);
+
+      showMessage(
+        evacuationMessage,
+        "تعذر الاتصال بالنظام أثناء رفع التقرير.",
+        "error"
+      );
+
+    } finally {
+
+      evacuationSubmitButton.disabled =
+        false;
+
+      evacuationSubmitButton.textContent =
+        "رفع التقرير";
+
+      evacuationProgress.classList.remove(
+        "show"
+      );
+    }
+  }
+);
+
+
+safetyMomentForm.addEventListener(
+  "submit",
+  async function(event) {
+
+    event.preventDefault();
+
+    clearMessage(
+      safetyMomentMessage
+    );
+
+    if (
+      !currentSchool ||
+      !currentSchool.loginNumber
+    ) {
+      showMessage(
+        safetyMomentMessage,
+        "انتهت جلسة المدرسة. يرجى تسجيل الدخول مرة أخرى.",
+        "error"
+      );
+      return;
+    }
+
+    const programName =
+      document.getElementById(
+        "safetyMomentProgramName"
+      ).value.trim();
+
+    const executionDate =
+      document.getElementById(
+        "safetyMomentDate"
+      ).value;
+
+    const studentsValue =
+      document.getElementById(
+        "safetyMomentStudents"
+      ).value;
+
+    const parentsValue =
+      document.getElementById(
+        "safetyMomentParents"
+      ).value;
+
+    const staffValue =
+      document.getElementById(
+        "safetyMomentStaff"
+      ).value;
+
+    const declaration =
+      document.getElementById(
+        "safetyMomentDeclaration"
+      ).checked;
+
+    const file =
+      document.getElementById(
+        "safetyMomentFile"
+      ).files[0];
+
+    if (!programName) {
+      showMessage(
+        safetyMomentMessage,
+        "يرجى إدخال اسم البرنامج.",
+        "error"
+      );
+      return;
+    }
+
+    if (programName.length > 200) {
+      showMessage(
+        safetyMomentMessage,
+        "اسم البرنامج يجب ألا يتجاوز 200 حرف.",
+        "error"
+      );
+      return;
+    }
+
+    if (!executionDate) {
+      showMessage(
+        safetyMomentMessage,
+        "يرجى تحديد تاريخ التنفيذ.",
+        "error"
+      );
+      return;
+    }
+
+    if (
+      studentsValue === "" ||
+      parentsValue === "" ||
+      staffValue === ""
+    ) {
+      showMessage(
+        safetyMomentMessage,
+        "يرجى إدخال أعداد المستفيدين الثلاثة.",
+        "error"
+      );
+      return;
+    }
+
+    const studentsBeneficiaries =
+      Number(studentsValue);
+
+    const parentsBeneficiaries =
+      Number(parentsValue);
+
+    const staffBeneficiaries =
+      Number(staffValue);
+
+    if (
+      !Number.isInteger(
+        studentsBeneficiaries
+      ) ||
+      studentsBeneficiaries < 0 ||
+      !Number.isInteger(
+        parentsBeneficiaries
+      ) ||
+      parentsBeneficiaries < 0 ||
+      !Number.isInteger(
+        staffBeneficiaries
+      ) ||
+      staffBeneficiaries < 0
+    ) {
+      showMessage(
+        safetyMomentMessage,
+        "أعداد المستفيدين يجب أن تكون أعدادًا صحيحة لا تقل عن صفر.",
+        "error"
+      );
+      return;
+    }
+
+    if (!file) {
+      showMessage(
+        safetyMomentMessage,
+        "يرجى إرفاق التقرير المعتمد بصيغة PDF.",
+        "error"
+      );
+      return;
+    }
+
+    if (
+      file.type !== "application/pdf" &&
+      !file.name.toLowerCase().endsWith(".pdf")
+    ) {
+      showMessage(
+        safetyMomentMessage,
+        "المرفق يجب أن يكون ملف PDF.",
+        "error"
+      );
+      return;
+    }
+
+    if (
+      file.size >
+      10 * 1024 * 1024
+    ) {
+      showMessage(
+        safetyMomentMessage,
+        "حجم ملف PDF يجب ألا يتجاوز 10 ميجابايت.",
+        "error"
+      );
+      return;
+    }
+
+    if (!declaration) {
+      showMessage(
+        safetyMomentMessage,
+        "يجب الإقرار بصحة البيانات قبل رفع التقرير.",
+        "error"
+      );
+      return;
+    }
+
+    safetyMomentSubmitButton.disabled =
+      true;
+
+    safetyMomentSubmitButton.textContent =
+      "جاري رفع التقرير...";
+
+    safetyMomentProgress.classList.add(
+      "show"
+    );
+
+    try {
+
+      const base64Data =
+        await fileToBase64(file);
+
+      const response =
+        await fetch(
+          API_URL,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "text/plain;charset=utf-8"
+            },
+            body: JSON.stringify({
+              action:
+                "uploadSafetyMomentReport",
+              loginNumber:
+                currentSchool.loginNumber,
+              programName:
+                programName,
+              executionDate:
+                executionDate,
+              studentsBeneficiaries:
+                studentsBeneficiaries,
+              parentsBeneficiaries:
+                parentsBeneficiaries,
+              staffBeneficiaries:
+                staffBeneficiaries,
+              fileName:
+                file.name,
+              mimeType:
+                "application/pdf",
+              base64Data:
+                base64Data,
+              declaration:
+                declaration
+            })
+          }
+        );
+
+      if (!response.ok) {
+        throw new Error(
+          "HTTP Error"
+        );
+      }
+
+      const result =
+        await response.json();
+
+      if (!result.success) {
+        showMessage(
+          safetyMomentMessage,
+          result.message ||
+          "تعذر رفع تقرير لحظة سلامة. يرجى المحاولة مرة أخرى.",
+          "error"
+        );
+        return;
+      }
+
+      safetyMomentForm.reset();
+
+      updateSafetyMomentTotal();
+
+      showMessage(
+        safetyMomentMessage,
+        "تم رفع تقرير لحظة سلامة بنجاح.",
+        "success"
+      );
+
+      await loadReports();
+
+      await loadAchievement();
+
+    } catch (error) {
+
+      console.error(error);
+
+      showMessage(
+        safetyMomentMessage,
+        "تعذر رفع تقرير لحظة سلامة. يرجى المحاولة مرة أخرى.",
+        "error"
+      );
+
+    } finally {
+
+      safetyMomentSubmitButton.disabled =
+        false;
+
+      safetyMomentSubmitButton.textContent =
+        "رفع تقرير لحظة سلامة";
+
+      safetyMomentProgress.classList.remove(
+        "show"
+      );
+    }
+  }
+);
+
+
+civilDefenseForm.addEventListener(
+  "submit",
+  async function(event) {
+
+    event.preventDefault();
+
+    clearMessage(
+      civilDefenseMessage
+    );
+
+    if (
+      !currentSchool ||
+      !currentSchool.loginNumber
+    ) {
+      showMessage(
+        civilDefenseMessage,
+        "انتهت جلسة المدرسة. يرجى تسجيل الدخول مرة أخرى.",
+        "error"
+      );
+      return;
+    }
+
+    const programName =
+      document.getElementById(
+        "civilDefenseProgramName"
+      ).value.trim();
+
+    const executionDate =
+      document.getElementById(
+        "civilDefenseDate"
+      ).value;
+
+    const programTypes =
+      Array.from(
+        document.querySelectorAll(
+          'input[name="civilDefenseProgramType"]:checked'
+        ),
+        input => input.value
+      );
+
+    const otherType =
+      civilDefenseOtherCheckbox.checked
+        ? civilDefenseOtherType.value.trim()
+        : "";
+
+    const programsCountValue =
+      document.getElementById(
+        "civilDefenseProgramsCount"
+      ).value;
+
+    const studentsCountValue =
+      document.getElementById(
+        "civilDefenseStudents"
+      ).value;
+
+    const staffCountValue =
+      document.getElementById(
+        "civilDefenseStaff"
+      ).value;
+
+    const file =
+      document.getElementById(
+        "civilDefenseFile"
+      ).files[0];
+
+    const declaration =
+      document.getElementById(
+        "civilDefenseDeclaration"
+      ).checked;
+
+    if (!programName) {
+      showMessage(
+        civilDefenseMessage,
+        "يرجى إدخال اسم البرنامج.",
+        "error"
+      );
+      return;
+    }
+
+    if (!executionDate) {
+      showMessage(
+        civilDefenseMessage,
+        "يرجى تحديد تاريخ التنفيذ.",
+        "error"
+      );
+      return;
+    }
+
+    if (!programTypes.length) {
+      showMessage(
+        civilDefenseMessage,
+        "يرجى اختيار نوع واحد على الأقل للبرنامج.",
+        "error"
+      );
+      return;
+    }
+
+    if (
+      civilDefenseOtherCheckbox.checked &&
+      !otherType
+    ) {
+      showMessage(
+        civilDefenseMessage,
+        "يرجى تحديد النوع الآخر.",
+        "error"
+      );
+      return;
+    }
+
+    if (
+      programsCountValue === "" ||
+      studentsCountValue === "" ||
+      staffCountValue === ""
+    ) {
+      showMessage(
+        civilDefenseMessage,
+        "يرجى استكمال أعداد البرامج والمستفيدين.",
+        "error"
+      );
+      return;
+    }
+
+    const programsCount =
+      Number(programsCountValue);
+
+    const studentsCount =
+      Number(studentsCountValue);
+
+    const staffCount =
+      Number(staffCountValue);
+
+    if (
+      !Number.isInteger(programsCount) ||
+      programsCount < 1 ||
+      !Number.isInteger(studentsCount) ||
+      studentsCount < 0 ||
+      !Number.isInteger(staffCount) ||
+      staffCount < 0
+    ) {
+      showMessage(
+        civilDefenseMessage,
+        "الأعداد يجب أن تكون أعدادًا صحيحة، وعدد البرامج لا يقل عن واحد.",
+        "error"
+      );
+      return;
+    }
+
+    if (!file) {
+      showMessage(
+        civilDefenseMessage,
+        "يرجى إرفاق التقرير المعتمد بصيغة PDF.",
+        "error"
+      );
+      return;
+    }
+
+    if (
+      file.type !== "application/pdf" &&
+      !file.name.toLowerCase().endsWith(".pdf")
+    ) {
+      showMessage(
+        civilDefenseMessage,
+        "المرفق يجب أن يكون ملف PDF.",
+        "error"
+      );
+      return;
+    }
+
+    if (
+      file.size >
+      10 * 1024 * 1024
+    ) {
+      showMessage(
+        civilDefenseMessage,
+        "حجم ملف PDF يجب ألا يتجاوز 10 ميجابايت.",
+        "error"
+      );
+      return;
+    }
+
+    if (!declaration) {
+      showMessage(
+        civilDefenseMessage,
+        "يجب الإقرار بصحة البيانات قبل رفع التقرير.",
+        "error"
+      );
+      return;
+    }
+
+    civilDefenseSubmitButton.disabled =
+      true;
+
+    civilDefenseSubmitButton.textContent =
+      "جاري رفع التقرير...";
+
+    civilDefenseProgress.classList.add(
+      "show"
+    );
+
+    try {
+
+      const base64Data =
+        await fileToBase64(file);
+
+      const response =
+        await fetch(
+          API_URL,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "text/plain;charset=utf-8"
+            },
+            body: JSON.stringify({
+              action:
+                "uploadCivilDefenseReport",
+              loginNumber:
+                currentSchool.loginNumber,
+              programName:
+                programName,
+              executionDate:
+                executionDate,
+              programTypes:
+                programTypes,
+              otherType:
+                otherType,
+              programsCount:
+                programsCount,
+              studentsCount:
+                studentsCount,
+              staffCount:
+                staffCount,
+              fileName:
+                file.name,
+              mimeType:
+                "application/pdf",
+              base64Data:
+                base64Data,
+              declaration:
+                declaration
+            })
+          }
+        );
+
+      if (!response.ok) {
+        throw new Error(
+          "HTTP Error"
+        );
+      }
+
+      const result =
+        await response.json();
+
+      if (!result.success) {
+        showMessage(
+          civilDefenseMessage,
+          result.message ||
+          "تعذر رفع التقرير. يرجى المحاولة مرة أخرى.",
+          "error"
+        );
+        return;
+      }
+
+      civilDefenseForm.reset();
+
+      updateCivilDefenseOtherType();
+
+      civilDefenseForm.classList.remove(
+        "show"
+      );
+
+      showMessage(
+        reportsMessage,
+        "تم رفع تقرير اليوم العالمي للدفاع المدني بنجاح.",
+        "success"
+      );
+
+      await loadReports();
+
+      await loadAchievement();
+
+    } catch (error) {
+
+      console.error(error);
+
+      showMessage(
+        civilDefenseMessage,
+        "تعذر رفع التقرير. يرجى المحاولة مرة أخرى.",
+        "error"
+      );
+
+    } finally {
+
+      civilDefenseSubmitButton.disabled =
+        false;
+
+      civilDefenseSubmitButton.textContent =
+        "رفع التقرير";
+
+      civilDefenseProgress.classList.remove(
+        "show"
+      );
+    }
+  }
+);
+
+
+trafficWeekForm.addEventListener(
+  "submit",
+  async function(event) {
+
+    event.preventDefault();
+
+    clearMessage(
+      trafficWeekMessage
+    );
+
+    if (
+      !currentSchool ||
+      !currentSchool.loginNumber
+    ) {
+      showMessage(
+        trafficWeekMessage,
+        "انتهت جلسة المدرسة. يرجى تسجيل الدخول مرة أخرى.",
+        "error"
+      );
+      return;
+    }
+
+    const programName =
+      document.getElementById(
+        "trafficWeekProgramName"
+      ).value.trim();
+
+    const executionDate =
+      document.getElementById(
+        "trafficWeekExecutionDate"
+      ).value;
+
+    const programTypes =
+      Array.from(
+        document.querySelectorAll(
+          'input[name="trafficWeekProgramType"]:checked'
+        ),
+        input => input.value
+      );
+
+    const otherType =
+      trafficWeekOtherCheckbox.checked
+        ? trafficWeekOtherType.value.trim()
+        : "";
+
+    const programsCountValue =
+      document.getElementById(
+        "trafficWeekProgramsCount"
+      ).value;
+
+    const studentsCountValue =
+      document.getElementById(
+        "trafficWeekStudentsCount"
+      ).value;
+
+    const staffCountValue =
+      document.getElementById(
+        "trafficWeekStaffCount"
+      ).value;
+
+    const file =
+      document.getElementById(
+        "trafficWeekFile"
+      ).files[0];
+
+    const declaration =
+      document.getElementById(
+        "trafficWeekDeclaration"
+      ).checked;
+
+    if (!programName) {
+      showMessage(
+        trafficWeekMessage,
+        "يرجى إدخال اسم البرنامج.",
+        "error"
+      );
+      return;
+    }
+
+    if (!executionDate) {
+      showMessage(
+        trafficWeekMessage,
+        "يرجى تحديد تاريخ التنفيذ.",
+        "error"
+      );
+      return;
+    }
+
+    if (!programTypes.length) {
+      showMessage(
+        trafficWeekMessage,
+        "يرجى اختيار نوع واحد على الأقل للبرنامج.",
+        "error"
+      );
+      return;
+    }
+
+    if (
+      trafficWeekOtherCheckbox.checked &&
+      !otherType
+    ) {
+      showMessage(
+        trafficWeekMessage,
+        "يرجى تحديد النوع الآخر.",
+        "error"
+      );
+      return;
+    }
+
+    if (
+      programsCountValue === "" ||
+      studentsCountValue === "" ||
+      staffCountValue === ""
+    ) {
+      showMessage(
+        trafficWeekMessage,
+        "يرجى استكمال أعداد البرامج والمستفيدين.",
+        "error"
+      );
+      return;
+    }
+
+    const programsCount =
+      Number(programsCountValue);
+
+    const studentsCount =
+      Number(studentsCountValue);
+
+    const staffCount =
+      Number(staffCountValue);
+
+    if (
+      !Number.isInteger(programsCount) ||
+      programsCount < 1 ||
+      !Number.isInteger(studentsCount) ||
+      studentsCount < 0 ||
+      !Number.isInteger(staffCount) ||
+      staffCount < 0
+    ) {
+      showMessage(
+        trafficWeekMessage,
+        "الأعداد يجب أن تكون أعدادًا صحيحة، وعدد البرامج لا يقل عن واحد.",
+        "error"
+      );
+      return;
+    }
+
+    if (!file) {
+      showMessage(
+        trafficWeekMessage,
+        "يرجى إرفاق التقرير المعتمد بصيغة PDF.",
+        "error"
+      );
+      return;
+    }
+
+    if (
+      file.type !== "application/pdf" &&
+      !file.name.toLowerCase().endsWith(".pdf")
+    ) {
+      showMessage(
+        trafficWeekMessage,
+        "المرفق يجب أن يكون ملف PDF.",
+        "error"
+      );
+      return;
+    }
+
+    if (
+      file.size >
+      10 * 1024 * 1024
+    ) {
+      showMessage(
+        trafficWeekMessage,
+        "حجم ملف PDF يجب ألا يتجاوز 10 ميجابايت.",
+        "error"
+      );
+      return;
+    }
+
+    if (!declaration) {
+      showMessage(
+        trafficWeekMessage,
+        "يجب الإقرار بصحة البيانات قبل رفع التقرير.",
+        "error"
+      );
+      return;
+    }
+
+    trafficWeekSubmitButton.disabled =
+      true;
+
+    trafficWeekSubmitButton.textContent =
+      "جاري رفع التقرير...";
+
+    trafficWeekProgress.classList.add(
+      "show"
+    );
+
+    try {
+
+      const base64Data =
+        await fileToBase64(file);
+
+      const response =
+        await fetch(
+          API_URL,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "text/plain;charset=utf-8"
+            },
+            body: JSON.stringify({
+              action:
+                "uploadTrafficWeekReport",
+              loginNumber:
+                currentSchool.loginNumber,
+              programName:
+                programName,
+              executionDate:
+                executionDate,
+              programTypes:
+                programTypes,
+              otherType:
+                otherType,
+              programsCount:
+                programsCount,
+              studentsCount:
+                studentsCount,
+              staffCount:
+                staffCount,
+              fileName:
+                file.name,
+              mimeType:
+                file.type || "application/pdf",
+              base64Data:
+                base64Data,
+              declaration:
+                declaration
+            })
+          }
+        );
+
+      if (!response.ok) {
+        throw new Error(
+          "HTTP Error"
+        );
+      }
+
+      const result =
+        await response.json();
+
+      if (!result.success) {
+        showMessage(
+          trafficWeekMessage,
+          result.message ||
+          "تعذر رفع التقرير. يرجى المحاولة مرة أخرى.",
+          "error"
+        );
+        return;
+      }
+
+      trafficWeekForm.reset();
+
+      updateTrafficWeekOtherType();
+
+      trafficWeekForm.classList.remove(
+        "show"
+      );
+
+      showMessage(
+        reportsMessage,
+        "تم رفع تقرير أسبوع المرور بنجاح.",
+        "success"
+      );
+
+      await loadReports();
+
+      await loadAchievement();
+
+    } catch (error) {
+
+      console.error(error);
+
+      showMessage(
+        trafficWeekMessage,
+        "تعذر رفع التقرير. يرجى المحاولة مرة أخرى.",
+        "error"
+      );
+
+    } finally {
+
+      trafficWeekSubmitButton.disabled =
+        false;
+
+      trafficWeekSubmitButton.textContent =
+        "رفع التقرير";
+
+      trafficWeekProgress.classList.remove(
+        "show"
+      );
+    }
+  }
+);
+
+
+function fileToBase64(file) {
+
+  return new Promise(
+    (resolve, reject) => {
+
+      const reader =
+        new FileReader();
+
+      reader.onload = () => {
+
+        const result =
+          String(reader.result || "");
+
+        const commaIndex =
+          result.indexOf(",");
+
+        if (commaIndex === -1) {
+          reject(
+            new Error(
+              "Invalid file data"
+            )
+          );
+          return;
+        }
+
+        resolve(
+          result.substring(
+            commaIndex + 1
+          )
+        );
+      };
+
+      reader.onerror = () =>
+        reject(
+          new Error(
+            "File read error"
+          )
+        );
+
+      reader.readAsDataURL(
+        file
+      );
+    }
+  );
+}
+
+
+function getAchievementNumber(value) {
+
+  const number = Number(value);
+
+  return Number.isFinite(number)
+    ? Math.max(0, number)
+    : 0;
+}
+
+
+function renderAchievementLoading() {
+
+  achievementCard.classList.remove(
+    "complete"
+  );
+
+  achievementTitle.textContent =
+    "مؤشر الإنجاز";
+
+  achievementLoading.hidden = false;
+  achievementDetails.hidden = true;
+  achievementError.hidden = true;
+}
+
+
+function renderAchievementReport(
+  countId,
+  statusId,
+  reportData
+) {
+
+  const completed = Math.floor(
+    getAchievementNumber(
+      reportData &&
+      reportData.completed
+    )
+  );
+
+  const target = Math.floor(
+    getAchievementNumber(
+      reportData &&
+      reportData.target
+    )
+  );
+
+  const countElement =
+    document.getElementById(countId);
+
+  const statusElement =
+    document.getElementById(statusId);
+
+  countElement.textContent =
+    `${completed} من ${target}`;
+
+  const isCompleted =
+    target > 0 &&
+    completed >= target;
+
+  statusElement.textContent =
+    isCompleted
+      ? "✓ مكتمل"
+      : `تبقى ${Math.max(0, target - completed)}`;
+
+  statusElement.classList.toggle(
+    "completed",
+    isCompleted
+  );
+}
+
+
+function renderAchievement(data) {
+
+  const score = Math.floor(
+    getAchievementNumber(data.score)
+  );
+
+  const maxScore = Math.floor(
+    getAchievementNumber(data.maxScore)
+  );
+
+  const percentage = Math.min(
+    100,
+    getAchievementNumber(
+      data.percentage
+    )
+  );
+
+  const isComplete =
+    (
+      maxScore > 0 &&
+      score === maxScore
+    ) ||
+    percentage >= 100;
+
+  achievementCard.classList.toggle(
+    "complete",
+    isComplete
+  );
+
+  achievementTitle.textContent =
+    isComplete
+      ? "اكتمل الإنجاز"
+      : "مؤشر الإنجاز";
+
+  achievementScore.textContent =
+    `${score} / ${maxScore}`;
+
+  achievementPercentage.textContent =
+    `${Math.round(percentage)}%`;
+
+  achievementProgress.style.width =
+    `${percentage}%`;
+
+  achievementProgress.parentElement.setAttribute(
+    "aria-valuenow",
+    String(percentage)
+  );
+
+  achievementStars.replaceChildren();
+
+  for (
+    let index = 0;
+    index < maxScore;
+    index += 1
+  ) {
+    const star =
+      document.createElement("span");
+
+    star.className =
+      "achievement-star";
+
+    if (index < score) {
+      star.classList.add(
+        "completed"
+      );
+    }
+
+    star.textContent =
+      index < score ? "★" : "☆";
+
+    star.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    achievementStars.appendChild(star);
+  }
+
+  renderAchievementReport(
+    "achievementEvacuationCount",
+    "achievementEvacuationStatus",
+    data.evacuation
+  );
+
+  renderAchievementReport(
+    "achievementSafetyMomentCount",
+    "achievementSafetyMomentStatus",
+    data.safetyMoment
+  );
+
+  renderAchievementReport(
+    "achievementCivilDefenseCount",
+    "achievementCivilDefenseStatus",
+    data.civilDefense
+  );
+
+  renderAchievementReport(
+    "achievementTrafficWeekCount",
+    "achievementTrafficWeekStatus",
+    data.trafficWeek
+  );
+
+  achievementMessage.textContent =
+    typeof data.message === "string" &&
+    data.message.trim()
+      ? data.message.trim()
+      : "استمر في رفع التقارير لإكمال رحلة الإنجاز.";
+
+  achievementLoading.hidden = true;
+  achievementError.hidden = true;
+  achievementDetails.hidden = false;
+}
+
+
+function renderAchievementError() {
+
+  achievementLoading.hidden = true;
+  achievementDetails.hidden = true;
+  achievementError.hidden = false;
+}
+
+
+async function loadAchievement() {
+
+  if (
+    !currentSchool ||
+    !currentSchool.loginNumber
+  ) {
+    renderAchievementError();
+    return;
+  }
+
+  const loginNumber =
+    currentSchool.loginNumber;
+
+  renderAchievementLoading();
+
+  try {
+
+    const url =
+      `${API_URL}?action=getAchievement&number=${
+        encodeURIComponent(loginNumber)
+      }`;
+
+    const response =
+      await fetch(
+        url,
+        {
+          method: "GET",
+          cache: "no-store"
+        }
+      );
+
+    if (!response.ok) {
+      throw new Error(
+        "HTTP Error"
+      );
+    }
+
+    const result =
+      await response.json();
+
+    if (
+      !result.success ||
+      !result.data
+    ) {
+      throw new Error(
+        result.message ||
+        "Invalid achievement response"
+      );
+    }
+
+    if (
+      !currentSchool ||
+      currentSchool.loginNumber !==
+        loginNumber
+    ) {
+      return;
+    }
+
+    renderAchievement(
+      result.data
+    );
+
+  } catch (error) {
+
+    console.error(error);
+
+    if (
+      currentSchool &&
+      currentSchool.loginNumber ===
+        loginNumber
+    ) {
+      renderAchievementError();
+    }
+  }
+}
+
+
+achievementRetryButton.addEventListener(
+  "click",
+  loadAchievement
+);
+
+
+async function loadReports() {
+
+  if (!currentSchool) {
+    return;
+  }
+
+  reportsList.innerHTML =
+    '<div class="empty-state">جاري تحميل سجل التقارير...</div>';
+
+  try {
+
+    const url =
+      `${API_URL}?action=getReports&number=${
+        encodeURIComponent(
+          currentSchool.loginNumber
+        )
+      }`;
+
+    const response =
+      await fetch(
+        url,
+        {
+          method: "GET",
+          cache: "no-store"
+        }
+      );
+
+    if (!response.ok) {
+      throw new Error(
+        "HTTP Error"
+      );
+    }
+
+    const result =
+      await response.json();
+
+    if (!result.success) {
+      throw new Error(
+        result.message ||
+        "تعذر تحميل التقارير."
+      );
+    }
+
+    renderReports(
+      result.data || []
+    );
+
+  } catch (error) {
+
+    console.error(error);
+
+    reportsList.innerHTML =
+      '<div class="empty-state">تعذر تحميل سجل التقارير حاليًا.</div>';
+  }
+}
+
+
+function renderReports(reports) {
+
+  if (!reports.length) {
+    reportsList.innerHTML =
+      '<div class="empty-state">لا توجد تقارير مرفوعة حتى الآن.</div>';
+    return;
+  }
+
+  reportsList.innerHTML =
+    reports.map(report => {
+
+      const type =
+        escapeHtml(
+          report.reportType || "تقرير"
+        );
+
+      const executionDate =
+        escapeHtml(
+          report.executionDate || "—"
+        );
+
+      const uploadDate =
+        escapeHtml(
+          report.uploadDate || "—"
+        );
+
+      const status =
+        escapeHtml(
+          report.status || "مرفوع"
+        );
+
+      return `
+        <div class="report-item">
+          <div class="report-name">${type}</div>
+          <div>تاريخ التنفيذ: ${executionDate}</div>
+          <div>تاريخ الرفع: ${uploadDate}</div>
+          <div class="report-status">${status}</div>
+        </div>
+      `;
+    }).join("");
+}
+
+
+function escapeHtml(value) {
+
+  const div =
+    document.createElement("div");
+
+  div.textContent =
+    String(value || "");
+
+  return div.innerHTML;
+}
+
+
+/*
+ * =========================================================
+ * تسجيل الخروج
+ * =========================================================
+ */
+
+document.getElementById(
+  "logoutButton"
+).addEventListener(
+  "click",
+  function() {
+
+    sessionStorage.removeItem(
+      "schoolData"
+    );
+
+    currentSchool = null;
+
+    schoolNumber.value = "";
+
+    clearMessage(
+      loginMessage
+    );
+
+    clearMessage(
+      saveMessage
+    );
+
+    clearMessage(
+      reportsMessage
+    );
+
+    reportTypes.classList.remove(
+      "show"
+    );
+
+    evacuationForm.reset();
+
+    evacuationForm.classList.remove(
+      "show"
+    );
+
+    clearMessage(
+      evacuationMessage
+    );
+
+    safetyMomentForm.reset();
+
+    updateSafetyMomentTotal();
+
+    safetyMomentForm.classList.remove(
+      "show"
+    );
+
+    clearMessage(
+      safetyMomentMessage
+    );
+
+    civilDefenseForm.reset();
+
+    updateCivilDefenseOtherType();
+
+    civilDefenseForm.classList.remove(
+      "show"
+    );
+
+    clearMessage(
+      civilDefenseMessage
+    );
+
+    trafficWeekForm.reset();
+
+    updateTrafficWeekOtherType();
+
+    trafficWeekForm.classList.remove(
+      "show"
+    );
+
+    clearMessage(
+      trafficWeekMessage
+    );
+
+    reportsList.innerHTML =
+      '<div class="empty-state">لا توجد تقارير مرفوعة حتى الآن.</div>';
+
+    dashboardPage.style.display =
+      "none";
+
+    loginPage.style.display =
+      "flex";
+
+    schoolNumber.focus();
+  }
+);
+
+
+/*
+ * =========================================================
+ * وظائف مساعدة
+ * =========================================================
+ */
+
+function normalizeSchoolNumber(
+  value
+) {
+
+  return convertArabicDigitsToEnglish(
+    String(value || "")
+  )
+    .trim()
+    .toUpperCase()
+    .replace(
+      /[^A-Z0-9]/g,
+      ""
+    );
+}
+
+
+function normalizePhoneInput(
+  value
+) {
+
+  let phone =
+    convertArabicDigitsToEnglish(
+      String(value || "")
+    )
+    .replace(/\D/g, "");
+
+
+  if (
+    phone.startsWith("00966")
+  ) {
+    phone =
+      phone.substring(5);
+  }
+
+
+  if (
+    phone.startsWith("966")
+  ) {
+    phone =
+      phone.substring(3);
+  }
+
+
+  if (
+    phone.startsWith("5") &&
+    phone.length === 9
+  ) {
+    phone =
+      "0" + phone;
+  }
+
+
+  return phone;
+}
+
+
+function convertArabicDigitsToEnglish(
+  value
+) {
+
+  return String(value)
+
+    .replace(
+      /[٠-٩]/g,
+      digit =>
+        "٠١٢٣٤٥٦٧٨٩"
+          .indexOf(digit)
+    )
+
+    .replace(
+      /[۰-۹]/g,
+      digit =>
+        "۰۱۲۳۴۵۶۷۸۹"
+          .indexOf(digit)
+    );
+}
+
+
+function showMessage(
+  element,
+  text,
+  type
+) {
+
+  element.textContent =
+    text;
+
+  element.className =
+    `message ${type}`;
+}
+
+
+function clearMessage(
+  element
+) {
+
+  element.textContent = "";
+
+  element.className =
+    "message";
+}
+
+
+function setLoginLoading(
+  loading
+) {
+
+  loginButton.disabled =
+    loading;
+
+  schoolNumber.disabled =
+    loading;
+
+
+  loginButton.innerHTML =
+    loading
+      ? '<span class="loader"></span> جاري التحقق...'
+      : 'دخول';
+}
+
+
+function setSaveLoading(
+  loading
+) {
+
+  saveButton.disabled =
+    loading;
+
+
+  saveButton.innerHTML =
+    loading
+      ? '<span class="loader"></span> جاري الحفظ...'
+      : 'حفظ البيانات';
+}
+
+</script>
+
+</body>
+</html>
