@@ -12,7 +12,7 @@ const SafetyAPI = (() => {
    * =========================================================
    */
   const BASE_URL =
-    'https://script.google.com/macros/s/AKfycbxRb6qs5YPWJat2hm8snSa3cB1yGgVJovIlw_ceAWcfREEMgiTCVrazfE74rJAD_Ik/exec';
+    'https://script.google.com/macros/s/AKfycbzva85n4egrM79u6bjFGL80bdrDH3KQE3Bn7ZYr5bwXUJYRXPliXfzge2DXm-dz-Hc/exec';
 
 
   /**

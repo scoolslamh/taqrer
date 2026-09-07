@@ -52,6 +52,25 @@ const portalImages = Array.from(
 ).filter(reference => !/^(?:https?:|data:|\/\/)/i.test(reference));
 assertLocalFilesExist('index.html', portalImages);
 
+const apiSources = [
+  portalHtml,
+  read('safety-dashboard/js/config.js'),
+  read('safety-dashboard/js/api.js')
+];
+const apiUrls = apiSources.map(source => {
+  const match = source.match(
+    /https:\/\/script\.google\.com\/macros\/s\/[^'"\s]+\/exec/
+  );
+
+  assert.ok(match, 'Google Apps Script deployment URL is missing');
+  return match[0];
+});
+assert.strictEqual(
+  new Set(apiUrls).size,
+  1,
+  'All frontend entry points must use the same API deployment URL'
+);
+
 assert.match(read('dashbord.html'), /url=\.\/dashboard\.html/);
 assert.match(
   read('safety-dashboard/index.html'),
