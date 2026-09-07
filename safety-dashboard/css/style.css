@@ -1,0 +1,1302 @@
+/* =========================================================
+   لوحة متابعة الأمن والسلامة المدرسية
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  direction: rtl;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family:
+    "Segoe UI",
+    Tahoma,
+    Arial,
+    sans-serif;
+  background: #f5f7fa;
+  color: #1f2937;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* مهم جدًا */
+.hidden {
+  display: none !important;
+}
+
+
+/* =========================================================
+   صفحة تسجيل الدخول
+   ========================================================= */
+
+.login-view {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(0, 112, 74, 0.10),
+      transparent 35%
+    ),
+    linear-gradient(
+      135deg,
+      #f8fafc 0%,
+      #eef4f1 100%
+    );
+}
+
+.login-card {
+  width: 100%;
+  max-width: 430px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow:
+    0 20px 60px rgba(15, 23, 42, 0.10);
+  border: 1px solid #e7ece9;
+}
+
+
+/* =========================================================
+   الهوية
+   ========================================================= */
+
+.brand {
+  text-align: center;
+  margin-bottom: 34px;
+}
+
+.brand-icon {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 20px;
+
+  background: #00704a;
+  color: #ffffff;
+
+  font-size: 32px;
+  font-weight: 700;
+
+  box-shadow:
+    0 10px 25px rgba(0, 112, 74, 0.20);
+}
+
+.brand h1 {
+  margin: 0 0 10px;
+  font-size: 30px;
+  color: #16231d;
+}
+
+.brand p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.8;
+  font-size: 15px;
+}
+
+
+/* =========================================================
+   الحقول
+   ========================================================= */
+
+.field {
+  margin-bottom: 18px;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 9px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.field input {
+  width: 100%;
+  height: 52px;
+
+  padding: 0 16px;
+
+  border: 1px solid #d7dfdc;
+  border-radius: 12px;
+
+  outline: none;
+
+  background: #ffffff;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.field input:focus {
+  border-color: #00704a;
+
+  box-shadow:
+    0 0 0 4px rgba(0, 112, 74, 0.10);
+}
+
+.field input::placeholder {
+  color: #9ca3af;
+}
+
+
+/* =========================================================
+   زر الدخول
+   ========================================================= */
+
+.primary-button {
+  width: 100%;
+  min-height: 52px;
+
+  border: 0;
+  border-radius: 12px;
+
+  background: #00704a;
+  color: #ffffff;
+
+  font-weight: 700;
+  font-size: 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.primary-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 10px 24px rgba(0, 112, 74, 0.20);
+}
+
+.primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+
+/* =========================================================
+   الرسائل
+   ========================================================= */
+
+.message {
+  min-height: 24px;
+  margin: 4px 0 12px;
+
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.message[data-type="error"] {
+  color: #b42318;
+}
+
+.message[data-type="success"] {
+  color: #067647;
+}
+
+
+/* =========================================================
+   مؤشر التحميل
+   ========================================================= */
+
+.loader {
+  width: 18px;
+  height: 18px;
+
+  border-radius: 50%;
+
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =========================================================
+   أسفل بطاقة الدخول
+   ========================================================= */
+
+.login-footer {
+  margin-top: 24px;
+  padding-top: 20px;
+
+  border-top: 1px solid #edf0ef;
+
+  text-align: center;
+
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   الداشبورد
+   ========================================================= */
+
+.dashboard-view {
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+
+
+/* =========================================================
+   رأس الداشبورد
+   ========================================================= */
+
+.dashboard-header {
+  min-height: 82px;
+
+  padding: 15px 6%;
+
+  background: #ffffff;
+
+  border-bottom: 1px solid #e8ecea;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.welcome-label {
+  display: block;
+  margin-bottom: 4px;
+
+  color: #64748b;
+  font-size: 13px;
+}
+
+.user-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-name-row h2 {
+  margin: 0;
+
+  color: #17231e;
+  font-size: 19px;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+
+  min-height: 27px;
+
+  padding: 4px 11px;
+
+  border-radius: 20px;
+
+  background: #e8f5ef;
+  color: #00704a;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.logout-button {
+  border: 1px solid #d9e0dd;
+
+  background: #ffffff;
+  color: #475569;
+
+  padding: 10px 16px;
+
+  border-radius: 10px;
+
+  transition: 0.2s ease;
+}
+
+.logout-button:hover {
+  border-color: #b42318;
+  color: #b42318;
+  background: #fff7f6;
+}
+
+
+/* =========================================================
+   المحتوى
+   ========================================================= */
+
+.dashboard-content {
+  width: min(1400px, 92%);
+  margin: 0 auto;
+
+  padding: 38px 0 60px;
+}
+
+.page-heading {
+  margin-bottom: 28px;
+}
+
+.page-heading h1 {
+  margin: 0 0 8px;
+
+  font-size: 30px;
+  color: #17231e;
+}
+
+.page-heading p {
+  margin: 0;
+
+  color: #64748b;
+  line-height: 1.8;
+}
+
+
+/* =========================================================
+   بطاقات المؤشرات
+   ========================================================= */
+
+.stats-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 18px;
+
+  margin-bottom: 28px;
+}
+
+.stat-card {
+  min-height: 160px;
+
+  padding: 24px;
+
+  background: #ffffff;
+
+  border: 1px solid #e7ece9;
+  border-radius: 18px;
+
+  box-shadow:
+    0 5px 20px rgba(15, 23, 42, 0.04);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+
+  box-shadow:
+    0 12px 28px rgba(15, 23, 42, 0.07);
+}
+
+.stat-label {
+  color: #64748b;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.stat-card strong {
+  display: block;
+
+  margin: 10px 0 5px;
+
+  color: #00704a;
+
+  font-size: 36px;
+  line-height: 1;
+}
+
+.stat-card small {
+  color: #94a3b8;
+}
+
+
+/* =========================================================
+   اللوحات
+   ========================================================= */
+
+.panel {
+  background: #ffffff;
+
+  border: 1px solid #e7ece9;
+  border-radius: 18px;
+
+  box-shadow:
+    0 5px 20px rgba(15, 23, 42, 0.04);
+
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 22px 24px;
+
+  border-bottom: 1px solid #edf0ef;
+}
+
+.panel-header h3 {
+  margin: 0 0 6px;
+
+  font-size: 19px;
+  color: #17231e;
+}
+
+.panel-header p {
+  margin: 0;
+
+  color: #64748b;
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   الحالة الفارغة
+   ========================================================= */
+
+.empty-state {
+  padding: 60px 20px;
+
+  text-align: center;
+
+  color: #64748b;
+}
+
+.empty-icon {
+  width: 55px;
+  height: 55px;
+
+  margin: 0 auto 16px;
+
+  border-radius: 16px;
+
+  background: #edf7f3;
+  color: #00704a;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 25px;
+}
+
+.empty-state strong {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: #334155;
+}
+
+.empty-state p {
+  margin: 0;
+
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+
+@media (max-width: 1000px) {
+
+  .stats-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+
+@media (max-width: 600px) {
+
+  .login-card {
+    padding: 30px 22px;
+    border-radius: 20px;
+  }
+
+  .brand h1 {
+    font-size: 25px;
+  }
+
+  .dashboard-header {
+    padding: 14px 18px;
+  }
+
+  .dashboard-content {
+    width: calc(100% - 30px);
+    padding-top: 25px;
+  }
+
+  .page-heading h1 {
+    font-size: 24px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    min-height: 135px;
+  }
+}
+/* =========================================================
+   قائمة المدارس
+========================================================= */
+
+.schools-toolbar {
+  padding: 20px 24px 0;
+}
+
+.schools-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.school-filter {
+  border: 1px solid #dfe5e2;
+  background: #ffffff;
+  padding: 10px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+.school-filter span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 25px;
+  height: 25px;
+  margin-right: 6px;
+  padding: 0 7px;
+  border-radius: 20px;
+  background: #f1f4f3;
+}
+
+.school-filter:hover {
+  border-color: #00865f;
+}
+
+.school-filter.active {
+  background: #00865f;
+  color: #ffffff;
+  border-color: #00865f;
+}
+
+.school-filter.active span {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+
+/* متابعة خطط الإخلاء */
+
+.evacuation-monitor {
+  margin: 20px 24px 0;
+  padding: 20px;
+  border: 1px solid #dfe8e4;
+  border-radius: 16px;
+  background: #f8fbfa;
+}
+
+.evacuation-monitor-header h4 {
+  margin: 0 0 5px;
+  color: #17231e;
+  font-size: 17px;
+}
+
+.evacuation-monitor-header p {
+  margin: 0;
+  color: #71807a;
+  font-size: 13px;
+}
+
+.evacuation-monitor-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.evacuation-monitor-filters.without-plan {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.evacuation-filter-field label {
+  display: block;
+  margin-bottom: 7px;
+  color: #44534d;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.evacuation-filter-field select {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 13px;
+  border: 1px solid #d7dfdc;
+  border-radius: 11px;
+  outline: none;
+  background: #ffffff;
+  color: #26342f;
+  font: inherit;
+}
+
+.evacuation-filter-field select:focus {
+  border-color: #00865f;
+  box-shadow: 0 0 0 3px rgba(0, 134, 95, 0.10);
+}
+
+.evacuation-summary {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #edf7f3;
+}
+
+.evacuation-summary > strong {
+  display: block;
+  margin-bottom: 9px;
+  color: #176448;
+}
+
+.evacuation-summary-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  color: #53635d;
+  font-size: 13px;
+}
+
+.evacuation-summary-values b {
+  color: #17231e;
+}
+
+.reset-filters-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 18px;
+  padding: 10px 16px;
+  border: 1px solid #00865f;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #00704a;
+  font: inherit;
+  font-weight: 700;
+}
+
+
+/* قائمة المدارس */
+
+.schools-list {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  padding: 24px;
+}
+
+
+/* بطاقة المدرسة */
+
+.school-card {
+  background: #ffffff;
+  border: 1px solid #e4e9e7;
+  border-radius: 18px;
+  padding: 20px;
+  content-visibility: auto;
+  contain-intrinsic-size: 520px;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.school-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.school-row-number {
+  display: none;
+}
+
+
+.school-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+
+.school-title {
+  min-width: 0;
+}
+
+.school-title h4 {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.7;
+  color: #17231f;
+}
+
+.school-title p {
+  margin: 5px 0 0;
+  font-size: 13px;
+  color: #83918c;
+}
+
+
+/* حالة المدرسة */
+
+.school-status {
+  flex-shrink: 0;
+  padding: 6px 11px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.school-status.completed {
+  background: #e5f6ef;
+  color: #007c59;
+}
+
+.school-status.pending {
+  background: #fff3df;
+  color: #9a6200;
+}
+
+
+/* نسبة الإنجاز */
+
+.school-progress-row {
+  margin-top: 20px;
+}
+
+.school-progress-row > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.school-progress-row span {
+  color: #74827d;
+  font-size: 13px;
+}
+
+.school-progress-row strong {
+  color: #00865f;
+  font-size: 18px;
+}
+
+.progress-track {
+  width: 100%;
+  height: 8px;
+  overflow: hidden;
+  background: #edf1ef;
+  border-radius: 20px;
+}
+
+.progress-bar {
+  height: 100%;
+  background: #00865f;
+  border-radius: inherit;
+  transition: width 0.4s ease;
+}
+
+
+/* البرامج */
+
+.requirements-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.requirement-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f7f9f8;
+}
+
+.requirement-name {
+  color: #56645f;
+  font-size: 13px;
+}
+
+.requirement-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #9a6200;
+}
+
+.requirement-value.completed {
+  color: #00865f;
+}
+
+
+/* تفاصيل خطط الإخلاء داخل بطاقة المدرسة */
+
+.evacuation-plans-detail {
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid #e7ece9;
+  border-radius: 12px;
+  background: #fbfcfc;
+}
+
+.selected-report-detail {
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid #e7ece9;
+  border-radius: 12px;
+  background: #fbfcfc;
+}
+
+.selected-report-detail h5 {
+  margin: 0 0 10px;
+  color: #34443e;
+  font-size: 14px;
+}
+
+.selected-report-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  color: #596761;
+  font-size: 12px;
+}
+
+.selected-report-status {
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.selected-report-status.completed {
+  color: #00865f;
+}
+
+.selected-report-status.pending {
+  color: #9a6200;
+}
+
+.evacuation-plans-title {
+  margin: 0 0 10px;
+  color: #34443e;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.evacuation-plan-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 9px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  color: #596761;
+  font-size: 12px;
+}
+
+.evacuation-plan-row + .evacuation-plan-row {
+  margin-top: 4px;
+}
+
+.evacuation-plan-row.selected {
+  border-color: #b8dace;
+  background: #edf7f3;
+  font-weight: 700;
+}
+
+.evacuation-plan-state {
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.evacuation-plan-state.uploaded {
+  color: #00865f;
+}
+
+.evacuation-plan-state.not-uploaded {
+  color: #9a6200;
+}
+
+
+/* الرقم الإحصائي */
+
+.school-numbers {
+  margin-top: 15px;
+  padding-top: 13px;
+  border-top: 1px solid #edf0ef;
+  color: #89958f;
+  font-size: 12px;
+}
+
+.school-supervisor {
+  margin-top: 12px;
+  padding: 11px 13px;
+  border-radius: 10px;
+  background: #f1f7f4;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.school-supervisor strong {
+  color: #176448;
+}
+
+
+/* =========================================================
+   لوحة مدير النظام
+========================================================= */
+
+.admin-page-heading,
+.admin-schools-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.compact-button {
+  width: auto;
+  min-height: 44px;
+  padding: 0 20px;
+}
+
+.admin-stats-grid {
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+}
+
+.warning-card strong {
+  color: #9a6200;
+}
+
+.admin-toolbar {
+  display: grid;
+  grid-template-columns:
+    minmax(220px, 2fr)
+    repeat(2, minmax(160px, 1fr));
+  gap: 14px;
+  padding: 20px 24px;
+  background: #f8fbfa;
+  border-bottom: 1px solid #edf0ef;
+}
+
+.admin-school-toolbar {
+  grid-template-columns:
+    repeat(auto-fit, minmax(170px, 1fr));
+  margin: 20px 24px 0;
+  border: 1px solid #dfe8e4;
+  border-radius: 16px;
+}
+
+.admin-search-field input {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 13px;
+  border: 1px solid #d7dfdc;
+  border-radius: 11px;
+  outline: none;
+  background: #ffffff;
+  color: #26342f;
+}
+
+.admin-search-field input:focus {
+  border-color: #00865f;
+  box-shadow:
+    0 0 0 3px rgba(0, 134, 95, 0.10);
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-supervisors-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 920px;
+}
+
+.admin-supervisors-table th,
+.admin-supervisors-table td {
+  padding: 16px 14px;
+  border-bottom: 1px solid #edf0ef;
+  text-align: right;
+  vertical-align: middle;
+  font-size: 14px;
+}
+
+.admin-supervisors-table th {
+  background: #fbfcfc;
+  color: #53635d;
+  font-size: 13px;
+}
+
+.admin-supervisors-table td > strong,
+.admin-supervisors-table td > small {
+  display: block;
+}
+
+.admin-supervisors-table td > small {
+  margin-top: 4px;
+  color: #94a3b8;
+}
+
+.admin-progress-value {
+  min-width: 145px;
+}
+
+.admin-progress-value > span {
+  display: block;
+  margin-bottom: 7px;
+  color: #00704a;
+  font-weight: 700;
+}
+
+.table-action {
+  margin-top: 0;
+  white-space: nowrap;
+}
+
+.admin-selection-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  margin: 20px 24px 0;
+  padding: 15px 18px;
+  border-radius: 12px;
+  background: #edf7f3;
+  color: #53635d;
+  font-size: 14px;
+}
+
+.admin-selection-summary b {
+  color: #176448;
+}
+
+.admin-school-filter {
+  border: 1px solid #dfe5e2;
+  background: #ffffff;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.admin-school-filter:hover {
+  border-color: #00865f;
+}
+
+.admin-school-filter.active {
+  border-color: #00865f;
+  background: #00865f;
+  color: #ffffff;
+}
+
+#adminResetSchoolFiltersButton {
+  margin-right: 24px;
+}
+
+
+@media (max-width: 1000px) {
+  .admin-stats-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-toolbar {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+@media (max-width: 700px) {
+  .admin-page-heading,
+  .admin-schools-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .compact-button {
+    width: 100%;
+  }
+
+  .admin-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-toolbar,
+  .admin-school-toolbar {
+    margin-right: 16px;
+    margin-left: 16px;
+    padding: 16px;
+  }
+
+  .admin-toolbar:not(.admin-school-toolbar) {
+    margin: 0;
+  }
+
+  .admin-selection-summary {
+    margin-right: 16px;
+    margin-left: 16px;
+  }
+
+  #adminResetSchoolFiltersButton {
+    margin-right: 16px;
+  }
+}
+
+
+/* الجوال */
+
+@media (max-width: 800px) {
+
+  .schools-list {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .school-card {
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+    border-radius: 13px;
+  }
+
+  .school-card:hover {
+    transform: none;
+  }
+
+  .school-row-number {
+    display: block;
+    padding: 9px 14px;
+    background: #00865f;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .school-row-number::before {
+    content: "المدرسة رقم ";
+  }
+
+  .schools-toolbar {
+    padding: 16px 16px 0;
+  }
+
+  .evacuation-monitor {
+    margin: 16px 16px 0;
+    padding: 16px;
+  }
+
+  .evacuation-monitor-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .evacuation-monitor-filters.without-plan {
+    grid-template-columns: 1fr;
+  }
+
+  .requirements-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+    margin-top: 0;
+  }
+
+  .school-card-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    padding: 13px 14px;
+    border-bottom: 1px solid #edf0ef;
+  }
+
+  .school-title h4 {
+    font-size: 15px;
+  }
+
+  .school-progress-row {
+    margin-top: 0;
+    padding: 12px 14px;
+    border-bottom: 1px solid #edf0ef;
+  }
+
+  .requirement-item {
+    min-height: 43px;
+    padding: 9px 14px;
+    border-radius: 0;
+    border-bottom: 1px solid #edf0ef;
+    background: #fff;
+  }
+
+  .selected-report-detail,
+  .evacuation-plans-detail {
+    margin: 0;
+    padding: 13px 14px;
+    border-width: 0 0 1px;
+    border-radius: 0;
+  }
+
+  .school-numbers {
+    margin-top: 0;
+    padding: 11px 14px;
+  }
+}
