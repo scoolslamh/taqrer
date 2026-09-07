@@ -218,6 +218,14 @@ vm.runInContext(
     schoolPortalHtml,
     /instructionsConfirmButton\.addEventListener\([\s\S]*sessionStorage\.setItem\([\s\S]*openDashboard\(/
   );
+  assert.match(
+    schoolPortalHtml,
+    /\.instructions-content\s*\{[\s\S]*?min-height:\s*0;[\s\S]*?overflow-y:\s*auto;/
+  );
+  assert.match(
+    schoolPortalHtml,
+    /@media \(max-width: 600px\)[\s\S]*?\.instructions-dialog\s*\{[\s\S]*?height:\s*100%;[\s\S]*?max-height:\s*100%;/
+  );
   const inlineScripts = Array.from(
     schoolPortalHtml.matchAll(
       /<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g

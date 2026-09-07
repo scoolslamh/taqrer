@@ -219,6 +219,8 @@ body.instructions-open {
 .instructions-modal {
   position: fixed;
   inset: 0;
+  height: 100vh;
+  height: 100dvh;
   z-index: 1000;
   display: none;
   align-items: center;
@@ -244,6 +246,7 @@ body.instructions-open {
 }
 
 .instructions-header {
+  flex: 0 0 auto;
   padding: 22px 26px 18px;
   color: #fff;
   background: linear-gradient(135deg, #0d6b57, #16846c);
@@ -256,7 +259,11 @@ body.instructions-open {
 }
 
 .instructions-content {
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: 22px 26px;
   line-height: 1.9;
   scrollbar-gutter: stable;
@@ -286,6 +293,7 @@ body.instructions-open {
 }
 
 .instructions-footer {
+  flex: 0 0 auto;
   padding: 18px 26px 22px;
   border-top: 1px solid #e4ebe8;
   background: #f8faf9;
@@ -311,11 +319,17 @@ body.instructions-open {
 
 @media (max-width: 600px) {
   .instructions-modal {
-    padding: 10px;
+    align-items: stretch;
+    padding-top: max(8px, env(safe-area-inset-top));
+    padding-right: max(8px, env(safe-area-inset-right));
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    padding-left: max(8px, env(safe-area-inset-left));
   }
 
   .instructions-dialog {
-    max-height: calc(100vh - 20px);
+    height: 100%;
+    max-height: 100%;
+    margin: auto;
     border-radius: 15px;
   }
 
@@ -328,6 +342,37 @@ body.instructions-open {
 
   .instructions-header h2 {
     font-size: 18px;
+  }
+
+  .instructions-header {
+    padding-top: 14px;
+    padding-bottom: 12px;
+  }
+
+  .instructions-content {
+    padding-top: 14px;
+    padding-bottom: 14px;
+    font-size: 14px;
+    line-height: 1.75;
+  }
+
+  .instructions-list li {
+    margin-bottom: 9px;
+  }
+
+  .instructions-footer {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .instructions-acknowledgement {
+    margin-bottom: 10px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .instructions-confirm-button {
+    min-height: 46px;
   }
 }
 
@@ -1101,7 +1146,7 @@ body.instructions-open {
 
       <button
         id="instructionsConfirmButton"
-        class="btn btn-primary"
+        class="btn btn-primary instructions-confirm-button"
         type="button"
         disabled
       >
