@@ -193,6 +193,31 @@ vm.runInContext(
     __dirname + '/../index.html',
     'utf8'
   );
+  const schoolPortalIds = Array.from(
+    schoolPortalHtml.matchAll(/\sid="([^"]+)"/g),
+    match => match[1]
+  );
+  assert.strictEqual(
+    new Set(schoolPortalIds).size,
+    schoolPortalIds.length,
+    'School portal HTML IDs must remain unique'
+  );
+  assert.match(
+    schoolPortalHtml,
+    /id="systemInstructionsModal"[\s\S]*role="dialog"[\s\S]*aria-modal="true"/
+  );
+  assert.match(
+    schoolPortalHtml,
+    /id="instructionsReadCheckbox"[\s\S]*id="instructionsConfirmButton"[\s\S]*disabled/
+  );
+  assert.match(
+    schoolPortalHtml,
+    /showSystemInstructions\(\{[\s\S]*school: authenticatedSchool[\s\S]*achievement: result\.data\.achievement/
+  );
+  assert.match(
+    schoolPortalHtml,
+    /instructionsConfirmButton\.addEventListener\([\s\S]*sessionStorage\.setItem\([\s\S]*openDashboard\(/
+  );
   const inlineScripts = Array.from(
     schoolPortalHtml.matchAll(
       /<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g

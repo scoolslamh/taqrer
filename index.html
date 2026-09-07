@@ -209,6 +209,130 @@ select {
 
 
 /* =========================
+   SYSTEM INSTRUCTIONS
+========================= */
+
+body.instructions-open {
+  overflow: hidden;
+}
+
+.instructions-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(13, 35, 29, .72);
+  backdrop-filter: blur(3px);
+}
+
+.instructions-modal.show {
+  display: flex;
+}
+
+.instructions-dialog {
+  width: min(100%, 780px);
+  max-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .24);
+}
+
+.instructions-header {
+  padding: 22px 26px 18px;
+  color: #fff;
+  background: linear-gradient(135deg, #0d6b57, #16846c);
+}
+
+.instructions-header h2 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.6;
+}
+
+.instructions-content {
+  overflow-y: auto;
+  padding: 22px 26px;
+  line-height: 1.9;
+  scrollbar-gutter: stable;
+}
+
+.instructions-intro {
+  margin: 0 0 16px;
+}
+
+.instructions-list {
+  margin: 0;
+  padding-right: 23px;
+}
+
+.instructions-list li {
+  margin-bottom: 12px;
+  padding-right: 5px;
+}
+
+.instructions-alert {
+  margin: 18px 0 0;
+  padding: 14px 16px;
+  color: #704c08;
+  background: #fff8e8;
+  border: 1px solid #f0d99f;
+  border-radius: 12px;
+}
+
+.instructions-footer {
+  padding: 18px 26px 22px;
+  border-top: 1px solid #e4ebe8;
+  background: #f8faf9;
+}
+
+.instructions-acknowledgement {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 15px;
+  font-weight: bold;
+  line-height: 1.7;
+  cursor: pointer;
+}
+
+.instructions-acknowledgement input {
+  width: 20px;
+  height: 20px;
+  margin-top: 4px;
+  accent-color: #0d6b57;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 600px) {
+  .instructions-modal {
+    padding: 10px;
+  }
+
+  .instructions-dialog {
+    max-height: calc(100vh - 20px);
+    border-radius: 15px;
+  }
+
+  .instructions-header,
+  .instructions-content,
+  .instructions-footer {
+    padding-right: 17px;
+    padding-left: 17px;
+  }
+
+  .instructions-header h2 {
+    font-size: 18px;
+  }
+}
+
+
+/* =========================
    DASHBOARD
 ========================= */
 
@@ -920,6 +1044,72 @@ select {
 <!-- =========================
      لوحة المدرسة
 ========================= -->
+
+<div
+  id="systemInstructionsModal"
+  class="instructions-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-hidden="true"
+  aria-labelledby="systemInstructionsTitle"
+  aria-describedby="systemInstructionsContent"
+>
+  <section
+    class="instructions-dialog"
+    tabindex="-1"
+  >
+    <header class="instructions-header">
+      <h2 id="systemInstructionsTitle">
+        تعليمات استخدام منصة تقارير الأمن والسلامة
+      </h2>
+    </header>
+
+    <div
+      id="systemInstructionsContent"
+      class="instructions-content"
+    >
+      <p class="instructions-intro">
+        حرصًا على توثيق منجزات المدارس في مجال الأمن والسلامة، وقياس مستوى التقدم في تنفيذ البرامج والخطط المعتمدة خلال العام الدراسي <strong>1448–1449هـ</strong>، تم تخصيص هذه المنصة لتكون السجل الإلكتروني المعتمد لأعمال ومنجزات الأمن والسلامة في المدارس طوال العام الدراسي.
+      </p>
+
+      <p><strong>يرجى الالتزام بالتعليمات الآتية:</strong></p>
+
+      <ol class="instructions-list">
+        <li><strong>توثيق المنجزات:</strong> تهدف المنصة إلى حفظ وتوثيق منجزات المدرسة في مجال الأمن والسلامة، وقياس مستوى تقدمها في تنفيذ المتطلبات والبرامج المعتمدة، والاستفادة من البيانات الموثقة في تقييم مستوى الإنجاز والتكريم وفق المنجز الفعلي.</li>
+        <li><strong>خطط الإخلاء:</strong> يتم تنفيذ ورفع تقرير كل خطة إخلاء <strong>في موعدها المحدد وفق الجدول الزمني المعتمد في الخطة التنفيذية</strong>، وعدم تأجيل رفع التقارير أو تجميعها.</li>
+        <li><strong>استمرارية التوثيق:</strong> المنصة مخصصة لتوثيق <strong>جميع أعمال وبرامج وتقارير الأمن والسلامة طوال العام الدراسي 1448–1449هـ</strong>، وليست مقتصرة على برنامج أو فترة زمنية محددة.</li>
+        <li><strong>الرفع في حينه:</strong> يجب رفع كل تقرير فور تنفيذ البرنامج أو النشاط المرتبط به، ولا يتم تأجيل التقارير ثم تعبئتها أو رفعها دفعة واحدة في وقت لاحق؛ لضمان دقة قياس مستوى الإنجاز الفعلي للمدرسة.</li>
+        <li><strong>المتابعة والتحقق:</strong> تتم متابعة مستوى الإنجاز والتقارير المرفوعة عبر المنصة من قبل <strong>إدارة الأمن والسلامة والمرافق</strong>، والتحقق من انتظام المدارس في تنفيذ ورفع الأعمال المطلوبة.</li>
+        <li><strong>دقة وصحة البيانات:</strong> يتحمل منسق/ة الأمن والسلامة مسؤولية صحة ودقة البيانات والتقارير والشواهد المرفوعة، ويجب أن تعكس ما تم تنفيذه فعليًا في المدرسة.</li>
+        <li><strong>المساءلة:</strong> أي تلاعب في البيانات أو التقارير، أو رفع معلومات أو شواهد لا تعكس التنفيذ الفعلي، يعرّض <strong>منسق/ة الأمن والسلامة للمساءلة وفق الأنظمة والتعليمات المعمول بها</strong>.</li>
+      </ol>
+
+      <p class="instructions-alert">
+        <strong>تنبيه:</strong><br>
+        يمثل مستوى الإنجاز الظاهر في المنصة انعكاسًا لما تم توثيقه ورفعه من أعمال المدرسة؛ لذا فإن الالتزام بالتنفيذ والرفع في الوقت المحدد يسهم في إظهار المنجز الحقيقي للمدرسة، ويُبنى عليه التقييم والتكريم.
+      </p>
+    </div>
+
+    <footer class="instructions-footer">
+      <label class="instructions-acknowledgement">
+        <input
+          id="instructionsReadCheckbox"
+          type="checkbox"
+        >
+        <span>قرأت تعليمات استخدام المنصة وأتعهد بالالتزام بها.</span>
+      </label>
+
+      <button
+        id="instructionsConfirmButton"
+        class="btn btn-primary"
+        type="button"
+        disabled
+      >
+        تأكيد القراءة والدخول إلى التقارير
+      </button>
+    </footer>
+  </section>
+</div>
 
 <section id="dashboardPage">
 
@@ -2060,6 +2250,7 @@ const API_URL =
 
 
 let currentSchool = null;
+let pendingDashboardData = null;
 
 
 /*
@@ -2073,6 +2264,24 @@ const loginPage =
 
 const dashboardPage =
   document.getElementById("dashboardPage");
+
+const systemInstructionsModal =
+  document.getElementById("systemInstructionsModal");
+
+const instructionsDialog =
+  systemInstructionsModal.querySelector(
+    ".instructions-dialog"
+  );
+
+const instructionsReadCheckbox =
+  document.getElementById(
+    "instructionsReadCheckbox"
+  );
+
+const instructionsConfirmButton =
+  document.getElementById(
+    "instructionsConfirmButton"
+  );
 
 const loginForm =
   document.getElementById("loginForm");
@@ -2333,27 +2542,20 @@ loginForm.addEventListener(
       }
 
 
-      currentSchool =
-        result.data.school;
+      const authenticatedSchool =
+        result.data?.school;
 
-      if (!currentSchool) {
+      if (!authenticatedSchool) {
         throw new Error(
           "Invalid school dashboard response"
         );
       }
 
-
-      sessionStorage.setItem(
-        "schoolData",
-        JSON.stringify(currentSchool)
-      );
-
-
-      openDashboard(
-        currentSchool,
-        result.data.reports,
-        result.data.achievement
-      );
+      showSystemInstructions({
+        school: authenticatedSchool,
+        reports: result.data.reports,
+        achievement: result.data.achievement
+      });
 
     }
 
@@ -2384,6 +2586,112 @@ loginForm.addEventListener(
  * فتح لوحة المدرسة
  * =========================================================
  */
+
+function showSystemInstructions(
+  dashboardData
+) {
+
+  pendingDashboardData =
+    dashboardData;
+
+  instructionsReadCheckbox.checked =
+    false;
+
+  instructionsConfirmButton.disabled =
+    true;
+
+  systemInstructionsModal.classList.add(
+    "show"
+  );
+
+  systemInstructionsModal.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+  document.body.classList.add(
+    "instructions-open"
+  );
+
+  requestAnimationFrame(() => {
+    instructionsDialog.focus();
+  });
+}
+
+
+function hideSystemInstructions() {
+
+  systemInstructionsModal.classList.remove(
+    "show"
+  );
+
+  systemInstructionsModal.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  document.body.classList.remove(
+    "instructions-open"
+  );
+}
+
+
+instructionsReadCheckbox.addEventListener(
+  "change",
+  function() {
+    instructionsConfirmButton.disabled =
+      !this.checked;
+  }
+);
+
+
+instructionsConfirmButton.addEventListener(
+  "click",
+  function() {
+
+    if (
+      !instructionsReadCheckbox.checked ||
+      !pendingDashboardData
+    ) {
+      return;
+    }
+
+    const dashboardData =
+      pendingDashboardData;
+
+    pendingDashboardData = null;
+    currentSchool = dashboardData.school;
+
+    sessionStorage.setItem(
+      "schoolData",
+      JSON.stringify(currentSchool)
+    );
+
+    hideSystemInstructions();
+
+    openDashboard(
+      currentSchool,
+      dashboardData.reports,
+      dashboardData.achievement
+    );
+  }
+);
+
+
+document.addEventListener(
+  "keydown",
+  function(event) {
+    if (
+      event.key === "Escape" &&
+      systemInstructionsModal.classList.contains(
+        "show"
+      )
+    ) {
+      event.preventDefault();
+    }
+  }
+);
+
 
 function openDashboard(
   data,
