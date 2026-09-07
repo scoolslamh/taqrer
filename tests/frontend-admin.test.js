@@ -167,10 +167,8 @@ vm.runInContext(
     /SafetyAuth\.logout\(\);[\s\S]*clearAdminState\(\)/
   );
 
-  const dashboardHtmlPath = [
-    __dirname + '/../safety-dashboard/index.html',
-    __dirname + '/../safety-dashboard/dashbord.html'
-  ].find(filePath => fs.existsSync(filePath));
+  const dashboardHtmlPath =
+    __dirname + '/../dashboard.html';
 
   assert.ok(
     dashboardHtmlPath,

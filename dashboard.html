@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="description"
+    content="بوابة متابعة تقارير الأمن والسلامة المدرسية"
+  >
+
+  <title>بوابة متابعة الأمن والسلامة المدرسية</title>
+
+  <link
+    rel="stylesheet"
+    href="./safety-dashboard/css/style.css"
+  >
+</head>
+
+
+<body>
+
+  <!-- =====================================================
+       شاشة تسجيل الدخول
+  ====================================================== -->
+
+  <main
+    id="loginView"
+    class="login-view"
+  >
+
+    <section class="login-card">
+
+      <div class="brand">
+
+        <div
+          class="brand-icon"
+          aria-hidden="true"
+        >
+          ✓
+        </div>
+
+        <h1>
+          بوابة المتابعة
+        </h1>
+
+        <p>
+          نظام متابعة تقارير الأمن والسلامة المدرسية
+        </p>
+
+      </div>
+
+
+      <form
+        id="loginForm"
+        novalidate
+      >
+
+        <div class="field">
+
+          <label for="nationalId">
+            السجل المدني
+          </label>
+
+          <input
+            id="nationalId"
+            name="nationalId"
+            type="text"
+            inputmode="numeric"
+            maxlength="10"
+            autocomplete="off"
+            placeholder="أدخل السجل المدني"
+            required
+          >
+
+        </div>
+
+
+        <div
+          id="loginMessage"
+          class="message"
+          role="alert"
+          aria-live="polite"
+        ></div>
+
+
+        <button
+          id="loginButton"
+          class="primary-button"
+          type="submit"
+        >
+
+          <span id="loginButtonText">
+            تسجيل الدخول
+          </span>
+
+          <span
+            id="loginLoader"
+            class="loader hidden"
+            aria-hidden="true"
+          ></span>
+
+        </button>
+
+      </form>
+
+
+      <div class="login-footer">
+        الدخول مخصص للمشرفين والإدارة
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- =====================================================
+       لوحة التحكم
+  ====================================================== -->
+
+  <main
+    id="dashboardView"
+    class="dashboard-view hidden"
+  >
+
+    <!-- رأس الصفحة -->
+
+    <header class="dashboard-header">
+
+      <div class="user-info">
+
+        <span class="welcome-label">
+          مرحبًا بك
+        </span>
+
+        <div class="user-name-row">
+
+          <h2 id="userName">
+            -
+          </h2>
+
+          <span
+            id="userRole"
+            class="role-badge"
+          >
+            -
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <button
+        id="logoutButton"
+        class="logout-button"
+        type="button"
+      >
+        تسجيل الخروج
+      </button>
+
+    </header>
+
+
+    <!-- محتوى الداشبورد -->
+
+    <div
+      id="supervisorDashboardContent"
+      class="dashboard-content"
+    >
+
+      <section class="page-heading">
+
+        <div>
+
+          <h1>
+            لوحة متابعة المدارس
+          </h1>
+
+          <p>
+            متابعة مستوى إنجاز تقارير الأمن والسلامة المدرسية
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           المؤشرات الرئيسية
+      ================================================== -->
+
+      <section
+        class="stats-grid"
+        aria-label="مؤشرات الأداء"
+      >
+
+        <article class="stat-card">
+
+          <span class="stat-label">
+            المدارس المسندة
+          </span>
+
+          <strong id="schoolsCount">
+            —
+          </strong>
+
+          <small>
+            إجمالي المدارس
+          </small>
+
+        </article>
+
+
+        <article class="stat-card">
+
+          <span class="stat-label">
+            متوسط الإنجاز
+          </span>
+
+          <strong id="averageProgress">
+            —
+          </strong>
+
+          <small>
+            مستوى الإنجاز العام
+          </small>
+
+        </article>
+
+
+        <article class="stat-card">
+
+          <span class="stat-label">
+            مدارس مكتملة
+          </span>
+
+          <strong id="completedSchools">
+            —
+          </strong>
+
+          <small>
+            حققت كامل المتطلبات
+          </small>
+
+        </article>
+
+
+        <article class="stat-card">
+
+          <span class="stat-label">
+            تحتاج متابعة
+          </span>
+
+          <strong id="pendingSchools">
+            —
+          </strong>
+
+          <small>
+            لم تستكمل المتطلبات
+          </small>
+
+        </article>
+
+      </section>
+
+
+      <!-- =================================================
+           المدارس
+      ================================================== -->
+
+      <section class="panel">
+
+        <div class="panel-header">
+
+          <div>
+
+            <h3>
+              المدارس
+            </h3>
+
+            <p>
+              متابعة مستوى تقدم المدارس المرتبطة بحسابك
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <!-- أدوات تصفية المدارس -->
+<div class="schools-toolbar">
+
+  <div
+    class="schools-filters"
+    role="group"
+    aria-label="تصفية المدارس"
+  >
+
+    <button
+      type="button"
+      class="school-filter active"
+      data-filter="all"
+    >
+      جميع المدارس
+      <span id="allSchoolsFilterCount">0</span>
+    </button>
+
+    <button
+      type="button"
+      class="school-filter"
+      data-filter="completed"
+    >
+      مكتملة
+      <span id="completedSchoolsFilterCount">0</span>
+    </button>
+
+    <button
+      type="button"
+      class="school-filter"
+      data-filter="pending"
+    >
+      تحتاج متابعة
+      <span id="pendingSchoolsFilterCount">0</span>
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- متابعة التقارير -->
+<section
+  class="evacuation-monitor"
+  aria-labelledby="evacuationMonitorTitle"
+>
+
+  <div class="evacuation-monitor-header">
+    <div>
+      <h4 id="evacuationMonitorTitle">
+        متابعة التقارير
+      </h4>
+      <p>
+        تصفية المدارس حسب نوع التقرير وحالة الإنجاز.
+      </p>
+    </div>
+  </div>
+
+  <div class="evacuation-monitor-filters">
+
+    <div class="evacuation-filter-field">
+      <label for="reportTypeFilter">
+        نوع التقرير
+      </label>
+      <select id="reportTypeFilter">
+        <option value="all">جميع التقارير</option>
+        <option value="evacuation">خطط الإخلاء</option>
+        <option value="safetyMoment">لحظة سلامة</option>
+        <option value="civilDefense">اليوم العالمي للدفاع المدني</option>
+        <option value="trafficWeek">أسبوع المرور</option>
+      </select>
+    </div>
+
+    <div
+      id="evacuationPlanFilterField"
+      class="evacuation-filter-field hidden"
+    >
+      <label for="evacuationPlanFilter">
+        الخطة
+      </label>
+      <select id="evacuationPlanFilter">
+        <option value="all">جميع خطط الإخلاء</option>
+        <option value="1">خطة الإخلاء الأولى</option>
+        <option value="2">خطة الإخلاء الثانية</option>
+        <option value="3">خطة الإخلاء الثالثة</option>
+        <option value="4">خطة الإخلاء الرابعة</option>
+      </select>
+    </div>
+
+    <div class="evacuation-filter-field">
+      <label for="evacuationStatusFilter">
+        الحالة
+      </label>
+      <select id="evacuationStatusFilter">
+        <option value="all">جميع الحالات</option>
+        <option value="uploaded">تم الرفع</option>
+        <option value="not_uploaded">لم يتم الرفع</option>
+      </select>
+    </div>
+
+  </div>
+
+  <button
+    id="reportFiltersResetButton"
+    class="reset-filters-button"
+    type="button"
+  >
+    إعادة ضبط الفلاتر
+  </button>
+
+  <div
+    id="evacuationSummary"
+    class="evacuation-summary"
+    aria-live="polite"
+  >
+    <strong id="evacuationSummaryTitle">
+      خطط الإخلاء الأربع
+    </strong>
+
+    <div class="evacuation-summary-values">
+      <span>
+        <span id="evacuationUploadedLabel">مكتملة جميع الخطط</span>:
+        <b id="evacuationUploadedCount">0</b>
+      </span>
+      <span>
+        <span id="evacuationNotUploadedLabel">تحتاج استكمال</span>:
+        <b id="evacuationNotUploadedCount">0</b>
+      </span>
+      <span>
+        الإجمالي:
+        <b id="evacuationTotalCount">0</b>
+      </span>
+    </div>
+  </div>
+
+</section>
+
+
+<!-- حالة التحميل -->
+<div
+  id="schoolsLoading"
+  class="empty-state hidden"
+>
+
+  <div class="empty-icon">
+    ◷
+  </div>
+
+  <strong>
+    جاري تحميل المدارس
+  </strong>
+
+  <p>
+    يرجى الانتظار...
+  </p>
+
+</div>
+
+
+<!-- رسالة عدم وجود مدارس -->
+<div
+  id="schoolsEmpty"
+  class="empty-state hidden"
+>
+
+  <div class="empty-icon">
+    ✓
+  </div>
+
+  <strong id="schoolsEmptyTitle">
+    لا توجد مدارس
+  </strong>
+
+  <p id="schoolsEmptyMessage">
+    لا توجد مدارس مطابقة للتصنيف المحدد.
+  </p>
+
+  <button
+    id="schoolsResetFiltersButton"
+    class="reset-filters-button hidden"
+    type="button"
+  >
+    إعادة ضبط الفلاتر
+  </button>
+
+</div>
+
+
+<!-- قائمة المدارس -->
+<div
+  id="schoolsList"
+  class="schools-list"
+  aria-live="polite"
+></div>
+
+      </section>
+
+    </div>
+
+
+    <!-- =================================================
+         لوحة مدير النظام
+    ================================================== -->
+    <div
+      id="adminDashboardContent"
+      class="dashboard-content hidden"
+    >
+
+      <section class="page-heading admin-page-heading">
+        <div>
+          <h1>لوحة مدير النظام</h1>
+          <p>متابعة إنجاز المشرفين والمدارس</p>
+        </div>
+
+        <button
+          id="adminAllSchoolsButton"
+          class="primary-button compact-button"
+          type="button"
+        >
+          جميع المدارس
+        </button>
+      </section>
+
+      <div
+        id="adminLoading"
+        class="empty-state"
+        aria-live="polite"
+      >
+        <div class="empty-icon">◷</div>
+        <strong>جاري تحميل بيانات لوحة مدير النظام...</strong>
+        <p>يرجى الانتظار...</p>
+      </div>
+
+      <div
+        id="adminError"
+        class="empty-state hidden"
+        role="alert"
+      >
+        <div class="empty-icon">!</div>
+        <strong>تعذر تحميل بيانات لوحة مدير النظام.</strong>
+        <p id="adminErrorMessage">يرجى المحاولة مرة أخرى.</p>
+        <button
+          id="adminRetryButton"
+          class="primary-button compact-button"
+          type="button"
+        >
+          إعادة المحاولة
+        </button>
+      </div>
+
+      <div id="adminDashboardBody" class="hidden">
+
+        <section
+          class="stats-grid admin-stats-grid"
+          aria-label="مؤشرات الإدارة"
+        >
+          <article class="stat-card">
+            <span class="stat-label">إجمالي المشرفين</span>
+            <strong id="adminSupervisorsCount">—</strong>
+            <small>المشرفون المسجلون</small>
+          </article>
+          <article class="stat-card">
+            <span class="stat-label">إجمالي المدارس</span>
+            <strong id="adminSchoolsCount">—</strong>
+            <small>المدارس النشطة</small>
+          </article>
+          <article class="stat-card">
+            <span class="stat-label">متوسط الإنجاز العام</span>
+            <strong id="adminAverageAchievement">—</strong>
+            <small>متوسط جميع المدارس</small>
+          </article>
+          <article class="stat-card">
+            <span class="stat-label">المدارس المكتملة</span>
+            <strong id="adminCompletedSchools">—</strong>
+            <small>حققت كامل المتطلبات</small>
+          </article>
+          <article class="stat-card">
+            <span class="stat-label">تحتاج متابعة</span>
+            <strong id="adminPendingSchools">—</strong>
+            <small>لم تستكمل المتطلبات</small>
+          </article>
+          <article class="stat-card warning-card">
+            <span class="stat-label">مدارس غير مسندة</span>
+            <strong id="adminUnassignedSchools">—</strong>
+            <small>تحتاج إلى ربط بمشرف</small>
+          </article>
+        </section>
+
+        <section id="adminSupervisorsPanel" class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>إنجاز المشرفين</h3>
+              <p>الأقل إنجازًا يظهر أولًا لتسهيل المتابعة</p>
+            </div>
+          </div>
+
+          <div class="admin-toolbar">
+            <div class="evacuation-filter-field admin-search-field">
+              <label for="adminSupervisorSearch">البحث</label>
+              <input
+                id="adminSupervisorSearch"
+                type="search"
+                placeholder="ابحث باسم المشرف..."
+              >
+            </div>
+            <div class="evacuation-filter-field">
+              <label for="adminSupervisorStatusFilter">الحالة</label>
+              <select id="adminSupervisorStatusFilter">
+                <option value="all">جميع المشرفين</option>
+                <option value="completed">مكتمل</option>
+                <option value="pending">يحتاج متابعة</option>
+              </select>
+            </div>
+            <div class="evacuation-filter-field">
+              <label for="adminSupervisorSort">الترتيب</label>
+              <select id="adminSupervisorSort">
+                <option value="achievement-asc">الأقل إنجازًا</option>
+                <option value="achievement-desc">الأعلى إنجازًا</option>
+                <option value="name">الاسم</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="admin-table-wrap">
+            <table class="admin-supervisors-table">
+              <thead>
+                <tr>
+                  <th>المشرف</th>
+                  <th>عدد المدارس</th>
+                  <th>نسبة الإنجاز</th>
+                  <th>المدارس المكتملة</th>
+                  <th>تحتاج متابعة</th>
+                  <th>الحالة</th>
+                  <th>الإجراء</th>
+                </tr>
+              </thead>
+              <tbody id="adminSupervisorsTableBody"></tbody>
+            </table>
+          </div>
+
+          <div
+            id="adminSupervisorsEmpty"
+            class="empty-state hidden"
+          >
+            <div class="empty-icon">⌕</div>
+            <strong>لا توجد نتائج مطابقة للفلاتر الحالية.</strong>
+          </div>
+        </section>
+
+        <section id="adminSchoolsPanel" class="panel hidden">
+          <div class="panel-header admin-schools-header">
+            <div>
+              <h3 id="adminSchoolsTitle">جميع المدارس</h3>
+              <p id="adminSchoolsSubtitle">متابعة جميع مدارس النظام</p>
+            </div>
+            <button
+              id="adminBackToSupervisorsButton"
+              class="reset-filters-button"
+              type="button"
+            >
+              العودة إلى جميع المشرفين
+            </button>
+          </div>
+
+          <div
+            id="adminSelectedSupervisorSummary"
+            class="admin-selection-summary hidden"
+          ></div>
+
+          <div class="schools-toolbar">
+            <div
+              class="schools-filters"
+              role="group"
+              aria-label="تصفية مدارس الإدارة"
+            >
+              <button type="button" class="admin-school-filter active" data-filter="all">
+                جميع المدارس
+              </button>
+              <button type="button" class="admin-school-filter" data-filter="completed">
+                مكتملة
+              </button>
+              <button type="button" class="admin-school-filter" data-filter="pending">
+                تحتاج متابعة
+              </button>
+            </div>
+          </div>
+
+          <div class="admin-toolbar admin-school-toolbar">
+            <div class="evacuation-filter-field">
+              <label for="adminSchoolSupervisorFilter">المشرف</label>
+              <select id="adminSchoolSupervisorFilter">
+                <option value="all">جميع المشرفين</option>
+              </select>
+            </div>
+            <div class="evacuation-filter-field">
+              <label for="adminGovernorateFilter">المحافظة</label>
+              <select id="adminGovernorateFilter">
+                <option value="all">جميع المحافظات</option>
+              </select>
+            </div>
+            <div class="evacuation-filter-field">
+              <label for="adminReportTypeFilter">نوع التقرير</label>
+              <select id="adminReportTypeFilter">
+                <option value="all">جميع التقارير</option>
+                <option value="evacuation">خطط الإخلاء</option>
+                <option value="safetyMoment">لحظة سلامة</option>
+                <option value="civilDefense">اليوم العالمي للدفاع المدني</option>
+                <option value="trafficWeek">أسبوع المرور</option>
+              </select>
+            </div>
+            <div
+              id="adminEvacuationPlanFilterField"
+              class="evacuation-filter-field hidden"
+            >
+              <label for="adminEvacuationPlanFilter">الخطة</label>
+              <select id="adminEvacuationPlanFilter">
+                <option value="all">جميع خطط الإخلاء</option>
+                <option value="1">خطة الإخلاء الأولى</option>
+                <option value="2">خطة الإخلاء الثانية</option>
+                <option value="3">خطة الإخلاء الثالثة</option>
+                <option value="4">خطة الإخلاء الرابعة</option>
+              </select>
+            </div>
+            <div class="evacuation-filter-field">
+              <label for="adminReportStatusFilter">الحالة</label>
+              <select id="adminReportStatusFilter">
+                <option value="all">جميع الحالات</option>
+                <option value="uploaded">تم الرفع</option>
+                <option value="not_uploaded">لم يتم الرفع</option>
+              </select>
+            </div>
+          </div>
+
+          <button
+            id="adminResetSchoolFiltersButton"
+            class="reset-filters-button"
+            type="button"
+          >
+            إعادة ضبط الفلاتر
+          </button>
+
+          <div
+            id="adminSchoolsEmpty"
+            class="empty-state hidden"
+          >
+            <div class="empty-icon">⌕</div>
+            <strong>لا توجد نتائج مطابقة للفلاتر الحالية.</strong>
+          </div>
+
+          <div
+            id="adminSchoolsList"
+            class="schools-list"
+            aria-live="polite"
+          ></div>
+        </section>
+
+      </div>
+    </div>
+
+  </main>
+
+
+  <!-- =====================================================
+       JavaScript
+       الترتيب مهم
+  ====================================================== -->
+
+  <script src="./safety-dashboard/js/config.js"></script>
+  <script src="./safety-dashboard/js/api.js"></script>
+  <script src="./safety-dashboard/js/auth.js"></script>
+  <script src="./safety-dashboard/js/app.js"></script>
+
+</body>
+
+</html>
