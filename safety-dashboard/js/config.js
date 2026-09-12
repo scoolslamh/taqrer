@@ -1,4 +1,4 @@
 const CONFIG = Object.freeze({
   API_URL:
-    'https://script.google.com/macros/s/AKfycbzva85n4egrM79u6bjFGL80bdrDH3KQE3Bn7ZYr5bwXUJYRXPliXfzge2DXm-dz-Hc/exec'
+    'https://script.google.com/macros/s/AKfycbyHmXTwU5v69zZHueQl3qevTuICizaNHdL46edmoLoCtxIbLJbtczRW9f4tae2lOT10/exec'
 });
