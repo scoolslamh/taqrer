@@ -3450,6 +3450,163 @@ trafficWeekCancelButton.addEventListener(
 );
 
 
+const pendingUploadRequests =
+  Object.create(null);
+
+
+function createUploadRequestId() {
+
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
+    return crypto.randomUUID();
+  }
+
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
+    .replace(/[xy]/g, character => {
+      const randomValue =
+        Math.floor(Math.random() * 16);
+      const value = character === "x"
+        ? randomValue
+        : (randomValue & 0x3) | 0x8;
+
+      return value.toString(16);
+    });
+}
+
+
+function hashUploadFingerprint(value) {
+
+  let hash = 2166136261;
+
+  for (let index = 0; index < value.length; index++) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return (hash >>> 0).toString(16);
+}
+
+
+function createUploadFingerprint(
+  action,
+  reportData,
+  file
+) {
+  return hashUploadFingerprint(
+    JSON.stringify({
+      action: action,
+      loginNumber:
+        currentSchool?.loginNumber || "",
+      reportData: reportData,
+      file: {
+        name: file.name,
+        size: file.size,
+        lastModified: file.lastModified
+      }
+    })
+  );
+}
+
+
+function getPendingUploadRequestId(
+  action,
+  fingerprint
+) {
+  const storageKey =
+    "schoolSafetyPendingUpload:" + action;
+
+  let pendingRequest =
+    pendingUploadRequests[storageKey] || null;
+
+  try {
+    const storedValue =
+      localStorage.getItem(storageKey);
+
+    if (storedValue) {
+      pendingRequest = JSON.parse(storedValue);
+    }
+  } catch (error) {
+    console.warn(
+      "تعذر قراءة محاولة الرفع المحفوظة.",
+      error
+    );
+  }
+
+  if (
+    pendingRequest &&
+    pendingRequest.fingerprint === fingerprint &&
+    pendingRequest.uploadRequestId
+  ) {
+    return pendingRequest.uploadRequestId;
+  }
+
+  pendingRequest = {
+    fingerprint: fingerprint,
+    uploadRequestId: createUploadRequestId()
+  };
+
+  pendingUploadRequests[storageKey] =
+    pendingRequest;
+
+  try {
+    localStorage.setItem(
+      storageKey,
+      JSON.stringify(pendingRequest)
+    );
+  } catch (error) {
+    console.warn(
+      "تعذر حفظ معرّف محاولة الرفع.",
+      error
+    );
+  }
+
+  return pendingRequest.uploadRequestId;
+}
+
+
+function clearPendingUploadRequest(
+  action,
+  uploadRequestId
+) {
+  const storageKey =
+    "schoolSafetyPendingUpload:" + action;
+
+  const pendingRequest =
+    pendingUploadRequests[storageKey];
+
+  if (
+    pendingRequest &&
+    pendingRequest.uploadRequestId !== uploadRequestId
+  ) {
+    return;
+  }
+
+  delete pendingUploadRequests[storageKey];
+
+  try {
+    const storedValue =
+      localStorage.getItem(storageKey);
+    const storedRequest = storedValue
+      ? JSON.parse(storedValue)
+      : null;
+
+    if (
+      !storedRequest ||
+      storedRequest.uploadRequestId === uploadRequestId
+    ) {
+      localStorage.removeItem(storageKey);
+    }
+  } catch (error) {
+    console.warn(
+      "تعذر حذف محاولة الرفع المحفوظة.",
+      error
+    );
+  }
+}
+
+
 evacuationForm.addEventListener(
   "submit",
   async function(event) {
@@ -3597,6 +3754,26 @@ evacuationForm.addEventListener(
       return;
     }
 
+    const uploadAction =
+      "uploadEvacuationReport";
+
+    const uploadRequestId =
+      getPendingUploadRequestId(
+        uploadAction,
+        createUploadFingerprint(
+          uploadAction,
+          {
+            evacuationPlanNumber:
+              selectedPlanNumber,
+            executionDate: executionDate,
+            studentsCount: studentsCount,
+            staffCount: staffCount,
+            notes: notes
+          },
+          file
+        )
+      );
+
     evacuationSubmitButton.disabled =
       true;
 
@@ -3623,7 +3800,9 @@ evacuationForm.addEventListener(
             },
             body: JSON.stringify({
               action:
-                "uploadEvacuationReport",
+                uploadAction,
+              uploadRequestId:
+                uploadRequestId,
               loginNumber:
                 currentSchool.loginNumber,
               evacuationPlanNumber:
@@ -3668,6 +3847,11 @@ evacuationForm.addEventListener(
         );
         return;
       }
+
+      clearPendingUploadRequest(
+        uploadAction,
+        uploadRequestId
+      );
 
       evacuationForm.reset();
 
@@ -3882,6 +4066,28 @@ safetyMomentForm.addEventListener(
       return;
     }
 
+    const uploadAction =
+      "uploadSafetyMomentReport";
+
+    const uploadRequestId =
+      getPendingUploadRequestId(
+        uploadAction,
+        createUploadFingerprint(
+          uploadAction,
+          {
+            programName: programName,
+            executionDate: executionDate,
+            studentsBeneficiaries:
+              studentsBeneficiaries,
+            parentsBeneficiaries:
+              parentsBeneficiaries,
+            staffBeneficiaries:
+              staffBeneficiaries
+          },
+          file
+        )
+      );
+
     safetyMomentSubmitButton.disabled =
       true;
 
@@ -3908,7 +4114,9 @@ safetyMomentForm.addEventListener(
             },
             body: JSON.stringify({
               action:
-                "uploadSafetyMomentReport",
+                uploadAction,
+              uploadRequestId:
+                uploadRequestId,
               loginNumber:
                 currentSchool.loginNumber,
               programName:
@@ -3951,6 +4159,11 @@ safetyMomentForm.addEventListener(
         );
         return;
       }
+
+      clearPendingUploadRequest(
+        uploadAction,
+        uploadRequestId
+      );
 
       safetyMomentForm.reset();
 
@@ -4179,6 +4392,27 @@ civilDefenseForm.addEventListener(
       return;
     }
 
+    const uploadAction =
+      "uploadCivilDefenseReport";
+
+    const uploadRequestId =
+      getPendingUploadRequestId(
+        uploadAction,
+        createUploadFingerprint(
+          uploadAction,
+          {
+            programName: programName,
+            executionDate: executionDate,
+            programTypes: programTypes,
+            otherType: otherType,
+            programsCount: programsCount,
+            studentsCount: studentsCount,
+            staffCount: staffCount
+          },
+          file
+        )
+      );
+
     civilDefenseSubmitButton.disabled =
       true;
 
@@ -4205,7 +4439,9 @@ civilDefenseForm.addEventListener(
             },
             body: JSON.stringify({
               action:
-                "uploadCivilDefenseReport",
+                uploadAction,
+              uploadRequestId:
+                uploadRequestId,
               loginNumber:
                 currentSchool.loginNumber,
               programName:
@@ -4252,6 +4488,11 @@ civilDefenseForm.addEventListener(
         );
         return;
       }
+
+      clearPendingUploadRequest(
+        uploadAction,
+        uploadRequestId
+      );
 
       civilDefenseForm.reset();
 
@@ -4484,6 +4725,27 @@ trafficWeekForm.addEventListener(
       return;
     }
 
+    const uploadAction =
+      "uploadTrafficWeekReport";
+
+    const uploadRequestId =
+      getPendingUploadRequestId(
+        uploadAction,
+        createUploadFingerprint(
+          uploadAction,
+          {
+            programName: programName,
+            executionDate: executionDate,
+            programTypes: programTypes,
+            otherType: otherType,
+            programsCount: programsCount,
+            studentsCount: studentsCount,
+            staffCount: staffCount
+          },
+          file
+        )
+      );
+
     trafficWeekSubmitButton.disabled =
       true;
 
@@ -4510,7 +4772,9 @@ trafficWeekForm.addEventListener(
             },
             body: JSON.stringify({
               action:
-                "uploadTrafficWeekReport",
+                uploadAction,
+              uploadRequestId:
+                uploadRequestId,
               loginNumber:
                 currentSchool.loginNumber,
               programName:
@@ -4557,6 +4821,11 @@ trafficWeekForm.addEventListener(
         );
         return;
       }
+
+      clearPendingUploadRequest(
+        uploadAction,
+        uploadRequestId
+      );
 
       trafficWeekForm.reset();
 

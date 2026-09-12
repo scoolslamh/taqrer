@@ -1731,7 +1731,7 @@ function normalizeStaffType(value) {
  * يحصر القفل العام في الكتابة المشتركة القصيرة فقط.
  * عمليات التحقق وDrive وفك الملفات تتم خارج القفل.
  */
-function appendRowWithScriptLock(sheet, row) {
+function appendRowWithScriptLock(sheet, row, uploadIdentity) {
 
   const lock = LockService.getScriptLock();
 
@@ -1744,15 +1744,230 @@ function appendRowWithScriptLock(sheet, row) {
   }
 
   try {
+    if (uploadIdentity) {
+      const existingUpload =
+        findReportUploadById(
+          sheet,
+          uploadIdentity.reportId
+        );
+
+      if (existingUpload) {
+        if (
+          existingUpload.loginNumber !==
+          uploadIdentity.loginNumber
+        ) {
+          throw new Error(
+            'معرّف محاولة الرفع مستخدم لمدرسة أخرى.'
+          );
+        }
+
+        return {
+          duplicate: true,
+          reportId: existingUpload.reportId
+        };
+      }
+    }
+
     sheet.appendRow(row);
     SpreadsheetApp.flush();
+
+    return {
+      duplicate: false,
+      reportId: uploadIdentity
+        ? uploadIdentity.reportId
+        : ''
+    };
   } finally {
     lock.releaseLock();
   }
 }
 
 
+/**
+ * يعيد معرّفًا ثابتًا للمحاولة ويسترجع نتيجة الطلب السابق عند إعادة إرساله.
+ */
+function prepareReportUpload(action, data) {
+
+  const rawRequestId =
+    String(data.uploadRequestId || '').trim();
+
+  if (
+    rawRequestId &&
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      .test(rawRequestId)
+  ) {
+    return {
+      response: jsonResponse({
+        success: false,
+        error: 'INVALID_UPLOAD_REQUEST_ID',
+        message: 'معرّف محاولة رفع التقرير غير صالح.'
+      })
+    };
+  }
+
+  const reportId = rawRequestId ||
+    Utilities.getUuid();
+
+  if (!rawRequestId) {
+    return { reportId: reportId };
+  }
+
+  const sheet =
+    getReportSheetForUploadAction(action);
+
+  const existingUpload =
+    findReportUploadById(sheet, reportId);
+
+  if (!existingUpload) {
+    return { reportId: reportId };
+  }
+
+  const loginNumber =
+    normalizeSchoolNumber(data.loginNumber);
+
+  if (
+    existingUpload.loginNumber !== loginNumber
+  ) {
+    return {
+      response: jsonResponse({
+        success: false,
+        error: 'UPLOAD_REQUEST_ID_CONFLICT',
+        message: 'تعذر التحقق من محاولة رفع التقرير.'
+      })
+    };
+  }
+
+  return {
+    reportId: reportId,
+    response: jsonResponse({
+      success: true,
+      message: 'تم رفع التقرير مسبقًا بنجاح.',
+      data: {
+        reportId: reportId,
+        duplicate: true
+      }
+    })
+  };
+}
+
+
+function getReportSheetForUploadAction(action) {
+
+  if (action === 'uploadEvacuationReport') {
+    return getReportsSheet();
+  }
+
+  if (action === 'uploadSafetyMomentReport') {
+    return getSafetyMomentReportsSheet();
+  }
+
+  if (action === 'uploadCivilDefenseReport') {
+    return getCivilDefenseReportsSheet();
+  }
+
+  if (action === 'uploadTrafficWeekReport') {
+    return getTrafficWeekSheet();
+  }
+
+  throw new Error('نوع رفع التقرير غير معروف.');
+}
+
+
+function findReportUploadById(sheet, reportId) {
+
+  const lastRow = sheet.getLastRow();
+
+  if (lastRow < 2) {
+    return null;
+  }
+
+  const headers = sheet
+    .getRange(1, 1, 1, sheet.getLastColumn())
+    .getDisplayValues()[0]
+    .map(header => String(header).trim());
+
+  const reportIdIndex =
+    headers.indexOf('Report_ID');
+
+  const loginNumberIndex =
+    headers.indexOf('الرقم الإحصائي المستخدم');
+
+  if (
+    reportIdIndex < 0 ||
+    loginNumberIndex < 0
+  ) {
+    throw new Error(
+      'أعمدة التحقق من تكرار التقرير غير موجودة.'
+    );
+  }
+
+  const reportIds = sheet
+    .getRange(
+      2,
+      reportIdIndex + 1,
+      lastRow - 1,
+      1
+    )
+    .getDisplayValues();
+
+  for (
+    let index = 0;
+    index < reportIds.length;
+    index++
+  ) {
+    if (
+      String(reportIds[index][0]).trim() ===
+      reportId
+    ) {
+      const loginNumber = sheet
+        .getRange(
+          index + 2,
+          loginNumberIndex + 1,
+          1,
+          1
+        )
+        .getDisplayValues()[0][0];
+
+      return {
+        reportId: reportId,
+        loginNumber: normalizeSchoolNumber(
+          loginNumber
+        )
+      };
+    }
+  }
+
+  return null;
+}
+
+
+function discardDuplicateUploadResources(
+  writeResult,
+  file,
+  reportFolder
+) {
+  if (!writeResult || !writeResult.duplicate) {
+    return;
+  }
+
+  file.setTrashed(true);
+  reportFolder.setTrashed(true);
+}
+
+
 function uploadEvacuationReport(data) {
+
+  const uploadAttempt =
+    prepareReportUpload(
+      'uploadEvacuationReport',
+      data
+    );
+
+  if (uploadAttempt.response) {
+    return uploadAttempt.response;
+  }
+
+  const reportId = uploadAttempt.reportId;
 
   const loginNumber =
     normalizeSchoolNumber(data.loginNumber);
@@ -2003,9 +2218,6 @@ const staffType =
         blob
       );
 
-    const reportId =
-      Utilities.getUuid();
-
     const reportsSheet =
       getReportsSheet();
 
@@ -2093,9 +2305,19 @@ const staffType =
             : ''
       );
 
-    appendRowWithScriptLock(
+    const writeResult = appendRowWithScriptLock(
       reportsSheet,
-      row
+      row,
+      {
+        reportId: reportId,
+        loginNumber: loginNumber
+      }
+    );
+
+    discardDuplicateUploadResources(
+      writeResult,
+      file,
+      reportFolder
     );
 
     return jsonResponse({
@@ -2166,6 +2388,18 @@ function sanitizeFileName(fileName) {
  * =========================================================
  */
 function uploadSafetyMomentReport(data) {
+
+  const uploadAttempt =
+    prepareReportUpload(
+      'uploadSafetyMomentReport',
+      data
+    );
+
+  if (uploadAttempt.response) {
+    return uploadAttempt.response;
+  }
+
+  const reportId = uploadAttempt.reportId;
 
   const loginNumber =
     normalizeSchoolNumber(
@@ -2611,10 +2845,6 @@ function uploadSafetyMomentReport(data) {
      * ===================================================
      */
 
-    const reportId =
-      Utilities.getUuid();
-
-
     const reportsSheet =
       getSafetyMomentReportsSheet();
 
@@ -2755,9 +2985,19 @@ function uploadSafetyMomentReport(data) {
       );
 
 
-    appendRowWithScriptLock(
+    const writeResult = appendRowWithScriptLock(
       reportsSheet,
-      row
+      row,
+      {
+        reportId: reportId,
+        loginNumber: loginNumber
+      }
+    );
+
+    discardDuplicateUploadResources(
+      writeResult,
+      file,
+      reportFolder
     );
 
 
@@ -2815,6 +3055,18 @@ function uploadSafetyMomentReport(data) {
  * =========================================================
  */
 function uploadCivilDefenseReport(data) {
+
+  const uploadAttempt =
+    prepareReportUpload(
+      'uploadCivilDefenseReport',
+      data
+    );
+
+  if (uploadAttempt.response) {
+    return uploadAttempt.response;
+  }
+
+  const reportId = uploadAttempt.reportId;
 
   const loginNumber =
     normalizeSchoolNumber(data.loginNumber);
@@ -3261,10 +3513,6 @@ function uploadCivilDefenseReport(data) {
      * =====================================================
      */
 
-    const reportId =
-      Utilities.getUuid();
-
-
     const reportsSheet =
       getCivilDefenseReportsSheet();
 
@@ -3429,9 +3677,19 @@ function uploadCivilDefenseReport(data) {
       );
 
 
-    appendRowWithScriptLock(
+    const writeResult = appendRowWithScriptLock(
       reportsSheet,
-      row
+      row,
+      {
+        reportId: reportId,
+        loginNumber: loginNumber
+      }
+    );
+
+    discardDuplicateUploadResources(
+      writeResult,
+      file,
+      reportFolder
     );
 
 
@@ -3485,6 +3743,18 @@ function uploadCivilDefenseReport(data) {
  * =========================================================
  */
 function uploadTrafficWeekReport(data) {
+
+  const uploadAttempt =
+    prepareReportUpload(
+      'uploadTrafficWeekReport',
+      data
+    );
+
+  if (uploadAttempt.response) {
+    return uploadAttempt.response;
+  }
+
+  const reportId = uploadAttempt.reportId;
 
   const loginNumber =
     normalizeSchoolNumber(data.loginNumber);
@@ -3879,10 +4149,6 @@ function uploadTrafficWeekReport(data) {
      * =====================================================
      */
 
-    const reportId =
-      Utilities.getUuid();
-
-
     /*
      * =====================================================
      * الوصول إلى شيت أسبوع المرور
@@ -4051,9 +4317,19 @@ function uploadTrafficWeekReport(data) {
     /*
      * إضافة التقرير.
      */
-    appendRowWithScriptLock(
+    const writeResult = appendRowWithScriptLock(
       reportsSheet,
-      row
+      row,
+      {
+        reportId: reportId,
+        loginNumber: loginNumber
+      }
+    );
+
+    discardDuplicateUploadResources(
+      writeResult,
+      file,
+      reportFolder
     );
 
 
