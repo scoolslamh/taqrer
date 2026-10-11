@@ -180,6 +180,14 @@ vm.runInContext(
   );
   assert.match(
     appSource,
+    /function getAdminSupervisorMetric\([\s\S]*isSelectedReportCompleted\([\s\S]*Math\.round\(\(completed \/ total\) \* 100\)/
+  );
+  assert.match(
+    appSource,
+    /showAdminSchools\([\s\S]*getAdminSupervisorReportFilters\(\)/
+  );
+  assert.match(
+    appSource,
     /function downloadFilteredSchoolsExcel\([\s\S]*SchoolExcelExport\.downloadWorkbook/
   );
   assert.match(
@@ -223,6 +231,10 @@ vm.runInContext(
   assert.match(
     html,
     /id="reportSummaryPercentage"[\s\S]*id="reportSummaryProgressTrack"/
+  );
+  assert.match(
+    html,
+    /id="adminSupervisorReportTypeFilter"[\s\S]*id="adminSupervisorEvacuationPlanFilter"/
   );
 
   const schoolPortalHtml = fs.readFileSync(

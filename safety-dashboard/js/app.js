@@ -1800,6 +1800,20 @@ document.getElementById(
     }
 
     resetAdminSchoolFilters();
+
+    [
+      'adminSupervisorReportTypeFilter',
+      'adminSupervisorEvacuationPlanFilter',
+      'adminSupervisorStatusFilter'
+    ].forEach(id => {
+      const field = document.getElementById(id);
+      if (field) {
+        field.value = 'all';
+      }
+    });
+    document.getElementById(
+      'adminSupervisorEvacuationPlanFilterField'
+    )?.classList.add('hidden');
   }
 
 
@@ -1853,6 +1867,117 @@ document.getElementById(
   }
 
 
+  function getAdminSupervisorReportFilters() {
+    return {
+      reportType:
+        document.getElementById(
+          'adminSupervisorReportTypeFilter'
+        )?.value || 'all',
+      evacuationPlan:
+        document.getElementById(
+          'adminSupervisorEvacuationPlanFilter'
+        )?.value || 'all'
+    };
+  }
+
+
+  function getAdminSupervisorReportTitle(filters) {
+    if (filters.reportType === 'all') {
+      return 'الإنجاز العام لجميع التقارير';
+    }
+
+    if (filters.reportType === 'evacuation') {
+      return filters.evacuationPlan === 'all'
+        ? 'جميع خطط الإخلاء'
+        : EVACUATION_PLAN_LABELS[
+            Number(filters.evacuationPlan)
+          ] || 'خطة الإخلاء';
+    }
+
+    return REPORT_TYPE_LABELS[
+      filters.reportType
+    ] || 'التقرير المختار';
+  }
+
+
+  function getAdminSupervisorMetric(
+    supervisor,
+    filters = getAdminSupervisorReportFilters()
+  ) {
+    if (filters.reportType === 'all') {
+      const total =
+        Number(supervisor.totalSchools) || 0;
+      const completed =
+        Number(supervisor.completedSchools) || 0;
+
+      return {
+        total,
+        completed,
+        pending: Math.max(0, total - completed),
+        percentage: Math.max(
+          0,
+          Math.min(
+            100,
+            Number(
+              supervisor.averageAchievement
+            ) || 0
+          )
+        ),
+        isCompleted:
+          supervisor.achievementStatus ===
+          'مكتمل'
+      };
+    }
+
+    const schools = adminSchools.filter(
+      school =>
+        school.supervisorId ===
+        supervisor.supervisorId
+    );
+    const completed = schools.filter(
+      school =>
+        isSelectedReportCompleted(
+          school,
+          filters
+        )
+    ).length;
+    const total = schools.length;
+
+    return {
+      total,
+      completed,
+      pending: Math.max(0, total - completed),
+      percentage: total
+        ? Math.round((completed / total) * 100)
+        : 0,
+      isCompleted: total > 0 && completed === total
+    };
+  }
+
+
+  function syncAdminSupervisorReportFilter() {
+    const filters =
+      getAdminSupervisorReportFilters();
+    const title =
+      getAdminSupervisorReportTitle(filters);
+
+    document.getElementById(
+      'adminSupervisorEvacuationPlanFilterField'
+    )?.classList.toggle(
+      'hidden',
+      filters.reportType !== 'evacuation'
+    );
+    setText(
+      'adminSupervisorsSubtitle',
+      `النسب محسوبة حسب: ${title}`
+    );
+    setText(
+      'adminSupervisorPercentageHeader',
+      `نسبة الإنجاز (${title})`
+    );
+  }
+
+
   function getFilteredAdminSupervisors() {
 
     const search = String(
@@ -1871,8 +1996,19 @@ document.getElementById(
         'adminSupervisorSort'
       )?.value || 'achievement-asc';
 
-    const result = adminSupervisors.filter(
-      supervisor => {
+    const reportFilters =
+      getAdminSupervisorReportFilters();
+
+    const result = adminSupervisors.map(
+      supervisor => ({
+        supervisor,
+        metric: getAdminSupervisorMetric(
+          supervisor,
+          reportFilters
+        )
+      })
+    ).filter(
+      ({ supervisor, metric }) => {
         const matchesSearch =
           !search ||
           String(
@@ -1880,16 +2016,12 @@ document.getElementById(
           ).toLocaleLowerCase('ar')
             .includes(search);
 
-        const isCompleted =
-          supervisor.achievementStatus ===
-          'مكتمل';
-
         const matchesStatus =
           status === 'all' ||
           (
             status === 'completed'
-              ? isCompleted
-              : !isCompleted
+              ? metric.isCompleted
+              : !metric.isCompleted
           );
 
         return matchesSearch && matchesStatus;
@@ -1899,16 +2031,18 @@ document.getElementById(
     result.sort((a, b) => {
       if (sort === 'name') {
         return String(
-          a.supervisorName || ''
+          a.supervisor.supervisorName || ''
         ).localeCompare(
-          String(b.supervisorName || ''),
+          String(
+            b.supervisor.supervisorName || ''
+          ),
           'ar'
         );
       }
 
       const difference =
-        Number(a.averageAchievement || 0) -
-        Number(b.averageAchievement || 0);
+        a.metric.percentage -
+        b.metric.percentage;
 
       const achievementOrder =
         sort === 'achievement-desc'
@@ -1916,9 +2050,13 @@ document.getElementById(
           : difference;
 
       return achievementOrder ||
-        String(a.supervisorName || '')
+        String(
+          a.supervisor.supervisorName || ''
+        )
           .localeCompare(
-            String(b.supervisorName || ''),
+            String(
+              b.supervisor.supervisorName || ''
+            ),
             'ar'
           );
     });
@@ -1940,6 +2078,8 @@ document.getElementById(
       return;
     }
 
+    syncAdminSupervisorReportFilter();
+
     const supervisors =
       getFilteredAdminSupervisors();
 
@@ -1949,17 +2089,9 @@ document.getElementById(
       supervisors.length > 0
     );
 
-    supervisors.forEach(supervisor => {
-
-      const percentage = Math.max(
-        0,
-        Math.min(
-          100,
-          Number(
-            supervisor.averageAchievement
-          ) || 0
-        )
-      );
+    supervisors.forEach(item => {
+      const { supervisor, metric } = item;
+      const percentage = metric.percentage;
 
       const row = document.createElement('tr');
       row.innerHTML = `
@@ -1973,7 +2105,7 @@ document.getElementById(
           )}</small>
         </td>
         <td data-label="عدد المدارس">
-          ${Number(supervisor.totalSchools) || 0}
+          ${metric.total}
         </td>
         <td data-label="نسبة الإنجاز">
           <div class="admin-progress-value">
@@ -1984,21 +2116,21 @@ document.getElementById(
           </div>
         </td>
         <td data-label="المدارس المكتملة">
-          ${Number(supervisor.completedSchools) || 0}
+          ${metric.completed}
         </td>
         <td data-label="تحتاج متابعة">
-          ${Number(supervisor.pendingSchools) || 0}
+          ${metric.pending}
         </td>
         <td data-label="الحالة">
           <span class="school-status ${
-            supervisor.achievementStatus ===
-            'مكتمل'
+            metric.isCompleted
               ? 'completed'
               : 'pending'
           }">
             ${escapeHTML(
-              supervisor.achievementStatus ||
-              'يحتاج متابعة'
+              metric.isCompleted
+                ? 'مكتمل'
+                : 'يحتاج متابعة'
             )}
           </span>
         </td>
@@ -2014,7 +2146,8 @@ document.getElementById(
       button.textContent = 'عرض المدارس';
       button.addEventListener('click', () => {
         showAdminSchools(
-          supervisor.supervisorId
+          supervisor.supervisorId,
+          getAdminSupervisorReportFilters()
         );
       });
 
@@ -2372,7 +2505,10 @@ document.getElementById(
   }
 
 
-  function showAdminSchools(supervisorId = null) {
+  function showAdminSchools(
+    supervisorId = null,
+    reportFilters = null
+  ) {
 
     selectedAdminSupervisorId =
       supervisorId || null;
@@ -2385,6 +2521,40 @@ document.getElementById(
     );
 
     resetAdminSchoolFilters();
+
+    if (
+      reportFilters &&
+      reportFilters.reportType !== 'all'
+    ) {
+      const reportTypeField =
+        document.getElementById(
+          'adminReportTypeFilter'
+        );
+      const planField =
+        document.getElementById(
+          'adminEvacuationPlanFilter'
+        );
+
+      if (reportTypeField) {
+        reportTypeField.value =
+          reportFilters.reportType;
+      }
+      if (
+        planField &&
+        reportFilters.reportType ===
+          'evacuation'
+      ) {
+        planField.value =
+          reportFilters.evacuationPlan;
+      }
+      document.getElementById(
+        'adminEvacuationPlanFilterField'
+      )?.classList.toggle(
+        'hidden',
+        reportFilters.reportType !==
+          'evacuation'
+      );
+    }
 
     const title = document.getElementById(
       'adminSchoolsTitle'
@@ -2407,6 +2577,15 @@ document.getElementById(
             item.supervisorId === supervisorId
         )
       : null;
+    const supervisorMetric = supervisor
+      ? getAdminSupervisorMetric(
+          supervisor,
+          reportFilters || {
+            reportType: 'all',
+            evacuationPlan: 'all'
+          }
+        )
+      : null;
 
     if (supervisor) {
       if (title) {
@@ -2426,16 +2605,16 @@ document.getElementById(
       if (selectionSummary) {
         selectionSummary.innerHTML = `
           <span>عدد المدارس: <b>${
-            supervisor.totalSchools
+            supervisorMetric.total
           }</b></span>
           <span>نسبة الإنجاز: <b>${
-            supervisor.averageAchievement
+            supervisorMetric.percentage
           }%</b></span>
           <span>مكتملة: <b>${
-            supervisor.completedSchools
+            supervisorMetric.completed
           }</b></span>
           <span>تحتاج متابعة: <b>${
-            supervisor.pendingSchools
+            supervisorMetric.pending
           }</b></span>
         `;
         selectionSummary.classList.remove(
@@ -2541,13 +2720,28 @@ document.getElementById(
 
   [
     'adminSupervisorStatusFilter',
-    'adminSupervisorSort'
+    'adminSupervisorSort',
+    'adminSupervisorEvacuationPlanFilter'
   ].forEach(id => {
     document.getElementById(id)
       ?.addEventListener(
         'change',
         renderAdminSupervisors
       );
+  });
+
+  document.getElementById(
+    'adminSupervisorReportTypeFilter'
+  )?.addEventListener('change', event => {
+    if (event.target.value !== 'evacuation') {
+      const planFilter = document.getElementById(
+        'adminSupervisorEvacuationPlanFilter'
+      );
+      if (planFilter) {
+        planFilter.value = 'all';
+      }
+    }
+    renderAdminSupervisors();
   });
 
 

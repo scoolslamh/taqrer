@@ -613,7 +613,7 @@
           <div class="panel-header">
             <div>
               <h3>إنجاز المشرفين</h3>
-              <p>الأقل إنجازًا يظهر أولًا لتسهيل المتابعة</p>
+              <p id="adminSupervisorsSubtitle">الأقل إنجازًا يظهر أولًا لتسهيل المتابعة</p>
             </div>
           </div>
 
@@ -625,6 +625,29 @@
                 type="search"
                 placeholder="ابحث باسم المشرف..."
               >
+            </div>
+            <div class="evacuation-filter-field">
+              <label for="adminSupervisorReportTypeFilter">نوع التقرير</label>
+              <select id="adminSupervisorReportTypeFilter">
+                <option value="all">جميع التقارير</option>
+                <option value="evacuation">خطط الإخلاء</option>
+                <option value="safetyMoment">لحظة سلامة</option>
+                <option value="civilDefense">اليوم العالمي للدفاع المدني</option>
+                <option value="trafficWeek">أسبوع المرور</option>
+              </select>
+            </div>
+            <div
+              id="adminSupervisorEvacuationPlanFilterField"
+              class="evacuation-filter-field hidden"
+            >
+              <label for="adminSupervisorEvacuationPlanFilter">خطة الإخلاء</label>
+              <select id="adminSupervisorEvacuationPlanFilter">
+                <option value="all">جميع الخطط</option>
+                <option value="1">الخطة الأولى</option>
+                <option value="2">الخطة الثانية</option>
+                <option value="3">الخطة الثالثة</option>
+                <option value="4">الخطة الرابعة</option>
+              </select>
             </div>
             <div class="evacuation-filter-field">
               <label for="adminSupervisorStatusFilter">الحالة</label>
@@ -650,7 +673,7 @@
                 <tr>
                   <th>المشرف</th>
                   <th>عدد المدارس</th>
-                  <th>نسبة الإنجاز</th>
+                  <th id="adminSupervisorPercentageHeader">نسبة الإنجاز</th>
                   <th>المدارس المكتملة</th>
                   <th>تحتاج متابعة</th>
                   <th>الحالة</th>
