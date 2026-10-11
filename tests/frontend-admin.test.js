@@ -166,6 +166,18 @@ vm.runInContext(
     appSource,
     /SafetyAuth\.logout\(\);[\s\S]*clearAdminState\(\)/
   );
+  assert.match(
+    appSource,
+    /function renderAdminReportProgress\([\s\S]*Math\.round\(\(completed \/ total\) \* 100\)/
+  );
+  assert.match(
+    appSource,
+    /getAdminReportProgressTitle\([\s\S]*EVACUATION_PLAN_LABELS\[evacuationPlan\]/
+  );
+  assert.match(
+    appSource,
+    /renderAdminReportProgress\([\s\S]*reportScopeSchools[\s\S]*filters/
+  );
 
   const dashboardHtmlPath =
     __dirname + '/../dashboard.html';
@@ -187,6 +199,10 @@ vm.runInContext(
     new Set(ids).size,
     ids.length,
     'HTML IDs must remain unique'
+  );
+  assert.match(
+    html,
+    /id="adminReportProgressSummary"[\s\S]*id="adminReportProgressPercentage"[\s\S]*role="progressbar"/
   );
 
   const schoolPortalHtml = fs.readFileSync(

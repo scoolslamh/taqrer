@@ -726,6 +726,40 @@
             </div>
           </div>
 
+          <div
+            id="adminReportProgressSummary"
+            class="admin-report-progress-summary"
+            aria-live="polite"
+          >
+            <div class="admin-report-progress-heading">
+              <div>
+                <span class="stat-label">نسبة الإنجاز حسب الاختيار</span>
+                <strong id="adminReportProgressTitle">الإنجاز العام</strong>
+              </div>
+              <strong id="adminReportProgressPercentage">0%</strong>
+            </div>
+            <div
+              id="adminReportProgressTrack"
+              class="progress-track"
+              role="progressbar"
+              aria-label="نسبة الإنجاز حسب التقرير المختار"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+            >
+              <div
+                id="adminReportProgressBar"
+                class="progress-bar"
+                style="width: 0%"
+              ></div>
+            </div>
+            <div class="admin-report-progress-counts">
+              <span>تم الإنجاز: <b id="adminReportProgressCompleted">0</b></span>
+              <span>لم يكتمل: <b id="adminReportProgressPending">0</b></span>
+              <span>الإجمالي: <b id="adminReportProgressTotal">0</b></span>
+            </div>
+          </div>
+
           <button
             id="adminResetSchoolFiltersButton"
             class="reset-filters-button"

@@ -1872,32 +1872,44 @@ if (reportFiltersResetButton) {
   }
 
 
-  function getFilteredAdminSchools() {
+  function getAdminSchoolFilterState() {
 
-    const schoolStatus =
-      document.querySelector(
-        '.admin-school-filter.active'
-      )?.dataset.filter || 'all';
-    const supervisorFilter =
-      document.getElementById(
-        'adminSchoolSupervisorFilter'
-      )?.value || 'all';
-    const governorateFilter =
-      document.getElementById(
-        'adminGovernorateFilter'
-      )?.value || 'all';
-    const reportType =
-      document.getElementById(
-        'adminReportTypeFilter'
-      )?.value || 'all';
-    const evacuationPlan =
-      document.getElementById(
-        'adminEvacuationPlanFilter'
-      )?.value || 'all';
-    const reportStatus =
-      document.getElementById(
-        'adminReportStatusFilter'
-      )?.value || 'all';
+    return {
+      schoolStatus:
+        document.querySelector(
+          '.admin-school-filter.active'
+        )?.dataset.filter || 'all',
+      supervisorFilter:
+        document.getElementById(
+          'adminSchoolSupervisorFilter'
+        )?.value || 'all',
+      governorateFilter:
+        document.getElementById(
+          'adminGovernorateFilter'
+        )?.value || 'all',
+      reportType:
+        document.getElementById(
+          'adminReportTypeFilter'
+        )?.value || 'all',
+      evacuationPlan:
+        document.getElementById(
+          'adminEvacuationPlanFilter'
+        )?.value || 'all',
+      reportStatus:
+        document.getElementById(
+          'adminReportStatusFilter'
+        )?.value || 'all'
+    };
+  }
+
+
+  function getAdminReportScopeSchools(filters) {
+
+    const {
+      schoolStatus,
+      supervisorFilter,
+      governorateFilter
+    } = filters;
 
     return adminSchools.filter(school => {
 
@@ -1946,15 +1958,122 @@ if (reportFiltersResetButton) {
         return false;
       }
 
-      return matchesReportFilter(
+      return true;
+    });
+  }
+
+
+  function getAdminReportProgressTitle(
+    reportType,
+    evacuationPlan
+  ) {
+    if (reportType === 'all') {
+      return 'الإنجاز العام لجميع التقارير';
+    }
+
+    if (reportType === 'evacuation') {
+      return evacuationPlan === 'all'
+        ? 'اكتمال خطط الإخلاء الأربع'
+        : `نسبة إنجاز ${
+            EVACUATION_PLAN_LABELS[evacuationPlan]
+          }`;
+    }
+
+    return `نسبة إنجاز ${
+      REPORT_TYPE_LABELS[reportType] || ''
+    }`;
+  }
+
+
+  function renderAdminReportProgress(
+    schools,
+    filters
+  ) {
+    const total = schools.length;
+    const completed = schools.filter(
+      school =>
+        isSelectedReportCompleted(
+          school,
+          {
+            reportType: filters.reportType,
+            evacuationPlan:
+              filters.evacuationPlan
+          }
+        )
+    ).length;
+    const pending = total - completed;
+    const percentage = total > 0
+      ? Math.round((completed / total) * 100)
+      : 0;
+
+    setText(
+      'adminReportProgressTitle',
+      getAdminReportProgressTitle(
+        filters.reportType,
+        filters.evacuationPlan
+      )
+    );
+    setText(
+      'adminReportProgressPercentage',
+      `${percentage}%`
+    );
+    setText(
+      'adminReportProgressCompleted',
+      completed
+    );
+    setText(
+      'adminReportProgressPending',
+      pending
+    );
+    setText(
+      'adminReportProgressTotal',
+      total
+    );
+
+    const progressBar = document.getElementById(
+      'adminReportProgressBar'
+    );
+    const progressTrack = document.getElementById(
+      'adminReportProgressTrack'
+    );
+
+    if (progressBar) {
+      progressBar.style.width = `${percentage}%`;
+    }
+
+    if (progressTrack) {
+      progressTrack.setAttribute(
+        'aria-valuenow',
+        String(percentage)
+      );
+      progressTrack.setAttribute(
+        'aria-valuetext',
+        `${percentage}%، ${completed} من ${total}`
+      );
+    }
+  }
+
+
+  function getFilteredAdminSchools(
+    filters,
+    reportScopeSchools
+  ) {
+    const activeFilters = filters ||
+      getAdminSchoolFilterState();
+    const scopeSchools = reportScopeSchools ||
+      getAdminReportScopeSchools(activeFilters);
+
+    return scopeSchools.filter(
+      school => matchesReportFilter(
         school,
         {
-          reportType,
-          evacuationPlan,
-          status: reportStatus
+          reportType: activeFilters.reportType,
+          evacuationPlan:
+            activeFilters.evacuationPlan,
+          status: activeFilters.reportStatus
         }
-      );
-    });
+      )
+    );
   }
 
 
@@ -1971,14 +2090,11 @@ if (reportFiltersResetButton) {
       return;
     }
 
-    const reportType =
-      document.getElementById(
-        'adminReportTypeFilter'
-      )?.value || 'all';
+    const filters =
+      getAdminSchoolFilterState();
+    const reportType = filters.reportType;
     const evacuationPlan =
-      document.getElementById(
-        'adminEvacuationPlanFilter'
-      )?.value || 'all';
+      filters.evacuationPlan;
 
     // createSchoolCard يعيد استخدام العرض الحالي، وهذه
     // القيم تجعله يعرض تفاصيل التقرير المختار للمدير.
@@ -1986,7 +2102,18 @@ if (reportFiltersResetButton) {
     currentEvacuationPlanFilter =
       evacuationPlan;
 
-    const schools = getFilteredAdminSchools();
+    const reportScopeSchools =
+      getAdminReportScopeSchools(filters);
+
+    renderAdminReportProgress(
+      reportScopeSchools,
+      filters
+    );
+
+    const schools = getFilteredAdminSchools(
+      filters,
+      reportScopeSchools
+    );
 
     renderSchoolCardsProgressively(
       list,
