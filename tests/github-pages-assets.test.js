@@ -33,6 +33,7 @@ assert.deepStrictEqual(dashboardAssets, [
   './safety-dashboard/js/config.js',
   './safety-dashboard/js/api.js',
   './safety-dashboard/js/auth.js',
+  './safety-dashboard/js/excel-export.js',
   './safety-dashboard/js/app.js'
 ]);
 assertLocalFilesExist('dashboard.html', dashboardAssets);

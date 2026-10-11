@@ -29,14 +29,18 @@ const sheetRows = {
       'المدينة',
       'الكادر',
       'حالة المدرسة',
+      'اسم مدير المدرسة',
+      'جوال مدير المدرسة',
+      'اسم منسق الأمن والسلامة',
+      'جوال منسق الأمن والسلامة',
       'السجل المدني للمشرف'
     ],
-    ['100001', 'مدرسة 100', 'أبها', 'أبها', 'تعليمي', 'نشطة', supervisorId],
-    ['100002', 'مدرسة 80', 'أبها', 'أبها', 'تعليمي', 'نشطة', supervisorId],
-    ['100003', 'مدرسة 60', 'خميس مشيط', 'خميس مشيط', 'تعليمي', 'نشطة', supervisorId],
-    ['100004', 'مدرسة 40', 'خميس مشيط', 'خميس مشيط', 'تعليمي', 'نشطة', supervisorId],
-    ['100005', 'مدرسة غير مسندة', 'أبها', 'أبها', 'تعليمي', 'نشطة', ''],
-    ['100006', 'مدرسة غير نشطة', 'أبها', 'أبها', 'تعليمي', 'غير نشطة', supervisorId]
+    ['100001', 'مدرسة 100', 'أبها', 'أبها', 'تعليمي', 'نشطة', 'مدير المدرسة', '0500000001', 'منسق المدرسة', '0500000002', supervisorId],
+    ['100002', 'مدرسة 80', 'أبها', 'أبها', 'تعليمي', 'نشطة', '', '', '', '', supervisorId],
+    ['100003', 'مدرسة 60', 'خميس مشيط', 'خميس مشيط', 'تعليمي', 'نشطة', '', '', '', '', supervisorId],
+    ['100004', 'مدرسة 40', 'خميس مشيط', 'خميس مشيط', 'تعليمي', 'نشطة', '', '', '', '', supervisorId],
+    ['100005', 'مدرسة غير مسندة', 'أبها', 'أبها', 'تعليمي', 'نشطة', '', '', '', '', ''],
+    ['100006', 'مدرسة غير نشطة', 'أبها', 'أبها', 'تعليمي', 'غير نشطة', '', '', '', '', supervisorId]
   ],
   Settings: [
     ['KEY', 'VALUE'],
@@ -195,6 +199,26 @@ assert.strictEqual(result.data.summary.pendingSchools, 4);
 assert.strictEqual(result.data.summary.unassignedSchools, 1);
 assert.strictEqual(result.data.summary.averageAchievement, 56);
 
+const schoolWithContacts = result.data.schools.find(
+  school => school.schoolName === 'مدرسة 100'
+);
+assert.strictEqual(
+  schoolWithContacts.principalName,
+  'مدير المدرسة'
+);
+assert.strictEqual(
+  schoolWithContacts.principalPhone,
+  '0500000001'
+);
+assert.strictEqual(
+  schoolWithContacts.coordinatorName,
+  'منسق المدرسة'
+);
+assert.strictEqual(
+  schoolWithContacts.coordinatorPhone,
+  '0500000002'
+);
+
 const unassigned = result.data.schools.find(
   school => school.schoolName === 'مدرسة غير مسندة'
 );
@@ -229,6 +253,18 @@ assert.strictEqual(
 assert.strictEqual(
   supervisorResult.data.totalSchools,
   5
+);
+const supervisorSchool =
+  supervisorResult.data.schools.find(
+    school => school.schoolName === 'مدرسة 100'
+  );
+assert.strictEqual(
+  supervisorSchool.principalPhone,
+  '0500000001'
+);
+assert.strictEqual(
+  supervisorSchool.coordinatorPhone,
+  '0500000002'
 );
 assert.strictEqual(displayReads, 7);
 

@@ -395,22 +395,50 @@
 
   </div>
 
-  <button
-    id="reportFiltersResetButton"
-    class="reset-filters-button"
-    type="button"
-  >
-    إعادة ضبط الفلاتر
-  </button>
+  <div class="report-filter-actions">
+    <button
+      id="reportFiltersResetButton"
+      class="reset-filters-button"
+      type="button"
+    >
+      إعادة ضبط الفلاتر
+    </button>
+    <button
+      id="exportSchoolsExcelButton"
+      class="primary-button compact-button export-excel-button"
+      type="button"
+    >
+      تصدير المدارس إلى Excel
+    </button>
+  </div>
 
   <div
     id="evacuationSummary"
     class="evacuation-summary"
     aria-live="polite"
   >
-    <strong id="evacuationSummaryTitle">
-      خطط الإخلاء الأربع
-    </strong>
+    <div class="evacuation-summary-heading">
+      <strong id="evacuationSummaryTitle">
+        خطط الإخلاء الأربع
+      </strong>
+      <strong id="reportSummaryPercentage">0%</strong>
+    </div>
+
+    <div
+      id="reportSummaryProgressTrack"
+      class="progress-track"
+      role="progressbar"
+      aria-label="نسبة إنجاز التقرير المختار"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="0"
+    >
+      <div
+        id="reportSummaryProgressBar"
+        class="progress-bar"
+        style="width: 0%"
+      ></div>
+    </div>
 
     <div class="evacuation-summary-values">
       <span>
@@ -760,13 +788,22 @@
             </div>
           </div>
 
-          <button
-            id="adminResetSchoolFiltersButton"
-            class="reset-filters-button"
-            type="button"
-          >
-            إعادة ضبط الفلاتر
-          </button>
+          <div class="report-filter-actions admin-report-actions">
+            <button
+              id="adminResetSchoolFiltersButton"
+              class="reset-filters-button"
+              type="button"
+            >
+              إعادة ضبط الفلاتر
+            </button>
+            <button
+              id="adminExportSchoolsExcelButton"
+              class="primary-button compact-button export-excel-button"
+              type="button"
+            >
+              تصدير المدارس إلى Excel
+            </button>
+          </div>
 
           <div
             id="adminSchoolsEmpty"
@@ -797,6 +834,7 @@
   <script src="./js/config.js"></script>
   <script src="./js/api.js"></script>
   <script src="./js/auth.js"></script>
+  <script src="./js/excel-export.js"></script>
   <script src="./js/app.js"></script>
 
 </body>

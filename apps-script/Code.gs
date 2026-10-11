@@ -1335,6 +1335,26 @@ function getSupervisorSchools(e) {
             school['الكادر'] || ''
           ).trim(),
 
+        principalName:
+          String(
+            school['اسم مدير المدرسة'] || ''
+          ).trim(),
+
+        principalPhone:
+          String(
+            school['جوال مدير المدرسة'] || ''
+          ).trim(),
+
+        coordinatorName:
+          String(
+            school['اسم منسق الأمن والسلامة'] || ''
+          ).trim(),
+
+        coordinatorPhone:
+          String(
+            school['جوال منسق الأمن والسلامة'] || ''
+          ).trim(),
+
         schoolStatus:
         String(
            school['حالة المدرسة'] || ''
@@ -6113,6 +6133,18 @@ function getAdminDashboard(e) {
         ).trim(),
         staffType: String(
           school['الكادر'] || ''
+        ).trim(),
+        principalName: String(
+          school['اسم مدير المدرسة'] || ''
+        ).trim(),
+        principalPhone: String(
+          school['جوال مدير المدرسة'] || ''
+        ).trim(),
+        coordinatorName: String(
+          school['اسم منسق الأمن والسلامة'] || ''
+        ).trim(),
+        coordinatorPhone: String(
+          school['جوال منسق الأمن والسلامة'] || ''
         ).trim(),
         schoolStatus: String(
           school['حالة المدرسة'] || ''

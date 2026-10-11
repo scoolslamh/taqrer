@@ -178,6 +178,14 @@ vm.runInContext(
     appSource,
     /renderAdminReportProgress\([\s\S]*reportScopeSchools[\s\S]*filters/
   );
+  assert.match(
+    appSource,
+    /function downloadFilteredSchoolsExcel\([\s\S]*SchoolExcelExport\.downloadWorkbook/
+  );
+  assert.match(
+    appSource,
+    /principalName:[\s\S]*principalPhone:[\s\S]*coordinatorName:[\s\S]*coordinatorPhone:/
+  );
 
   const dashboardHtmlPath =
     __dirname + '/../dashboard.html';
@@ -203,6 +211,18 @@ vm.runInContext(
   assert.match(
     html,
     /id="adminReportProgressSummary"[\s\S]*id="adminReportProgressPercentage"[\s\S]*role="progressbar"/
+  );
+  assert.match(
+    html,
+    /id="exportSchoolsExcelButton"[\s\S]*id="adminExportSchoolsExcelButton"/
+  );
+  assert.match(
+    html,
+    /excel-export\.js[\s\S]*app\.js/
+  );
+  assert.match(
+    html,
+    /id="reportSummaryPercentage"[\s\S]*id="reportSummaryProgressTrack"/
   );
 
   const schoolPortalHtml = fs.readFileSync(

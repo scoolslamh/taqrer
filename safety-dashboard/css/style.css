@@ -697,10 +697,36 @@ button {
   background: #edf7f3;
 }
 
-.evacuation-summary > strong {
-  display: block;
-  margin-bottom: 9px;
+.evacuation-summary-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.evacuation-summary-heading > strong:first-child {
   color: #176448;
+}
+
+#reportSummaryPercentage {
+  color: #00865f;
+  font-size: 24px;
+}
+
+.evacuation-summary .progress-track {
+  height: 10px;
+  margin-bottom: 11px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #dce9e4;
+}
+
+.evacuation-summary .progress-bar {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #00865f, #18a779);
+  transition: width 180ms ease;
 }
 
 .evacuation-summary-values {
@@ -727,6 +753,23 @@ button {
   color: #00704a;
   font: inherit;
   font-weight: 700;
+}
+
+.report-filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.report-filter-actions .reset-filters-button,
+.report-filter-actions .export-excel-button {
+  min-height: 42px;
+  margin-top: 18px;
+}
+
+.export-excel-button {
+  border: 1px solid #00865f;
 }
 
 
@@ -1208,8 +1251,9 @@ button {
   color: #ffffff;
 }
 
-#adminResetSchoolFiltersButton {
+.admin-report-actions {
   margin-right: 24px;
+  margin-left: 24px;
 }
 
 
@@ -1270,8 +1314,9 @@ button {
     margin-left: 16px;
   }
 
-  #adminResetSchoolFiltersButton {
+  .admin-report-actions {
     margin-right: 16px;
+    margin-left: 16px;
   }
 }
 

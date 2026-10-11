@@ -665,6 +665,12 @@ function renderReportSummary() {
       getGenerallyFilteredSchools()
     );
 
+  const percentage = stats.total > 0
+    ? Math.round(
+        (stats.completed / stats.total) * 100
+      )
+    : 0;
+
   const title =
     document.getElementById(
       'evacuationSummaryTitle'
@@ -693,6 +699,21 @@ function renderReportSummary() {
   const totalCount =
     document.getElementById(
       'evacuationTotalCount'
+    );
+
+  const percentageElement =
+    document.getElementById(
+      'reportSummaryPercentage'
+    );
+
+  const progressBar =
+    document.getElementById(
+      'reportSummaryProgressBar'
+    );
+
+  const progressTrack =
+    document.getElementById(
+      'reportSummaryProgressTrack'
     );
 
   let summaryTitle;
@@ -774,6 +795,204 @@ function renderReportSummary() {
     totalCount.textContent =
       String(stats.total);
   }
+
+  if (percentageElement) {
+    percentageElement.textContent =
+      `${percentage}%`;
+  }
+
+  if (progressBar) {
+    progressBar.style.width =
+      `${percentage}%`;
+  }
+
+  if (progressTrack) {
+    progressTrack.setAttribute(
+      'aria-valuenow',
+      String(percentage)
+    );
+    progressTrack.setAttribute(
+      'aria-valuetext',
+      `${percentage}%، ${stats.completed} من ${stats.total}`
+    );
+  }
+}
+
+
+function getSelectedReportLabel(
+  reportType,
+  evacuationPlan
+) {
+  if (reportType === 'all') {
+    return 'جميع التقارير';
+  }
+
+  if (reportType === 'evacuation') {
+    return evacuationPlan === 'all'
+      ? 'خطط الإخلاء الأربع'
+      : EVACUATION_PLAN_LABELS[
+          evacuationPlan
+        ] || 'خطة الإخلاء';
+  }
+
+  return REPORT_TYPE_LABELS[reportType] ||
+    'التقرير المختار';
+}
+
+
+function formatExportProgress(report) {
+  const completed = Number(report?.completed) || 0;
+  const target = Number(report?.target) || 0;
+
+  return `${completed} من ${target}`;
+}
+
+
+function buildSchoolExportRows(
+  schools,
+  options
+) {
+  return schools.map((school, index) => {
+    const achievement = school.achievement || {};
+    const plans = getEvacuationPlans(school);
+    const selectedCompleted =
+      isSelectedReportCompleted(
+        school,
+        {
+          reportType: options.reportType,
+          evacuationPlan:
+            options.evacuationPlan
+        }
+      );
+
+    return {
+      sequence: index + 1,
+      schoolName: school.schoolName || '',
+      statisticalNumbers: Array.isArray(
+        school.statisticalNumbers
+      )
+        ? school.statisticalNumbers.join('، ')
+        : school.statisticalNumbers || '',
+      governorate: school.governorate || '',
+      city: school.city || '',
+      staffType: school.staffType || '',
+      schoolStatus: school.schoolStatus || '',
+      principalName: school.principalName || '',
+      principalPhone: school.principalPhone || '',
+      coordinatorName:
+        school.coordinatorName || '',
+      coordinatorPhone:
+        school.coordinatorPhone || '',
+      supervisorName:
+        school.supervisorName ||
+        options.supervisorName || '',
+      achievementPercentage:
+        `${getSchoolPercentage(school)}%`,
+      evacuationProgress:
+        formatExportProgress(
+          achievement.evacuation
+        ),
+      evacuationPlan1:
+        plans[1] === true ? 'تم الرفع' : 'لم يتم الرفع',
+      evacuationPlan2:
+        plans[2] === true ? 'تم الرفع' : 'لم يتم الرفع',
+      evacuationPlan3:
+        plans[3] === true ? 'تم الرفع' : 'لم يتم الرفع',
+      evacuationPlan4:
+        plans[4] === true ? 'تم الرفع' : 'لم يتم الرفع',
+      safetyMomentProgress:
+        formatExportProgress(
+          achievement.safetyMoment
+        ),
+      civilDefenseProgress:
+        formatExportProgress(
+          achievement.civilDefense
+        ),
+      trafficWeekProgress:
+        formatExportProgress(
+          achievement.trafficWeek
+        ),
+      selectedReportStatus:
+        selectedCompleted
+          ? 'منجز'
+          : 'غير منجز'
+    };
+  });
+}
+
+
+const SCHOOL_EXPORT_COLUMNS = [
+  { key: 'sequence', header: 'م', width: 7 },
+  { key: 'schoolName', header: 'اسم المدرسة', width: 30 },
+  { key: 'statisticalNumbers', header: 'الأرقام الإحصائية', width: 22 },
+  { key: 'governorate', header: 'المحافظة', width: 18 },
+  { key: 'city', header: 'المدينة', width: 18 },
+  { key: 'staffType', header: 'الكادر', width: 15 },
+  { key: 'schoolStatus', header: 'حالة المدرسة', width: 16 },
+  { key: 'principalName', header: 'اسم مدير المدرسة', width: 26 },
+  { key: 'principalPhone', header: 'جوال مدير المدرسة', width: 19 },
+  { key: 'coordinatorName', header: 'اسم منسق الأمن والسلامة', width: 28 },
+  { key: 'coordinatorPhone', header: 'جوال منسق الأمن والسلامة', width: 22 },
+  { key: 'supervisorName', header: 'اسم المشرف', width: 24 },
+  { key: 'achievementPercentage', header: 'الإنجاز العام', width: 16 },
+  { key: 'evacuationProgress', header: 'خطط الإخلاء', width: 17 },
+  { key: 'evacuationPlan1', header: 'الخطة الأولى', width: 16 },
+  { key: 'evacuationPlan2', header: 'الخطة الثانية', width: 16 },
+  { key: 'evacuationPlan3', header: 'الخطة الثالثة', width: 16 },
+  { key: 'evacuationPlan4', header: 'الخطة الرابعة', width: 16 },
+  { key: 'safetyMomentProgress', header: 'لحظة سلامة', width: 17 },
+  { key: 'civilDefenseProgress', header: 'الدفاع المدني', width: 18 },
+  { key: 'trafficWeekProgress', header: 'أسبوع المرور', width: 17 },
+  { key: 'selectedReportStatus', header: 'حالة الاختيار الحالي', width: 20 }
+];
+
+
+function downloadFilteredSchoolsExcel(
+  schools,
+  options
+) {
+  if (!Array.isArray(schools) || schools.length === 0) {
+    window.alert(
+      'لا توجد مدارس مطابقة للفلاتر الحالية لتصديرها.'
+    );
+    return;
+  }
+
+  if (!window.SchoolExcelExport) {
+    window.alert(
+      'تعذر تجهيز ملف Excel. يرجى تحديث الصفحة والمحاولة مرة أخرى.'
+    );
+    return;
+  }
+
+  const reportLabel = getSelectedReportLabel(
+    options.reportType,
+    options.evacuationPlan
+  );
+  const exportDate = new Intl.DateTimeFormat(
+    'ar-SA-u-ca-gregory',
+    {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+      timeZone: 'Asia/Riyadh'
+    }
+  ).format(new Date());
+
+  window.SchoolExcelExport.downloadWorkbook({
+    title: `تقرير المدارس - ${reportLabel}`,
+    subtitle:
+      `حسب الفلاتر الحالية | عدد المدارس: ${schools.length} | تاريخ التصدير: ${exportDate}`,
+    sheetName: 'المدارس',
+    columns: SCHOOL_EXPORT_COLUMNS,
+    rows: buildSchoolExportRows(
+      schools,
+      options
+    ),
+    fileName:
+      `تقرير_المدارس_${reportLabel}_${
+        new Date().toISOString().slice(0, 10)
+      }`
+  });
 }
 
 
@@ -1473,6 +1692,22 @@ if (reportFiltersResetButton) {
     resetReportFilters
   );
 }
+
+
+document.getElementById(
+  'exportSchoolsExcelButton'
+)?.addEventListener('click', () => {
+  downloadFilteredSchoolsExcel(
+    getFilteredSchools(),
+    {
+      reportType: currentReportTypeFilter,
+      evacuationPlan:
+        currentEvacuationPlanFilter,
+      supervisorName:
+        currentDashboardSession?.name || ''
+    }
+  );
+});
 
 
   /*
@@ -2376,6 +2611,24 @@ if (reportFiltersResetButton) {
       }
     }
     renderAdminSchools();
+  });
+
+
+  document.getElementById(
+    'adminExportSchoolsExcelButton'
+  )?.addEventListener('click', () => {
+    const filters =
+      getAdminSchoolFilterState();
+
+    downloadFilteredSchoolsExcel(
+      getFilteredAdminSchools(filters),
+      {
+        reportType: filters.reportType,
+        evacuationPlan:
+          filters.evacuationPlan,
+        supervisorName: ''
+      }
+    );
   });
 
 
