@@ -873,6 +873,8 @@ function buildSchoolExportRows(
       )
         ? school.statisticalNumbers.join('، ')
         : school.statisticalNumbers || '',
+      schoolEmail: school.schoolEmail || '',
+      schoolGender: school.schoolGender || '',
       governorate: school.governorate || '',
       city: school.city || '',
       staffType: school.staffType || '',
@@ -925,6 +927,8 @@ const SCHOOL_EXPORT_COLUMNS = [
   { key: 'sequence', header: 'م', width: 7 },
   { key: 'schoolName', header: 'اسم المدرسة', width: 30 },
   { key: 'statisticalNumbers', header: 'الأرقام الإحصائية', width: 22 },
+  { key: 'schoolEmail', header: 'البريد الإلكتروني للمدرسة', width: 32 },
+  { key: 'schoolGender', header: 'الجنس', width: 12 },
   { key: 'governorate', header: 'المحافظة', width: 18 },
   { key: 'city', header: 'المدينة', width: 18 },
   { key: 'staffType', header: 'الكادر', width: 15 },
@@ -1348,6 +1352,34 @@ function createSchoolCard(school, index) {
               ${escapeHTML(
                 statisticalNumbers.join(' - ')
               )}
+            </div>
+          `
+          : ''
+      }
+
+      ${
+        school?.schoolEmail || school?.schoolGender
+          ? `
+            <div class="school-numbers">
+              ${
+                school.schoolEmail
+                  ? `البريد الإلكتروني: <strong>${escapeHTML(
+                      school.schoolEmail
+                    )}</strong>`
+                  : ''
+              }
+              ${
+                school.schoolEmail && school.schoolGender
+                  ? ' | '
+                  : ''
+              }
+              ${
+                school.schoolGender
+                  ? `الجنس: <strong>${escapeHTML(
+                      school.schoolGender
+                    )}</strong>`
+                  : ''
+              }
             </div>
           `
           : ''

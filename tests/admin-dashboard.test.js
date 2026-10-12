@@ -42,6 +42,14 @@ const sheetRows = {
     ['100005', 'مدرسة غير مسندة', 'أبها', 'أبها', 'تعليمي', 'نشطة', '', '', '', '', ''],
     ['100006', 'مدرسة غير نشطة', 'أبها', 'أبها', 'تعليمي', 'غير نشطة', '', '', '', '', supervisorId]
   ],
+  'دليل المدارس': [
+    ['الرقم الإحصائي', 'البريد الإلكتروني', 'الجنس'],
+    ['100001', 'school100@edu.sa', 'بنين'],
+    ['100002', 'school80@edu.sa', 'بنات'],
+    ['100003', 'school60@edu.sa', 'بنين'],
+    ['100004', 'school40@edu.sa', 'بنات'],
+    ['100005', 'unassigned@edu.sa', 'بنين']
+  ],
   Settings: [
     ['KEY', 'VALUE'],
     ['EVACUATION_TARGET', '4'],
@@ -170,7 +178,7 @@ displayReads = 0;
 const result = callAdmin(managerId);
 
 assert.strictEqual(result.success, true);
-assert.strictEqual(displayReads, 7);
+assert.strictEqual(displayReads, 8);
 assert.strictEqual(result.data.admin.role, 'مدير');
 assert.strictEqual(result.data.admin.nationalId, undefined);
 
@@ -217,6 +225,14 @@ assert.strictEqual(
 assert.strictEqual(
   schoolWithContacts.coordinatorPhone,
   '0500000002'
+);
+assert.strictEqual(
+  schoolWithContacts.schoolEmail,
+  'school100@edu.sa'
+);
+assert.strictEqual(
+  schoolWithContacts.schoolGender,
+  'بنين'
 );
 
 const unassigned = result.data.schools.find(
@@ -266,8 +282,16 @@ assert.strictEqual(
   supervisorSchool.coordinatorPhone,
   '0500000002'
 );
-assert.strictEqual(displayReads, 7);
+assert.strictEqual(
+  supervisorSchool.schoolEmail,
+  'school100@edu.sa'
+);
+assert.strictEqual(
+  supervisorSchool.schoolGender,
+  'بنين'
+);
+assert.strictEqual(displayReads, 8);
 
 console.log(
-  'Admin dashboard passed: authorization, average=70, global=56, unassigned=1, fixed sheet reads=7, supervisor regression'
+  'Admin dashboard passed: authorization, directory matching, average=70, global=56, unassigned=1, fixed sheet reads=8, supervisor regression'
 );

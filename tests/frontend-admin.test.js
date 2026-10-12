@@ -194,6 +194,10 @@ vm.runInContext(
     appSource,
     /principalName:[\s\S]*principalPhone:[\s\S]*coordinatorName:[\s\S]*coordinatorPhone:/
   );
+  assert.match(
+    appSource,
+    /schoolEmail:[\s\S]*schoolGender:/
+  );
 
   const dashboardHtmlPath =
     __dirname + '/../dashboard.html';

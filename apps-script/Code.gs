@@ -11,6 +11,9 @@
 const CONFIG = {
   SCHOOLS_SHEET: 'Schools',
 
+  // دليل البريد الإلكتروني والجنس حسب الرقم الإحصائي
+  SCHOOL_DIRECTORY_SHEET: 'دليل المدارس',
+
   // تقرير خطة الإخلاء
   REPORTS_SHEET: 'Reports',
 
@@ -684,8 +687,27 @@ function findSchoolByNumber(number) {
 function buildSchoolResponse(
   school,
   rowNumber,
-  loginNumber
+  loginNumber,
+  schoolDirectory
 ) {
+
+  const schoolNumbers =
+    extractSchoolNumbers(
+      school['الأرقام الإحصائية'] || ''
+    );
+
+  if (
+    loginNumber &&
+    !schoolNumbers.includes(loginNumber)
+  ) {
+    schoolNumbers.push(loginNumber);
+  }
+
+  const directoryEntry =
+    findSchoolDirectoryEntry(
+      schoolNumbers,
+      schoolDirectory || readSchoolDirectory()
+    );
 
   return {
 
@@ -699,6 +721,10 @@ function buildSchoolResponse(
       school[
         'الأرقام الإحصائية'
       ] || '',
+
+    schoolEmail: directoryEntry.email,
+
+    schoolGender: directoryEntry.gender,
 
     schoolName:
       school[
@@ -759,6 +785,134 @@ function buildSchoolResponse(
       school[
         'آخر تحديث للبيانات'
       ] || ''
+  };
+}
+
+
+function findHeaderIndex(headers, aliases) {
+  for (let index = 0; index < aliases.length; index++) {
+    const headerIndex = headers.indexOf(
+      aliases[index]
+    );
+    if (headerIndex !== -1) {
+      return headerIndex;
+    }
+  }
+  return -1;
+}
+
+
+function readSchoolDirectory() {
+  const sheet = SpreadsheetApp
+    .getActiveSpreadsheet()
+    .getSheetByName(
+      CONFIG.SCHOOL_DIRECTORY_SHEET
+    );
+
+  const directory = new Map();
+
+  if (!sheet) {
+    console.warn(
+      `لم يتم العثور على ورقة ${CONFIG.SCHOOL_DIRECTORY_SHEET}.`
+    );
+    return directory;
+  }
+
+  const values = sheet
+    .getDataRange()
+    .getDisplayValues();
+
+  if (values.length === 0) {
+    return directory;
+  }
+
+  const headers = values[0].map(
+    value => String(value || '').trim()
+  );
+  const numberIndex = findHeaderIndex(
+    headers,
+    [
+      'الرقم الإحصائي',
+      'الرقم الاحصائي',
+      'الأرقام الإحصائية'
+    ]
+  );
+  const emailIndex = findHeaderIndex(
+    headers,
+    [
+      'البريد الإلكتروني',
+      'البريد الالكتروني',
+      'الإيميل',
+      'الايميل'
+    ]
+  );
+  const genderIndex = findHeaderIndex(
+    headers,
+    ['الجنس', 'نوع المدرسة']
+  );
+
+  if (
+    numberIndex === -1 ||
+    emailIndex === -1 ||
+    genderIndex === -1
+  ) {
+    throw new Error(
+      'يجب أن تحتوي ورقة دليل المدارس على أعمدة الرقم الإحصائي والبريد الإلكتروني والجنس.'
+    );
+  }
+
+  values.slice(1).forEach((row, rowIndex) => {
+    const number = normalizeSchoolNumber(
+      row[numberIndex]
+    );
+
+    if (!number) {
+      return;
+    }
+
+    if (directory.has(number)) {
+      console.warn(
+        `رقم إحصائي مكرر في دليل المدارس: ${number} (الصف ${rowIndex + 2})`
+      );
+      return;
+    }
+
+    directory.set(number, {
+      email: String(
+        row[emailIndex] || ''
+      ).trim(),
+      gender: String(
+        row[genderIndex] || ''
+      ).trim()
+    });
+  });
+
+  return directory;
+}
+
+
+function findSchoolDirectoryEntry(
+  schoolNumbers,
+  directory
+) {
+  const numbers = Array.isArray(schoolNumbers)
+    ? schoolNumbers
+    : extractSchoolNumbers(
+        schoolNumbers || ''
+      );
+
+  for (let index = 0; index < numbers.length; index++) {
+    const entry = directory.get(
+      normalizeSchoolNumber(numbers[index])
+    );
+    if (entry) {
+      return entry;
+    }
+  }
+
+  return {
+    email: '',
+    gender: ''
   };
 }
 
@@ -1226,6 +1380,9 @@ function getSupervisorSchools(e) {
     const achievementContext =
       buildAchievementContext();
 
+    const schoolDirectory =
+      readSchoolDirectory();
+
     const sheetsLoadedAt = Date.now();
 
 
@@ -1296,6 +1453,12 @@ function getSupervisorSchools(e) {
         schoolNumbers.push(loginNumber);
       }
 
+      const directoryEntry =
+        findSchoolDirectoryEntry(
+          schoolNumbers,
+          schoolDirectory
+        );
+
       // ========================================
         // حساب إنجاز المدرسة
         // ========================================
@@ -1319,6 +1482,12 @@ function getSupervisorSchools(e) {
 
         statisticalNumbers:
           schoolNumbers,
+
+        schoolEmail:
+          directoryEntry.email,
+
+        schoolGender:
+          directoryEntry.gender,
 
         governorate:
           String(
@@ -6043,6 +6212,8 @@ function getAdminDashboard(e) {
 
     const schoolTable =
       readAdminSchoolsTable();
+    const schoolDirectory =
+      readSchoolDirectory();
     const dataReadAt = Date.now();
 
     const contextStartedAt = Date.now();
@@ -6108,6 +6279,12 @@ function getAdminDashboard(e) {
         schoolNumbers.push(loginNumber);
       }
 
+      const directoryEntry =
+        findSchoolDirectoryEntry(
+          schoolNumbers,
+          schoolDirectory
+        );
+
       const supervisorNationalId =
         normalizeNationalId(
           school['السجل المدني للمشرف'] || ''
@@ -6125,6 +6302,8 @@ function getAdminDashboard(e) {
           school['اسم المدرسة'] || ''
         ).trim(),
         statisticalNumbers: schoolNumbers,
+        schoolEmail: directoryEntry.email,
+        schoolGender: directoryEntry.gender,
         governorate: String(
           school['المحافظة'] || ''
         ).trim(),
