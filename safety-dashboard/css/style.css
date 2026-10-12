@@ -834,6 +834,47 @@ button {
   color: #83918c;
 }
 
+.school-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 6px;
+  color: #83918c;
+  font-size: 13px;
+}
+
+.school-gender-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 3px 10px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.school-gender-badge.boys {
+  color: #1d4f91;
+  background: #eaf3ff;
+  border-color: #c9def7;
+}
+
+.school-gender-badge.girls {
+  color: #77428d;
+  background: #f6edfa;
+  border-color: #e5cff0;
+}
+
+.school-gender-badge.unknown {
+  color: #66756f;
+  background: #f1f4f3;
+  border-color: #dce4e1;
+}
+
 
 /* حالة المدرسة */
 

@@ -1223,6 +1223,17 @@ function createSchoolCard(school, index) {
   const location =
     locationParts.join(' - ');
 
+  const schoolGender = String(
+    school?.schoolGender || ''
+  ).trim();
+
+  const schoolGenderClass =
+    schoolGender === 'بنين'
+      ? 'boys'
+      : schoolGender === 'بنات'
+        ? 'girls'
+        : 'unknown';
+
 
   return `
     <article
@@ -1246,15 +1257,18 @@ function createSchoolCard(school, index) {
             ${escapeHTML(schoolName)}
           </h4>
 
-          ${
-            location
-              ? `
-                <p>
-                  ${escapeHTML(location)}
-                </p>
-              `
-              : ''
-          }
+          <div class="school-meta">
+            ${
+              location
+                ? `<span>${escapeHTML(location)}</span>`
+                : ''
+            }
+            <span class="school-gender-badge ${schoolGenderClass}">
+              ${escapeHTML(
+                schoolGender || 'غير محدد'
+              )}
+            </span>
+          </div>
 
         </div>
 
@@ -1352,34 +1366,6 @@ function createSchoolCard(school, index) {
               ${escapeHTML(
                 statisticalNumbers.join(' - ')
               )}
-            </div>
-          `
-          : ''
-      }
-
-      ${
-        school?.schoolEmail || school?.schoolGender
-          ? `
-            <div class="school-numbers">
-              ${
-                school.schoolEmail
-                  ? `البريد الإلكتروني: <strong>${escapeHTML(
-                      school.schoolEmail
-                    )}</strong>`
-                  : ''
-              }
-              ${
-                school.schoolEmail && school.schoolGender
-                  ? ' | '
-                  : ''
-              }
-              ${
-                school.schoolGender
-                  ? `الجنس: <strong>${escapeHTML(
-                      school.schoolGender
-                    )}</strong>`
-                  : ''
-              }
             </div>
           `
           : ''

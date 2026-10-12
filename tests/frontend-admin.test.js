@@ -198,6 +198,10 @@ vm.runInContext(
     appSource,
     /schoolEmail:[\s\S]*schoolGender:/
   );
+  assert.match(
+    appSource,
+    /school-gender-badge[\s\S]*schoolGender \|\| 'غير محدد'/
+  );
 
   const dashboardHtmlPath =
     __dirname + '/../dashboard.html';
