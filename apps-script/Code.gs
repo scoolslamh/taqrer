@@ -49,6 +49,15 @@ function doGet(e) {
       e?.parameter?.action || ''
     ).trim();
 
+    if (
+      ['getReports', 'getAchievement'].includes(action)
+    ) {
+      const systemStatus = readSystemStatus();
+      if (!systemStatus.isOpen) {
+        return systemClosedResponse(systemStatus);
+      }
+    }
+
     if (action === 'getSchool') {
       return getSchoolByNumber(e);
     }
@@ -113,6 +122,25 @@ function doPost(e) {
     const action = String(
       data.action || ''
     ).trim();
+
+    if (action === 'setSystemStatus') {
+      return setSystemStatus(data);
+    }
+
+    if (
+      [
+        'updateSchool',
+        'uploadEvacuationReport',
+        'uploadSafetyMomentReport',
+        'uploadCivilDefenseReport',
+        'uploadTrafficWeekReport'
+      ].includes(action)
+    ) {
+      const systemStatus = readSystemStatus();
+      if (!systemStatus.isOpen) {
+        return systemClosedResponse(systemStatus);
+      }
+    }
     /*
  * تسجيل دخول المشرف / المدير
  */
@@ -160,6 +188,11 @@ function doPost(e) {
  * =========================================================
  */
 function getSchoolByNumber(e) {
+
+  const systemStatus = readSystemStatus();
+  if (!systemStatus.isOpen) {
+    return systemClosedResponse(systemStatus);
+  }
 
   const inputNumber =
     normalizeSchoolNumber(
@@ -273,6 +306,20 @@ function getSchoolDashboard(e) {
       buildAchievementContext({
         includeSourceValues: true
       });
+
+    const systemStatus =
+      achievementContext.settings.systemStatus || {
+        status: 'OPEN',
+        isOpen: true,
+        message: '',
+        updatedAt: '',
+        updatedBy: ''
+      };
+
+    if (!systemStatus.isOpen) {
+      return systemClosedResponse(systemStatus);
+    }
+
     const contextBuiltAt = Date.now();
 
     const achievement =
@@ -5972,6 +6019,210 @@ function validateAdminAccess(
 }
 
 
+function getSettingsSheet() {
+  const sheet = SpreadsheetApp
+    .getActiveSpreadsheet()
+    .getSheetByName(CONFIG.SETTINGS_SHEET);
+
+  if (!sheet) {
+    throw new Error(
+      `لم يتم العثور على ورقة ${CONFIG.SETTINGS_SHEET}.`
+    );
+  }
+
+  return sheet;
+}
+
+
+function readSystemStatus() {
+  const sheet = getSettingsSheet();
+  const values = sheet
+    .getDataRange()
+    .getDisplayValues();
+  const settings = {};
+
+  values.slice(1).forEach(row => {
+    const key = String(row[0] || '').trim();
+    if (key) {
+      settings[key] = String(
+        row[1] || ''
+      ).trim();
+    }
+  });
+
+  const status =
+    settings.SYSTEM_STATUS === 'CLOSED'
+      ? 'CLOSED'
+      : 'OPEN';
+
+  return {
+    status: status,
+    isOpen: status === 'OPEN',
+    message:
+      settings.SYSTEM_CLOSED_MESSAGE ||
+      'النظام مغلق مؤقتًا. يرجى المحاولة لاحقًا.',
+    updatedAt:
+      settings.SYSTEM_STATUS_UPDATED_AT || '',
+    updatedBy:
+      settings.SYSTEM_STATUS_UPDATED_BY || ''
+  };
+}
+
+
+function systemClosedResponse(systemStatus) {
+  const status = systemStatus ||
+    readSystemStatus();
+
+  return jsonResponse({
+    success: false,
+    error: 'SYSTEM_CLOSED',
+    message: status.message,
+    data: {
+      systemStatus: status
+    }
+  });
+}
+
+
+function writeSystemSettings(updates) {
+  const sheet = getSettingsSheet();
+  const values = sheet
+    .getDataRange()
+    .getDisplayValues();
+  const rows = values.length > 0
+    ? values.map(row => row.slice())
+    : [['KEY', 'VALUE']];
+
+  while (rows[0].length < 2) {
+    rows[0].push('');
+  }
+
+  if (!String(rows[0][0] || '').trim()) {
+    rows[0][0] = 'KEY';
+  }
+  if (!String(rows[0][1] || '').trim()) {
+    rows[0][1] = 'VALUE';
+  }
+
+  const rowByKey = new Map();
+  for (let index = 1; index < rows.length; index++) {
+    const key = String(rows[index][0] || '').trim();
+    if (key && !rowByKey.has(key)) {
+      rowByKey.set(key, index);
+    }
+  }
+
+  Object.entries(updates).forEach(([key, value]) => {
+    if (rowByKey.has(key)) {
+      const rowIndex = rowByKey.get(key);
+      while (rows[rowIndex].length < 2) {
+        rows[rowIndex].push('');
+      }
+      rows[rowIndex][1] = value;
+      return;
+    }
+
+    rowByKey.set(key, rows.length);
+    rows.push([key, value]);
+  });
+
+  const output = rows.map(row => [
+    row[0] || '',
+    row[1] || ''
+  ]);
+
+  sheet.getRange(
+    1,
+    1,
+    output.length,
+    2
+  ).setValues(output);
+}
+
+
+function setSystemStatus(data) {
+  try {
+    const directory = readSupervisorsDirectory();
+    const authorization = validateAdminAccess(
+      data && data.nationalId,
+      directory
+    );
+
+    if (!authorization.success) {
+      return jsonResponse(authorization);
+    }
+
+    const requestedStatus = String(
+      data && data.status || ''
+    ).trim().toUpperCase();
+
+    if (!['OPEN', 'CLOSED'].includes(requestedStatus)) {
+      return jsonResponse({
+        success: false,
+        error: 'INVALID_SYSTEM_STATUS',
+        message: 'حالة النظام المطلوبة غير صحيحة.'
+      });
+    }
+
+    const message = String(
+      data && data.message || ''
+    ).trim().slice(0, 300);
+    const adminName = String(
+      authorization.entry.record['اسم المشرف'] ||
+      authorization.entry.nationalId || ''
+    ).trim();
+    const lock = typeof LockService !== 'undefined'
+      ? LockService.getScriptLock()
+      : null;
+
+    if (lock) {
+      lock.waitLock(20000);
+    }
+
+    try {
+      writeSystemSettings({
+        SYSTEM_STATUS: requestedStatus,
+        SYSTEM_CLOSED_MESSAGE:
+          message ||
+          'النظام مغلق مؤقتًا. يرجى المحاولة لاحقًا.',
+        SYSTEM_STATUS_UPDATED_AT:
+          new Date().toISOString(),
+        SYSTEM_STATUS_UPDATED_BY: adminName
+      });
+
+      if (typeof CacheService !== 'undefined') {
+        CacheService
+          .getScriptCache()
+          .remove('achievement-settings-v1');
+      }
+    } finally {
+      if (lock) {
+        lock.releaseLock();
+      }
+    }
+
+    const systemStatus = readSystemStatus();
+
+    return jsonResponse({
+      success: true,
+      message: systemStatus.isOpen
+        ? 'تم فتح النظام بنجاح.'
+        : 'تم إغلاق النظام بنجاح.',
+      data: {
+        systemStatus: systemStatus
+      }
+    });
+  } catch (error) {
+    console.error('setSystemStatus Error:', error);
+    return jsonResponse({
+      success: false,
+      error: 'SET_SYSTEM_STATUS_FAILED',
+      message: 'تعذر تغيير حالة النظام.'
+    });
+  }
+}
+
+
 function readAdminSchoolsTable() {
 
   const sheet = getSchoolsSheet();
@@ -6214,6 +6465,7 @@ function getAdminDashboard(e) {
       readAdminSchoolsTable();
     const schoolDirectory =
       readSchoolDirectory();
+    const systemStatus = readSystemStatus();
     const dataReadAt = Date.now();
 
     const contextStartedAt = Date.now();
@@ -6377,6 +6629,8 @@ function getAdminDashboard(e) {
       schools
     );
 
+    data.systemStatus = systemStatus;
+
     const aggregatedAt = Date.now();
 
     console.log(
@@ -6428,6 +6682,7 @@ function getAdminDashboard(e) {
 function parseAchievementSettings(values) {
 
   const settings = {};
+  const rawSettings = {};
 
   for (let i = 1; i < values.length; i++) {
     const key =
@@ -6436,6 +6691,9 @@ function parseAchievementSettings(values) {
     const value = Number(values[i][1]);
 
     if (key) {
+      rawSettings[key] = String(
+        values[i][1] || ''
+      ).trim();
       settings[key] =
         Number.isFinite(value)
           ? Math.max(0, Math.floor(value))
@@ -6451,7 +6709,22 @@ function parseAchievementSettings(values) {
     civilDefenseTarget:
       settings.CIVIL_DEFENSE_TARGET ?? 1,
     trafficWeekTarget:
-      settings.TRAFFIC_WEEK_TARGET ?? 1
+      settings.TRAFFIC_WEEK_TARGET ?? 1,
+    systemStatus: {
+      status:
+        rawSettings.SYSTEM_STATUS === 'CLOSED'
+          ? 'CLOSED'
+          : 'OPEN',
+      isOpen:
+        rawSettings.SYSTEM_STATUS !== 'CLOSED',
+      message:
+        rawSettings.SYSTEM_CLOSED_MESSAGE ||
+        'النظام مغلق مؤقتًا. يرجى المحاولة لاحقًا.',
+      updatedAt:
+        rawSettings.SYSTEM_STATUS_UPDATED_AT || '',
+      updatedBy:
+        rawSettings.SYSTEM_STATUS_UPDATED_BY || ''
+    }
   };
 }
 

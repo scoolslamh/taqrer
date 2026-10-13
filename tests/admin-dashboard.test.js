@@ -99,13 +99,27 @@ function makeSheet(rows) {
     getLastColumn: () => rows[0]?.length || 0,
     getDataRange: () => makeRange(rows),
     getRange(row, column, rowCount, columnCount) {
-      return makeRange(
+      const range = makeRange(
         rows
           .slice(row - 1, row - 1 + rowCount)
           .map(values =>
             values.slice(column - 1, column - 1 + columnCount)
           )
       );
+      range.setValues = values => {
+        values.forEach((valuesRow, rowOffset) => {
+          const targetRow = row - 1 + rowOffset;
+          while (rows.length <= targetRow) {
+            rows.push([]);
+          }
+          valuesRow.forEach((value, columnOffset) => {
+            rows[targetRow][
+              column - 1 + columnOffset
+            ] = value;
+          });
+        });
+      };
+      return range;
     }
   };
 }
@@ -178,9 +192,11 @@ displayReads = 0;
 const result = callAdmin(managerId);
 
 assert.strictEqual(result.success, true);
-assert.strictEqual(displayReads, 8);
+assert.strictEqual(displayReads, 9);
 assert.strictEqual(result.data.admin.role, 'مدير');
 assert.strictEqual(result.data.admin.nationalId, undefined);
+assert.strictEqual(result.data.systemStatus.isOpen, true);
+assert.strictEqual(result.data.systemStatus.status, 'OPEN');
 
 const firstSupervisor = result.data.supervisors.find(
   supervisor => supervisor.supervisorId === 'SUP001'
@@ -292,6 +308,73 @@ assert.strictEqual(
 );
 assert.strictEqual(displayReads, 8);
 
+const unauthorizedStatusResponse = vm.runInContext(
+  `setSystemStatus({
+    nationalId: '${supervisorId}',
+    status: 'CLOSED',
+    message: 'اختبار الإغلاق'
+  })`,
+  sandbox
+);
+const unauthorizedStatusResult = JSON.parse(
+  unauthorizedStatusResponse.text
+);
+assert.strictEqual(
+  unauthorizedStatusResult.success,
+  false
+);
+assert.strictEqual(
+  unauthorizedStatusResult.error,
+  'FORBIDDEN'
+);
+
+const closeResponse = vm.runInContext(
+  `setSystemStatus({
+    nationalId: '${managerId}',
+    status: 'CLOSED',
+    message: 'تم إغلاق النظام للاختبار'
+  })`,
+  sandbox
+);
+const closeResult = JSON.parse(closeResponse.text);
+assert.strictEqual(closeResult.success, true);
+assert.strictEqual(
+  closeResult.data.systemStatus.isOpen,
+  false
+);
+assert.strictEqual(
+  closeResult.data.systemStatus.message,
+  'تم إغلاق النظام للاختبار'
+);
+
+const blockedSchoolResponse = vm.runInContext(
+  `getSchoolByNumber({ parameter: { number: '100001' } })`,
+  sandbox
+);
+const blockedSchoolResult = JSON.parse(
+  blockedSchoolResponse.text
+);
+assert.strictEqual(blockedSchoolResult.success, false);
+assert.strictEqual(
+  blockedSchoolResult.error,
+  'SYSTEM_CLOSED'
+);
+
+const openResponse = vm.runInContext(
+  `setSystemStatus({
+    nationalId: '${managerId}',
+    status: 'OPEN',
+    message: 'النظام متاح'
+  })`,
+  sandbox
+);
+const openResult = JSON.parse(openResponse.text);
+assert.strictEqual(openResult.success, true);
+assert.strictEqual(
+  openResult.data.systemStatus.isOpen,
+  true
+);
+
 console.log(
-  'Admin dashboard passed: authorization, directory matching, average=70, global=56, unassigned=1, fixed sheet reads=8, supervisor regression'
+  'Admin dashboard passed: authorization, system open/close, directory matching, average=70, global=56, unassigned=1, fixed sheet reads=9, supervisor regression'
 );

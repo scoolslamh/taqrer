@@ -439,9 +439,42 @@ const SafetyAPI = (() => {
         ) ? data.supervisors : [],
         schools: Array.isArray(
           data.schools
-        ) ? data.schools : []
+        ) ? data.schools : [],
+        systemStatus:
+          data.systemStatus || {
+            status: 'OPEN',
+            isOpen: true,
+            message: '',
+            updatedAt: '',
+            updatedBy: ''
+          }
       }
     };
+  }
+
+
+  async function setSystemStatus(
+    nationalId,
+    status,
+    message
+  ) {
+    const cleanNationalId =
+      normalizeNationalId(nationalId);
+
+    if (!isValidNationalId(cleanNationalId)) {
+      return {
+        success: false,
+        error: 'INVALID_NATIONAL_ID',
+        message: 'تعذر التحقق من صلاحية المدير.'
+      };
+    }
+
+    return post({
+      action: 'setSystemStatus',
+      nationalId: cleanNationalId,
+      status: status,
+      message: String(message || '').trim()
+    });
   }
 
 
@@ -467,7 +500,9 @@ const SafetyAPI = (() => {
     /*
      * جلب لوحة مدير النظام
      */
-    getAdminDashboard
+    getAdminDashboard,
+
+    setSystemStatus
 
   };
 

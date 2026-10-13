@@ -202,6 +202,10 @@ vm.runInContext(
     appSource,
     /school-gender-badge[\s\S]*schoolGender \|\| 'غير محدد'/
   );
+  assert.match(
+    appSource,
+    /adminSystemToggleButton[\s\S]*SafetyAPI\.setSystemStatus/
+  );
 
   const dashboardHtmlPath =
     __dirname + '/../dashboard.html';
@@ -243,6 +247,10 @@ vm.runInContext(
   assert.match(
     html,
     /id="adminSupervisorReportTypeFilter"[\s\S]*id="adminSupervisorEvacuationPlanFilter"/
+  );
+  assert.match(
+    html,
+    /id="adminSystemStatusBadge"[\s\S]*id="adminSystemClosedMessage"[\s\S]*id="adminSystemToggleButton"/
   );
 
   const schoolPortalHtml = fs.readFileSync(

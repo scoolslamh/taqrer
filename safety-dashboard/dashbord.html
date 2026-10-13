@@ -574,6 +574,49 @@
       <div id="adminDashboardBody" class="hidden">
 
         <section
+          id="adminSystemControl"
+          class="system-control-card"
+          aria-labelledby="adminSystemControlTitle"
+        >
+          <div class="system-control-content">
+            <div class="system-control-heading">
+              <div>
+                <span class="system-control-label">حالة النظام</span>
+                <h2 id="adminSystemControlTitle">التحكم في دخول المدارس</h2>
+              </div>
+              <span
+                id="adminSystemStatusBadge"
+                class="system-status-badge open"
+              >مفتوح</span>
+            </div>
+            <p id="adminSystemStatusDescription">
+              النظام متاح للمدارس وعمليات رفع التقارير.
+            </p>
+            <label for="adminSystemClosedMessage">رسالة الإغلاق للمدارس</label>
+            <textarea
+              id="adminSystemClosedMessage"
+              rows="2"
+              maxlength="300"
+              placeholder="مثال: تم إغلاق النظام لانتهاء فترة رفع التقارير."
+            ></textarea>
+            <small id="adminSystemStatusMeta"></small>
+            <div
+              id="adminSystemStatusFeedback"
+              class="system-control-feedback hidden"
+              role="status"
+              aria-live="polite"
+            ></div>
+          </div>
+          <button
+            id="adminSystemToggleButton"
+            class="system-toggle-button close-system"
+            type="button"
+          >
+            إغلاق النظام
+          </button>
+        </section>
+
+        <section
           class="stats-grid admin-stats-grid"
           aria-label="مؤشرات الإدارة"
         >

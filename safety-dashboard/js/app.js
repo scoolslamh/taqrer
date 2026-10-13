@@ -308,6 +308,13 @@ let supervisorSchools = [];
 let adminSchools = [];
 let adminSupervisors = [];
 let adminSummary = {};
+let adminSystemStatus = {
+  status: 'OPEN',
+  isOpen: true,
+  message: '',
+  updatedAt: '',
+  updatedBy: ''
+};
 let selectedAdminSupervisorId = null;
 let currentDashboardSession = null;
 let currentSchoolsFilter = 'all';
@@ -1795,6 +1802,13 @@ document.getElementById(
     adminSchools = [];
     adminSupervisors = [];
     adminSummary = {};
+    adminSystemStatus = {
+      status: 'OPEN',
+      isOpen: true,
+      message: '',
+      updatedAt: '',
+      updatedBy: ''
+    };
     selectedAdminSupervisorId = null;
 
     const supervisorsBody =
@@ -1882,6 +1896,98 @@ document.getElementById(
       'adminUnassignedSchools',
       adminSummary.unassignedSchools || 0
     );
+  }
+
+
+  function renderAdminSystemStatus() {
+    const isOpen =
+      adminSystemStatus.isOpen !== false &&
+      adminSystemStatus.status !== 'CLOSED';
+    const card = document.getElementById(
+      'adminSystemControl'
+    );
+    const badge = document.getElementById(
+      'adminSystemStatusBadge'
+    );
+    const description = document.getElementById(
+      'adminSystemStatusDescription'
+    );
+    const messageField = document.getElementById(
+      'adminSystemClosedMessage'
+    );
+    const meta = document.getElementById(
+      'adminSystemStatusMeta'
+    );
+    const button = document.getElementById(
+      'adminSystemToggleButton'
+    );
+
+    card?.classList.toggle('closed', !isOpen);
+    badge?.classList.toggle('open', isOpen);
+    badge?.classList.toggle('closed', !isOpen);
+
+    if (badge) {
+      badge.textContent = isOpen ? 'مفتوح' : 'مغلق';
+    }
+    if (description) {
+      description.textContent = isOpen
+        ? 'النظام متاح للمدارس وعمليات رفع التقارير.'
+        : 'دخول المدارس وعمليات الرفع والتعديل متوقفة، بينما تبقى لوحات المتابعة متاحة.';
+    }
+    if (messageField) {
+      messageField.value =
+        adminSystemStatus.message || '';
+    }
+    if (button) {
+      button.textContent = isOpen
+        ? 'إغلاق النظام'
+        : 'فتح النظام';
+      button.classList.toggle(
+        'close-system',
+        isOpen
+      );
+      button.classList.toggle(
+        'open-system',
+        !isOpen
+      );
+      button.dataset.nextStatus = isOpen
+        ? 'CLOSED'
+        : 'OPEN';
+    }
+
+    if (meta) {
+      const updatedAt =
+        adminSystemStatus.updatedAt
+          ? new Date(
+              adminSystemStatus.updatedAt
+            ).toLocaleString('ar-SA')
+          : '';
+      const details = [
+        adminSystemStatus.updatedBy
+          ? `آخر تعديل بواسطة: ${adminSystemStatus.updatedBy}`
+          : '',
+        updatedAt
+          ? `بتاريخ: ${updatedAt}`
+          : ''
+      ].filter(Boolean);
+      meta.textContent = details.join(' — ');
+    }
+  }
+
+
+  function showAdminSystemFeedback(
+    message,
+    isError = false
+  ) {
+    const feedback = document.getElementById(
+      'adminSystemStatusFeedback'
+    );
+    if (!feedback) {
+      return;
+    }
+    feedback.textContent = message;
+    feedback.classList.toggle('error', isError);
+    feedback.classList.toggle('hidden', !message);
   }
 
 
@@ -2665,9 +2771,17 @@ document.getElementById(
       data.supervisors
     ) ? data.supervisors : [];
     adminSummary = data.summary || {};
+    adminSystemStatus = data.systemStatus || {
+      status: 'OPEN',
+      isOpen: true,
+      message: '',
+      updatedAt: '',
+      updatedBy: ''
+    };
 
     populateAdminSchoolFilters();
     renderAdminStats();
+    renderAdminSystemStatus();
     renderAdminSupervisors();
     showAdminSupervisors();
 
@@ -2850,6 +2964,79 @@ document.getElementById(
     'click',
     () => showAdminSchools()
   );
+
+
+  document.getElementById(
+    'adminSystemToggleButton'
+  )?.addEventListener('click', async event => {
+    if (!currentDashboardSession) {
+      return;
+    }
+
+    const button = event.currentTarget;
+    const nextStatus = button.dataset.nextStatus;
+    const isClosing = nextStatus === 'CLOSED';
+    const messageField = document.getElementById(
+      'adminSystemClosedMessage'
+    );
+    const message = String(
+      messageField?.value || ''
+    ).trim();
+
+    if (isClosing && !message) {
+      showAdminSystemFeedback(
+        'اكتب رسالة تظهر للمدارس قبل إغلاق النظام.',
+        true
+      );
+      messageField?.focus();
+      return;
+    }
+
+    const confirmed = window.confirm(
+      isClosing
+        ? 'هل أنت متأكد من إغلاق النظام؟ سيتم منع المدارس من الدخول والرفع والتعديل.'
+        : 'هل أنت متأكد من فتح النظام للمدارس؟'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    button.disabled = true;
+    showAdminSystemFeedback(
+      isClosing
+        ? 'جاري إغلاق النظام...'
+        : 'جاري فتح النظام...'
+    );
+
+    const result = await SafetyAPI.setSystemStatus(
+      getSupervisorNationalId(
+        currentDashboardSession
+      ),
+      nextStatus,
+      message
+    );
+
+    button.disabled = false;
+
+    if (!result || result.success !== true) {
+      showAdminSystemFeedback(
+        result?.message ||
+        'تعذر تغيير حالة النظام.',
+        true
+      );
+      return;
+    }
+
+    adminSystemStatus =
+      result.data?.systemStatus ||
+      adminSystemStatus;
+    renderAdminSystemStatus();
+    showAdminSystemFeedback(
+      result.message ||
+      'تم تحديث حالة النظام.'
+    );
+  });
 
 
   document.getElementById(
