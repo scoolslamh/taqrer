@@ -849,6 +849,49 @@ function findHeaderIndex(headers, aliases) {
 }
 
 
+function getSchoolNumberLookupKeys(value) {
+  const normalized = normalizeSchoolNumber(value);
+
+  if (!normalized) {
+    return [];
+  }
+
+  const keys = [normalized];
+
+  if (/^\d+$/.test(normalized)) {
+    const withoutLeadingZeros =
+      normalized.replace(/^0+(?=\d)/, '');
+
+    if (
+      withoutLeadingZeros &&
+      withoutLeadingZeros !== normalized
+    ) {
+      keys.push(withoutLeadingZeros);
+    }
+  }
+
+  return keys;
+}
+
+
+function normalizeSchoolGender(value) {
+  const gender = String(value || '')
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (gender === 'بنين') {
+    return 'بنين';
+  }
+
+  if (gender === 'بنات') {
+    return 'بنات';
+  }
+
+  return gender;
+}
+
+
 function readSchoolDirectory() {
   const sheet = SpreadsheetApp
     .getActiveSpreadsheet()
@@ -867,7 +910,7 @@ function readSchoolDirectory() {
 
   const values = sheet
     .getDataRange()
-    .getDisplayValues();
+    .getValues();
 
   if (values.length === 0) {
     return directory;
@@ -909,28 +952,53 @@ function readSchoolDirectory() {
   }
 
   values.slice(1).forEach((row, rowIndex) => {
-    const number = normalizeSchoolNumber(
+    const numbers = extractSchoolNumbers(
       row[numberIndex]
     );
 
-    if (!number) {
+    if (numbers.length === 0) {
       return;
     }
 
-    if (directory.has(number)) {
-      console.warn(
-        `رقم إحصائي مكرر في دليل المدارس: ${number} (الصف ${rowIndex + 2})`
-      );
-      return;
-    }
-
-    directory.set(number, {
+    const incomingEntry = {
       email: String(
         row[emailIndex] || ''
       ).trim(),
-      gender: String(
-        row[genderIndex] || ''
-      ).trim()
+      gender: normalizeSchoolGender(
+        row[genderIndex]
+      )
+    };
+
+    numbers.forEach(number => {
+      getSchoolNumberLookupKeys(number)
+        .forEach(key => {
+          const existing = directory.get(key);
+
+          if (!existing) {
+            directory.set(key, {
+              email: incomingEntry.email,
+              gender: incomingEntry.gender
+            });
+            return;
+          }
+
+          if (!existing.email && incomingEntry.email) {
+            existing.email = incomingEntry.email;
+          }
+          if (!existing.gender && incomingEntry.gender) {
+            existing.gender = incomingEntry.gender;
+          }
+
+          if (
+            existing.gender &&
+            incomingEntry.gender &&
+            existing.gender !== incomingEntry.gender
+          ) {
+            console.warn(
+              `بيانات جنس متعارضة للرقم الإحصائي ${number} في الصف ${rowIndex + 2}.`
+            );
+          }
+        });
     });
   });
 
@@ -949,11 +1017,15 @@ function findSchoolDirectoryEntry(
       );
 
   for (let index = 0; index < numbers.length; index++) {
-    const entry = directory.get(
-      normalizeSchoolNumber(numbers[index])
+    const keys = getSchoolNumberLookupKeys(
+      numbers[index]
     );
-    if (entry) {
-      return entry;
+
+    for (let keyIndex = 0; keyIndex < keys.length; keyIndex++) {
+      const entry = directory.get(keys[keyIndex]);
+      if (entry) {
+        return entry;
+      }
     }
   }
 

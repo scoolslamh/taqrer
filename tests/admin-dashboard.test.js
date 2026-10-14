@@ -44,8 +44,8 @@ const sheetRows = {
   ],
   'دليل المدارس': [
     ['الرقم الإحصائي', 'البريد الإلكتروني', 'الجنس'],
-    ['100001', 'school100@edu.sa', 'بنين'],
-    ['100002', 'school80@edu.sa', 'بنات'],
+    ['٩٠٠٠٠١ / ١٠٠٠٠١', 'school100@edu.sa', 'بنين'],
+    ['000100002', 'school80@edu.sa', 'بنات'],
     ['100003', 'school60@edu.sa', 'بنين'],
     ['100004', 'school40@edu.sa', 'بنات'],
     ['100005', 'unassigned@edu.sa', 'بنين']
@@ -86,6 +86,10 @@ let displayReads = 0;
 
 function makeRange(rows) {
   return {
+    getValues() {
+      displayReads++;
+      return rows.map(row => row.slice());
+    },
     getDisplayValues() {
       displayReads++;
       return rows.map(row => row.slice());
@@ -257,6 +261,14 @@ const unassigned = result.data.schools.find(
 assert.strictEqual(unassigned.supervisorId, null);
 assert.strictEqual(unassigned.supervisorName, 'غير مسندة');
 assert.strictEqual(unassigned.supervisorStatus, null);
+
+const schoolWithLeadingZeros = result.data.schools.find(
+  school => school.schoolName === 'مدرسة 80'
+);
+assert.strictEqual(
+  schoolWithLeadingZeros.schoolGender,
+  'بنات'
+);
 
 assert.ok(
   result.data.schools.every(
