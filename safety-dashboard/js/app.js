@@ -1221,6 +1221,10 @@ function createSchoolCard(school, index) {
       ? school.statisticalNumbers
       : [];
 
+  const primarySchoolNumber =
+    statisticalNumbers[0] ||
+    school?.achievement?.schoolNumber || '';
+
 
   const locationParts =
     [governorate, city]
@@ -1394,6 +1398,21 @@ function createSchoolCard(school, index) {
               ${escapeHTML(
                 statisticalNumbers.join(' - ')
               )}
+            </div>
+          `
+          : ''
+      }
+
+      ${
+        primarySchoolNumber
+          ? `
+            <div class="school-report-viewer-action">
+              <button
+                class="school-reports-view-button"
+                type="button"
+                data-school-number="${escapeHTML(primarySchoolNumber)}"
+                data-school-name="${escapeHTML(schoolName)}"
+              >استعراض التقارير المرفوعة</button>
             </div>
           `
           : ''
@@ -1633,6 +1652,281 @@ window.addEventListener(
   closeSchoolPhoneMenu,
   true
 );
+
+
+let reviewerReports = [];
+let reviewerReportsTrigger = null;
+
+
+function ensureReportsViewerModal() {
+  let modal = document.getElementById(
+    'schoolReportsViewerModal'
+  );
+
+  if (modal) {
+    return modal;
+  }
+
+  modal = document.createElement('div');
+  modal.id = 'schoolReportsViewerModal';
+  modal.className = 'reports-viewer-modal hidden';
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.setAttribute(
+    'aria-labelledby',
+    'reportsViewerTitle'
+  );
+  modal.innerHTML = `
+    <div class="reports-viewer-backdrop" data-close-reports-viewer></div>
+    <section class="reports-viewer-dialog">
+      <header class="reports-viewer-header">
+        <div>
+          <span>تقارير المدرسة</span>
+          <h2 id="reportsViewerTitle">استعراض التقارير المرفوعة</h2>
+          <p id="reportsViewerSchoolName"></p>
+        </div>
+        <button class="reports-viewer-close" type="button" data-close-reports-viewer aria-label="إغلاق">×</button>
+      </header>
+      <div class="reports-viewer-toolbar">
+        <label for="reportsViewerFilter">نوع التقرير</label>
+        <select id="reportsViewerFilter">
+          <option value="all">جميع التقارير</option>
+          <option value="evacuation">خطط الإخلاء</option>
+          <option value="safetyMoment">لحظة سلامة</option>
+          <option value="civilDefense">الدفاع المدني</option>
+          <option value="trafficWeek">أسبوع المرور</option>
+        </select>
+      </div>
+      <div id="reportsViewerState" class="reports-viewer-state">جاري تحميل التقارير...</div>
+      <div id="reportsViewerList" class="reports-viewer-list hidden"></div>
+    </section>
+  `;
+  document.body.appendChild(modal);
+
+  modal.querySelectorAll(
+    '[data-close-reports-viewer]'
+  ).forEach(element => {
+    element.addEventListener(
+      'click',
+      closeReportsViewer
+    );
+  });
+
+  modal.querySelector(
+    '#reportsViewerFilter'
+  )?.addEventListener(
+    'change',
+    renderReviewerReports
+  );
+
+  return modal;
+}
+
+
+function closeReportsViewer() {
+  const modal = document.getElementById(
+    'schoolReportsViewerModal'
+  );
+  modal?.classList.add('hidden');
+  document.body.classList.remove(
+    'reports-viewer-open'
+  );
+  reviewerReports = [];
+  reviewerReportsTrigger?.focus();
+  reviewerReportsTrigger = null;
+}
+
+
+function getReportFileLinks(report) {
+  const fileId = String(
+    report?.fileId || ''
+  ).trim();
+
+  if (!/^[A-Za-z0-9_-]+$/.test(fileId)) {
+    return null;
+  }
+
+  return {
+    view:
+      `https://drive.google.com/file/d/${fileId}/view`,
+    download:
+      `https://drive.google.com/uc?export=download&id=${fileId}`
+  };
+}
+
+
+function renderReviewerReports() {
+  const modal = ensureReportsViewerModal();
+  const filter = modal.querySelector(
+    '#reportsViewerFilter'
+  )?.value || 'all';
+  const list = modal.querySelector(
+    '#reportsViewerList'
+  );
+  const state = modal.querySelector(
+    '#reportsViewerState'
+  );
+  const reports = reviewerReports.filter(
+    report =>
+      filter === 'all' ||
+      report.source === filter
+  );
+
+  if (!list || !state) {
+    return;
+  }
+
+  if (reports.length === 0) {
+    list.classList.add('hidden');
+    state.classList.remove('hidden');
+    state.textContent =
+      'لا توجد تقارير مطابقة لهذا النوع.';
+    return;
+  }
+
+  state.classList.add('hidden');
+  list.classList.remove('hidden');
+  list.innerHTML = reports.map((report, index) => {
+    const links = getReportFileLinks(report);
+    const typeLabel =
+      report.source === 'evacuation'
+        ? report.evacuationPlan
+          ? `خطة الإخلاء رقم ${report.evacuationPlan}`
+          : 'خطة إخلاء'
+        : REPORT_TYPE_LABELS[report.source] ||
+          report.reportType || 'تقرير';
+
+    return `
+      <article class="reviewer-report-item">
+        <div class="reviewer-report-number">${index + 1}</div>
+        <div class="reviewer-report-info">
+          <span>${escapeHTML(typeLabel)}</span>
+          <strong>${escapeHTML(
+            report.title || typeLabel
+          )}</strong>
+          <small>
+            تاريخ التنفيذ: ${escapeHTML(
+              report.executionDate || 'غير محدد'
+            )} · تاريخ الرفع: ${escapeHTML(
+              report.uploadDate || 'غير محدد'
+            )}
+          </small>
+          ${
+            report.fileName
+              ? `<small class="reviewer-report-file">${escapeHTML(report.fileName)}</small>`
+              : ''
+          }
+        </div>
+        <span class="reviewer-report-status">${escapeHTML(
+          report.status || 'مرفوع'
+        )}</span>
+        <div class="reviewer-report-actions">
+          ${
+            links
+              ? `
+                <a href="${links.view}" target="_blank" rel="noopener noreferrer">عرض</a>
+                <a href="${links.download}" target="_blank" rel="noopener noreferrer">تحميل</a>
+              `
+              : '<span>الملف غير متاح</span>'
+          }
+        </div>
+      </article>
+    `;
+  }).join('');
+}
+
+
+async function openReportsViewer(button) {
+  const modal = ensureReportsViewerModal();
+  const state = modal.querySelector(
+    '#reportsViewerState'
+  );
+  const list = modal.querySelector(
+    '#reportsViewerList'
+  );
+  const filter = modal.querySelector(
+    '#reportsViewerFilter'
+  );
+
+  reviewerReportsTrigger = button;
+  reviewerReports = [];
+  modal.classList.remove('hidden');
+  document.body.classList.add(
+    'reports-viewer-open'
+  );
+
+  if (filter) {
+    filter.value = 'all';
+  }
+  if (list) {
+    list.innerHTML = '';
+    list.classList.add('hidden');
+  }
+  if (state) {
+    state.textContent = 'جاري تحميل التقارير...';
+    state.classList.remove('hidden');
+  }
+
+  const schoolName = modal.querySelector(
+    '#reportsViewerSchoolName'
+  );
+  if (schoolName) {
+    schoolName.textContent =
+      button.dataset.schoolName || '';
+  }
+
+  const result =
+    await SafetyAPI.getReviewerSchoolReports(
+      getSupervisorNationalId(
+        currentDashboardSession
+      ),
+      button.dataset.schoolNumber
+    );
+
+  if (!result || result.success !== true) {
+    if (state) {
+      state.textContent =
+        result?.message ||
+        'تعذر تحميل تقارير المدرسة.';
+    }
+    return;
+  }
+
+  reviewerReports = Array.isArray(
+    result.data?.reports
+  ) ? result.data.reports : [];
+
+  if (schoolName) {
+    schoolName.textContent =
+      result.data?.schoolName ||
+      button.dataset.schoolName || '';
+  }
+
+  renderReviewerReports();
+}
+
+
+document.addEventListener('click', event => {
+  const button = event.target.closest(
+    '.school-reports-view-button'
+  );
+
+  if (button) {
+    openReportsViewer(button);
+  }
+});
+
+
+document.addEventListener('keydown', event => {
+  if (
+    event.key === 'Escape' &&
+    !document.getElementById(
+      'schoolReportsViewerModal'
+    )?.classList.contains('hidden')
+  ) {
+    closeReportsViewer();
+  }
+});
 
 
 const schoolListRenderTokens =

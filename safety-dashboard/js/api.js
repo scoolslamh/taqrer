@@ -478,6 +478,35 @@ const SafetyAPI = (() => {
   }
 
 
+  async function getReviewerSchoolReports(
+    nationalId,
+    schoolNumber
+  ) {
+    const cleanNationalId =
+      normalizeNationalId(nationalId);
+    const cleanSchoolNumber = String(
+      schoolNumber || ''
+    ).trim();
+
+    if (
+      !isValidNationalId(cleanNationalId) ||
+      !cleanSchoolNumber
+    ) {
+      return {
+        success: false,
+        error: 'INVALID_REQUEST',
+        message: 'تعذر التحقق من بيانات الطلب.'
+      };
+    }
+
+    return post({
+      action: 'getReviewerSchoolReports',
+      nationalId: cleanNationalId,
+      number: cleanSchoolNumber
+    });
+  }
+
+
   /**
    * =========================================================
    * الواجهة العامة للـ API
@@ -502,7 +531,9 @@ const SafetyAPI = (() => {
      */
     getAdminDashboard,
 
-    setSystemStatus
+    setSystemStatus,
+
+    getReviewerSchoolReports
 
   };
 

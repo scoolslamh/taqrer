@@ -1130,6 +1130,31 @@ button {
   color: #a0aaa6;
 }
 
+.school-report-viewer-action {
+  margin-top: 10px;
+}
+
+.school-reports-view-button {
+  width: 100%;
+  min-height: 36px;
+  padding: 7px 12px;
+  border: 1px solid #cfe2db;
+  border-radius: 9px;
+  background: #f5faf8;
+  color: #087653;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.school-reports-view-button:hover,
+.school-reports-view-button:focus-visible {
+  border-color: #168a63;
+  background: #eaf6f1;
+  outline: none;
+}
+
 .school-phone-actions-menu {
   position: fixed;
   z-index: 10000;
@@ -1169,6 +1194,211 @@ button {
   background: #edf7f3;
   color: #087653;
   outline: none;
+}
+
+body.reports-viewer-open {
+  overflow: hidden;
+}
+
+.reports-viewer-modal {
+  position: fixed;
+  z-index: 12000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.reports-viewer-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 35, 29, 0.58);
+  backdrop-filter: blur(2px);
+}
+
+.reports-viewer-dialog {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: min(920px, 100%);
+  max-height: min(780px, calc(100vh - 40px));
+  overflow: hidden;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(9, 34, 25, 0.3);
+}
+
+.reports-viewer-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid #e8eeeb;
+}
+
+.reports-viewer-header span {
+  color: #7c8a85;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.reports-viewer-header h2 {
+  margin: 3px 0 0;
+  color: #17231f;
+  font-size: 20px;
+}
+
+.reports-viewer-header p {
+  margin: 5px 0 0;
+  color: #087653;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.reports-viewer-close {
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 10px;
+  background: #f0f4f2;
+  color: #53635d;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.reports-viewer-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px;
+  border-bottom: 1px solid #edf1ef;
+  background: #fbfcfc;
+}
+
+.reports-viewer-toolbar label {
+  color: #53635d;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.reports-viewer-toolbar select {
+  min-height: 38px;
+  padding: 6px 12px;
+  border: 1px solid #d7e1dd;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #34443e;
+  font: inherit;
+  font-size: 13px;
+}
+
+.reports-viewer-state {
+  padding: 44px 22px;
+  color: #71807a;
+  text-align: center;
+}
+
+.reports-viewer-list {
+  display: grid;
+  gap: 10px;
+  padding: 16px 22px 22px;
+  overflow-y: auto;
+}
+
+.reviewer-report-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 13px;
+  border: 1px solid #e4ebe8;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.reviewer-report-number {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: #edf7f3;
+  color: #087653;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.reviewer-report-info {
+  min-width: 0;
+}
+
+.reviewer-report-info > span,
+.reviewer-report-info > strong,
+.reviewer-report-info > small {
+  display: block;
+}
+
+.reviewer-report-info > span {
+  color: #7a8883;
+  font-size: 11px;
+}
+
+.reviewer-report-info > strong {
+  margin-top: 2px;
+  overflow: hidden;
+  color: #2e3d37;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reviewer-report-info > small {
+  margin-top: 4px;
+  color: #82908a;
+  font-size: 11px;
+}
+
+.reviewer-report-file {
+  direction: ltr;
+  text-align: right;
+}
+
+.reviewer-report-status {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #e8f7ef;
+  color: #087653;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.reviewer-report-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.reviewer-report-actions a {
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: #087653;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.reviewer-report-actions a + a {
+  background: #eef5f2;
+  color: #087653;
+}
+
+.reviewer-report-actions > span {
+  color: #9aa5a1;
+  font-size: 11px;
 }
 
 .school-supervisor {
@@ -1730,5 +1960,41 @@ button {
   .school-contact-missing {
     margin-right: 0;
     margin-left: auto;
+  }
+
+  .school-report-viewer-action {
+    margin: 0;
+    padding: 10px 14px 0;
+  }
+
+  .reports-viewer-modal {
+    padding: 0;
+  }
+
+  .reports-viewer-dialog {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+  }
+
+  .reports-viewer-header,
+  .reports-viewer-toolbar,
+  .reports-viewer-list {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .reports-viewer-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .reviewer-report-item {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .reviewer-report-actions {
+    grid-column: 2 / -1;
   }
 }

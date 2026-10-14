@@ -58,27 +58,37 @@ const sheetRows = {
     ['TRAFFIC_WEEK_TARGET', '1']
   ],
   Reports: [
-    ['الرقم الإحصائي المستخدم', 'رقم خطة الإخلاء', 'حالة التقرير'],
+    ['Report_ID', 'الرقم الإحصائي المستخدم', 'رقم خطة الإخلاء', 'تاريخ التنفيذ', 'تاريخ الرفع', 'حالة التقرير', 'اسم الملف', 'ملف_ID', 'رابط الملف'],
     ...['100001', '100002', '100003', '100004']
       .flatMap(number => [1, 2, 3, 4]
-        .map(plan => [number, String(plan), 'مرفوع']))
+        .map(plan => [
+          `EV-${number}-${plan}`,
+          number,
+          String(plan),
+          '2026-10-01',
+          '2026-10-02',
+          'مرفوع',
+          `plan-${plan}.pdf`,
+          `FILE_${number}_${plan}`,
+          'javascript:alert(1)'
+        ]))
   ],
   SafetyMomentReports: [
-    ['الرقم الإحصائي المستخدم', 'حالة التقرير'],
-    ...Array.from({ length: 4 }, () => ['100001', 'مرفوع']),
-    ...Array.from({ length: 2 }, () => ['100002', 'مرفوع'])
+    ['Report_ID', 'الرقم الإحصائي المستخدم', 'تاريخ التنفيذ', 'تاريخ الرفع', 'حالة التقرير'],
+    ...Array.from({ length: 4 }, (_, index) => [`SM-1-${index}`, '100001', '2026-10-01', '2026-10-02', 'مرفوع']),
+    ...Array.from({ length: 2 }, (_, index) => [`SM-2-${index}`, '100002', '2026-10-01', '2026-10-02', 'مرفوع'])
   ],
   CivilDefenseReports: [
-    ['الرقم الإحصائي المستخدم', 'حالة التقرير'],
-    ['100001', 'مرفوع'],
-    ['100002', 'مرفوع'],
-    ['100003', 'مرفوع']
+    ['Report_ID', 'الرقم الإحصائي المستخدم', 'تاريخ التنفيذ', 'تاريخ الرفع', 'حالة التقرير'],
+    ['CD-1', '100001', '2026-10-01', '2026-10-02', 'مرفوع'],
+    ['CD-2', '100002', '2026-10-01', '2026-10-02', 'مرفوع'],
+    ['CD-3', '100003', '2026-10-01', '2026-10-02', 'مرفوع']
   ],
   TrafficWeekReports: [
-    ['الرقم الإحصائي المستخدم', 'حالة التقرير'],
-    ['100001', 'مرفوع'],
-    ['100002', 'مرفوع'],
-    ['100003', 'مرفوع']
+    ['Report_ID', 'الرقم الإحصائي المستخدم', 'تاريخ التنفيذ', 'تاريخ الرفع', 'حالة التقرير'],
+    ['TW-1', '100001', '2026-10-01', '2026-10-02', 'مرفوع'],
+    ['TW-2', '100002', '2026-10-01', '2026-10-02', 'مرفوع'],
+    ['TW-3', '100003', '2026-10-01', '2026-10-02', 'مرفوع']
   ]
 };
 
@@ -319,6 +329,60 @@ assert.strictEqual(
   'بنين'
 );
 assert.strictEqual(displayReads, 8);
+
+const reviewerReportsResponse = vm.runInContext(
+  `getReviewerSchoolReports({
+    nationalId: '${supervisorId}',
+    number: '100001'
+  })`,
+  sandbox
+);
+const reviewerReportsResult = JSON.parse(
+  reviewerReportsResponse.text
+);
+assert.strictEqual(reviewerReportsResult.success, true);
+assert.strictEqual(
+  reviewerReportsResult.data.schoolName,
+  'مدرسة 100'
+);
+assert.ok(reviewerReportsResult.data.reports.length > 0);
+const reviewerFileReport =
+  reviewerReportsResult.data.reports.find(
+    report => report.fileId === 'FILE_100001_1'
+  );
+assert.ok(reviewerFileReport);
+assert.strictEqual(
+  reviewerFileReport.fileUrl,
+  undefined
+);
+
+const forbiddenReportsResponse = vm.runInContext(
+  `getReviewerSchoolReports({
+    nationalId: '${supervisorId}',
+    number: '100005'
+  })`,
+  sandbox
+);
+const forbiddenReportsResult = JSON.parse(
+  forbiddenReportsResponse.text
+);
+assert.strictEqual(forbiddenReportsResult.success, false);
+assert.strictEqual(
+  forbiddenReportsResult.error,
+  'FORBIDDEN_SCHOOL'
+);
+
+const adminReportsResponse = vm.runInContext(
+  `getReviewerSchoolReports({
+    nationalId: '${managerId}',
+    number: '100005'
+  })`,
+  sandbox
+);
+const adminReportsResult = JSON.parse(
+  adminReportsResponse.text
+);
+assert.strictEqual(adminReportsResult.success, true);
 
 const unauthorizedStatusResponse = vm.runInContext(
   `setSystemStatus({

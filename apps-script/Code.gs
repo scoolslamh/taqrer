@@ -126,6 +126,9 @@ function doPost(e) {
     if (action === 'setSystemStatus') {
       return setSystemStatus(data);
     }
+    if (action === 'getReviewerSchoolReports') {
+      return getReviewerSchoolReports(data);
+    }
 
     if (
       [
@@ -4919,6 +4922,175 @@ let reports = [];
 }
 
 
+function getReviewerSchoolReports(e) {
+  try {
+    const nationalId = normalizeNationalId(
+      e?.parameter?.nationalId || e?.nationalId
+    );
+    const schoolNumber = normalizeSchoolNumber(
+      e?.parameter?.number || e?.number
+    );
+
+    if (!nationalId || !schoolNumber) {
+      return jsonResponse({
+        success: false,
+        error: 'INVALID_REQUEST',
+        message: 'تعذر التحقق من بيانات الطلب.'
+      });
+    }
+
+    const reviewerResult =
+      findSupervisorByNationalId(nationalId);
+
+    if (!reviewerResult) {
+      return jsonResponse({
+        success: false,
+        error: 'REVIEWER_NOT_FOUND',
+        message: 'لم يتم العثور على حساب المستخدم.'
+      });
+    }
+
+    const reviewer = reviewerResult.supervisor;
+    const role = String(
+      reviewer['الدور'] || ''
+    ).trim();
+    const accountStatus = String(
+      reviewer['الحالة'] || ''
+    ).trim();
+
+    if (accountStatus !== 'نشط') {
+      return jsonResponse({
+        success: false,
+        error: 'ACCOUNT_INACTIVE',
+        message: 'الحساب غير نشط.'
+      });
+    }
+
+    if (!['مشرف', 'مدير'].includes(role)) {
+      return jsonResponse({
+        success: false,
+        error: 'FORBIDDEN',
+        message: 'ليس لديك صلاحية استعراض التقارير.'
+      });
+    }
+
+    const schoolResult =
+      findSchoolByNumber(schoolNumber);
+
+    if (!schoolResult) {
+      return jsonResponse({
+        success: false,
+        error: 'SCHOOL_NOT_FOUND',
+        message: 'لم يتم العثور على المدرسة.'
+      });
+    }
+
+    const school = schoolResult.school;
+    const assignedSupervisorId =
+      normalizeNationalId(
+        school['السجل المدني للمشرف'] || ''
+      );
+
+    if (
+      role === 'مشرف' &&
+      assignedSupervisorId !== nationalId
+    ) {
+      return jsonResponse({
+        success: false,
+        error: 'FORBIDDEN_SCHOOL',
+        message:
+          'لا يمكنك استعراض تقارير مدرسة غير مسندة إليك.'
+      });
+    }
+
+    const schoolNumbers = extractSchoolNumbers(
+      school['الأرقام الإحصائية'] || ''
+    );
+
+    if (!schoolNumbers.includes(schoolNumber)) {
+      schoolNumbers.push(schoolNumber);
+    }
+
+    const reportSources = [
+      {
+        sheetName: CONFIG.REPORTS_SHEET,
+        defaultReportType: 'تقرير خطة إخلاء',
+        source: 'evacuation',
+        titleField: null
+      },
+      {
+        sheetName: CONFIG.SAFETY_MOMENT_SHEET,
+        defaultReportType: 'تقرير لحظة سلامة',
+        source: 'safetyMoment',
+        titleField: 'اسم البرنامج'
+      },
+      {
+        sheetName: CONFIG.CIVIL_DEFENSE_SHEET,
+        defaultReportType:
+          'تقرير اليوم العالمي للدفاع المدني',
+        source: 'civilDefense',
+        titleField: 'اسم البرنامج'
+      },
+      {
+        sheetName: CONFIG.TRAFFIC_WEEK_SHEET,
+        defaultReportType: 'تقرير أسبوع المرور',
+        source: 'trafficWeek',
+        titleField: 'اسم البرنامج'
+      }
+    ];
+
+    let reports = [];
+
+    reportSources.forEach(sourceConfig => {
+      reports = reports.concat(
+        readSchoolReportsFromSheet(
+          sourceConfig,
+          schoolNumbers,
+          undefined,
+          true
+        )
+      );
+    });
+
+    reports.sort((a, b) =>
+      Number(b._sortTime || 0) -
+      Number(a._sortTime || 0) ||
+      Number(b._rowNumber || 0) -
+      Number(a._rowNumber || 0)
+    );
+
+    const cleanReports = reports.map(report => {
+      const {
+        _sortTime,
+        _rowNumber,
+        ...cleanReport
+      } = report;
+      return cleanReport;
+    });
+
+    return jsonResponse({
+      success: true,
+      data: {
+        schoolName: String(
+          school['اسم المدرسة'] || ''
+        ).trim(),
+        reports: cleanReports
+      }
+    });
+  } catch (error) {
+    console.error(
+      'getReviewerSchoolReports Error:',
+      error
+    );
+    return jsonResponse({
+      success: false,
+      error: 'GET_REVIEWER_REPORTS_FAILED',
+      message: 'تعذر تحميل تقارير المدرسة.'
+    });
+  }
+}
+
+
 /**
  * =========================================================
  * قراءة تقارير المدرسة من ورقة محددة
@@ -4935,7 +5107,8 @@ let reports = [];
 function readSchoolReportsFromSheet(
   sourceConfig,
   schoolNumbers,
-  preloadedValues
+  preloadedValues,
+  includeFileDetails
 ) {
 
   let values;
@@ -5152,6 +5325,16 @@ function readSchoolReportsFromSheet(
 
       source:
         sourceConfig.source || '',
+
+      evacuationPlan:
+        item['رقم خطة الإخلاء'] || '',
+
+      ...(includeFileDetails ? {
+        fileName:
+          item['اسم الملف'] || '',
+        fileId:
+          item['ملف_ID'] || ''
+      } : {}),
 
       /*
        * حقول داخلية للترتيب فقط

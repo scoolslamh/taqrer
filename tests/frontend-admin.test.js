@@ -212,6 +212,14 @@ vm.runInContext(
   );
   assert.match(
     appSource,
+    /school-reports-view-button[\s\S]*getReviewerSchoolReports/
+  );
+  assert.match(
+    appSource,
+    /getReportFileLinks[\s\S]*drive\.google\.com\/file\/d\//
+  );
+  assert.match(
+    appSource,
     /adminSystemToggleButton[\s\S]*SafetyAPI\.setSystemStatus/
   );
 
