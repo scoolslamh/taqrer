@@ -204,6 +204,14 @@ vm.runInContext(
   );
   assert.match(
     appSource,
+    /principalName[\s\S]*coordinatorName[\s\S]*school-contacts/
+  );
+  assert.match(
+    appSource,
+    /data-phone-action="copy"[\s\S]*wa\.me[\s\S]*tel:/
+  );
+  assert.match(
+    appSource,
     /adminSystemToggleButton[\s\S]*SafetyAPI\.setSystemStatus/
   );
 

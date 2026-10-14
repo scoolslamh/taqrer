@@ -1241,6 +1241,27 @@ function createSchoolCard(school, index) {
         ? 'girls'
         : 'unknown';
 
+  const contacts = [
+    {
+      role: 'مدير المدرسة',
+      name: String(
+        school?.principalName || ''
+      ).trim(),
+      phone: String(
+        school?.principalPhone || ''
+      ).trim()
+    },
+    {
+      role: 'منسق الأمن والسلامة',
+      name: String(
+        school?.coordinatorName || ''
+      ).trim(),
+      phone: String(
+        school?.coordinatorPhone || ''
+      ).trim()
+    }
+  ].filter(contact => contact.name || contact.phone);
+
 
   return `
     <article
@@ -1378,9 +1399,240 @@ function createSchoolCard(school, index) {
           : ''
       }
 
+      ${
+        contacts.length
+          ? `
+            <div class="school-contacts" aria-label="بيانات التواصل">
+              ${contacts.map(contact => `
+                <div class="school-contact-row">
+                  <span class="school-contact-role">${escapeHTML(
+                    contact.role
+                  )}:</span>
+                  <span class="school-contact-name">${escapeHTML(
+                    contact.name || 'غير مسجل'
+                  )}</span>
+                  ${
+                    contact.phone
+                      ? `
+                        <button
+                          class="school-contact-phone"
+                          type="button"
+                          data-phone="${escapeHTML(contact.phone)}"
+                          data-contact-name="${escapeHTML(
+                            contact.name || contact.role
+                          )}"
+                          aria-haspopup="menu"
+                          aria-expanded="false"
+                          title="خيارات التواصل مع ${escapeHTML(
+                            contact.name || contact.role
+                          )}"
+                        >${escapeHTML(contact.phone)}</button>
+                      `
+                      : '<span class="school-contact-missing">لا يوجد رقم</span>'
+                  }
+                </div>
+              `).join('')}
+            </div>
+          `
+          : ''
+      }
+
     </article>
   `;
 }
+
+
+function normalizeContactPhone(value) {
+  const arabicDigits = '٠١٢٣٤٥٦٧٨٩';
+  const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+
+  return String(value || '')
+    .replace(/[٠-٩]/g, digit =>
+      String(arabicDigits.indexOf(digit))
+    )
+    .replace(/[۰-۹]/g, digit =>
+      String(persianDigits.indexOf(digit))
+    )
+    .replace(/\D/g, '');
+}
+
+
+function getWhatsAppPhone(value) {
+  let phone = normalizeContactPhone(value);
+
+  if (phone.startsWith('00')) {
+    phone = phone.slice(2);
+  }
+  if (phone.startsWith('0')) {
+    phone = `966${phone.slice(1)}`;
+  } else if (
+    phone.length === 9 &&
+    phone.startsWith('5')
+  ) {
+    phone = `966${phone}`;
+  }
+
+  return phone;
+}
+
+
+function copyTextToClipboard(value) {
+  if (
+    navigator.clipboard &&
+    window.isSecureContext
+  ) {
+    return navigator.clipboard.writeText(value);
+  }
+
+  const input = document.createElement('textarea');
+  input.value = value;
+  input.setAttribute('readonly', '');
+  input.style.position = 'fixed';
+  input.style.opacity = '0';
+  document.body.appendChild(input);
+  input.select();
+
+  try {
+    document.execCommand('copy');
+    return Promise.resolve();
+  } catch (error) {
+    return Promise.reject(error);
+  } finally {
+    input.remove();
+  }
+}
+
+
+let activePhoneButton = null;
+
+
+function closeSchoolPhoneMenu() {
+  document.getElementById(
+    'schoolPhoneActionsMenu'
+  )?.remove();
+
+  if (activePhoneButton) {
+    activePhoneButton.setAttribute(
+      'aria-expanded',
+      'false'
+    );
+    activePhoneButton = null;
+  }
+}
+
+
+function openSchoolPhoneMenu(button) {
+  if (activePhoneButton === button) {
+    closeSchoolPhoneMenu();
+    return;
+  }
+
+  closeSchoolPhoneMenu();
+
+  const rawPhone = button.dataset.phone || '';
+  const phone = normalizeContactPhone(rawPhone);
+  const whatsappPhone = getWhatsAppPhone(rawPhone);
+
+  if (!phone) {
+    return;
+  }
+
+  const menu = document.createElement('div');
+  menu.id = 'schoolPhoneActionsMenu';
+  menu.className = 'school-phone-actions-menu';
+  menu.setAttribute('role', 'menu');
+  menu.innerHTML = `
+    <button type="button" data-phone-action="copy" role="menuitem">نسخ</button>
+    <a href="https://wa.me/${whatsappPhone}" target="_blank" rel="noopener noreferrer" role="menuitem">واتساب</a>
+    <a href="tel:${phone}" role="menuitem">اتصال</a>
+  `;
+
+  document.body.appendChild(menu);
+
+  const rect = button.getBoundingClientRect();
+  const menuRect = menu.getBoundingClientRect();
+  const horizontalMargin = 8;
+  let left = rect.right - menuRect.width;
+  left = Math.max(
+    horizontalMargin,
+    Math.min(
+      left,
+      window.innerWidth - menuRect.width -
+      horizontalMargin
+    )
+  );
+  let top = rect.bottom + 6;
+
+  if (
+    top + menuRect.height >
+    window.innerHeight - horizontalMargin
+  ) {
+    top = rect.top - menuRect.height - 6;
+  }
+
+  menu.style.left = `${left}px`;
+  menu.style.top = `${Math.max(horizontalMargin, top)}px`;
+  menu.dataset.phone = rawPhone;
+
+  activePhoneButton = button;
+  button.setAttribute('aria-expanded', 'true');
+}
+
+
+document.addEventListener('click', event => {
+  const phoneButton = event.target.closest(
+    '.school-contact-phone'
+  );
+
+  if (phoneButton) {
+    event.preventDefault();
+    event.stopPropagation();
+    openSchoolPhoneMenu(phoneButton);
+    return;
+  }
+
+  const menu = event.target.closest(
+    '#schoolPhoneActionsMenu'
+  );
+
+  if (menu) {
+    const copyButton = event.target.closest(
+      '[data-phone-action="copy"]'
+    );
+
+    if (copyButton) {
+      event.preventDefault();
+      copyTextToClipboard(
+        menu.dataset.phone || ''
+      ).then(() => {
+        copyButton.textContent = 'تم النسخ';
+        setTimeout(closeSchoolPhoneMenu, 700);
+      }).catch(() => {
+        copyButton.textContent = 'تعذر النسخ';
+      });
+      return;
+    }
+
+    closeSchoolPhoneMenu();
+    return;
+  }
+
+  closeSchoolPhoneMenu();
+});
+
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') {
+    closeSchoolPhoneMenu();
+  }
+});
+
+
+window.addEventListener(
+  'scroll',
+  closeSchoolPhoneMenu,
+  true
+);
 
 
 const schoolListRenderTokens =

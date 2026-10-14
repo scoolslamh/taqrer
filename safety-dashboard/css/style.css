@@ -1071,6 +1071,106 @@ button {
   font-size: 12px;
 }
 
+.school-contacts {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #edf0ef;
+  color: #66756f;
+  font-size: 12px;
+}
+
+.school-contact-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  min-width: 0;
+}
+
+.school-contact-role {
+  color: #84918c;
+}
+
+.school-contact-name {
+  overflow: hidden;
+  color: #40514a;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.school-contact-phone {
+  margin-right: auto;
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: #edf7f3;
+  color: #087653;
+  font: inherit;
+  font-weight: 700;
+  direction: ltr;
+  cursor: pointer;
+}
+
+.school-contact-phone:hover,
+.school-contact-phone[aria-expanded="true"] {
+  background: #dcefe7;
+  color: #005f42;
+}
+
+.school-contact-phone:focus-visible {
+  outline: 2px solid #168a63;
+  outline-offset: 2px;
+}
+
+.school-contact-missing {
+  margin-right: auto;
+  color: #a0aaa6;
+}
+
+.school-phone-actions-menu {
+  position: fixed;
+  z-index: 10000;
+  display: flex;
+  gap: 4px;
+  min-width: max-content;
+  padding: 5px;
+  border: 1px solid #dbe5e1;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(28, 55, 45, 0.18);
+  direction: rtl;
+}
+
+.school-phone-actions-menu button,
+.school-phone-actions-menu a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 5px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #40514a;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.school-phone-actions-menu button:hover,
+.school-phone-actions-menu a:hover,
+.school-phone-actions-menu button:focus-visible,
+.school-phone-actions-menu a:focus-visible {
+  background: #edf7f3;
+  color: #087653;
+  outline: none;
+}
+
 .school-supervisor {
   margin-top: 12px;
   padding: 11px 13px;
@@ -1619,5 +1719,16 @@ button {
   .school-numbers {
     margin-top: 0;
     padding: 11px 14px;
+  }
+
+  .school-contacts {
+    margin-top: 0;
+    padding: 10px 14px 12px;
+  }
+
+  .school-contact-phone,
+  .school-contact-missing {
+    margin-right: 0;
+    margin-left: auto;
   }
 }
