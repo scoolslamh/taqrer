@@ -3,6 +3,7 @@ const fs = require('fs');
 const vm = require('vm');
 
 const storage = new Map();
+const persistentStorage = new Map();
 let loginRole = 'مشرف';
 let lastRequest = null;
 
@@ -20,6 +21,19 @@ const sandbox = {
     },
     removeItem(key) {
       storage.delete(key);
+    }
+  },
+  localStorage: {
+    setItem(key, value) {
+      persistentStorage.set(key, value);
+    },
+    getItem(key) {
+      return persistentStorage.has(key)
+        ? persistentStorage.get(key)
+        : null;
+    },
+    removeItem(key) {
+      persistentStorage.delete(key);
     }
   },
   async fetch(url, options = {}) {
@@ -104,6 +118,17 @@ vm.runInContext(
   assert.strictEqual(
     vm.runInContext('SafetyAuth.getSession().role', sandbox),
     'مشرف'
+  );
+  assert.strictEqual(storage.size, 0);
+  assert.strictEqual(persistentStorage.size, 1);
+  assert.ok(
+    Date.parse(
+      JSON.parse(
+        persistentStorage.get(
+          'safety_dashboard_session'
+        )
+      ).expiresAt
+    ) > Date.now()
   );
 
   vm.runInContext('SafetyAuth.logout()', sandbox);
@@ -268,6 +293,14 @@ vm.runInContext(
     html,
     /id="adminSystemStatusBadge"[\s\S]*id="adminSystemClosedMessage"[\s\S]*id="adminSystemToggleButton"/
   );
+  assert.match(
+    html,
+    /id="adminSystemSettingsButton"[\s\S]*id="adminSystemHeaderStatus"[\s\S]*id="logoutButton"/
+  );
+  assert.match(
+    html,
+    /id="adminSystemSettingsModal"[\s\S]*data-close-system-settings/
+  );
 
   const schoolPortalHtml = fs.readFileSync(
     __dirname + '/../index.html',
@@ -333,6 +366,7 @@ vm.runInContext(
 
   vm.runInContext('SafetyAuth.logout()', sandbox);
   assert.strictEqual(storage.size, 0);
+  assert.strictEqual(persistentStorage.size, 0);
 
   console.log(
     'Frontend passed: roles, sessions, admin route, unified school refresh, syntax, logout cleanup, unique IDs'

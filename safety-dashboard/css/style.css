@@ -354,6 +354,49 @@ button {
   background: #fff7f6;
 }
 
+.dashboard-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.system-settings-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 1px solid #cfe0d9;
+  border-radius: 10px;
+  background: #f7fbf9;
+  color: #176448;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.system-settings-button:hover {
+  border-color: #168a63;
+  background: #edf7f3;
+}
+
+.header-system-status {
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.header-system-status.open {
+  background: #dff4e9;
+  color: #087653;
+}
+
+.header-system-status.closed {
+  background: #fde4e1;
+  color: #a33c33;
+}
+
 
 /* =========================================================
    المحتوى
@@ -1433,33 +1476,55 @@ body.reports-viewer-open {
   padding: 0 20px;
 }
 
-.system-control-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 22px;
+.system-settings-modal {
+  position: fixed;
+  z-index: 13000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+body.system-settings-open {
+  overflow: hidden;
+}
+
+.system-settings-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 35, 29, 0.55);
+  backdrop-filter: blur(2px);
+}
+
+.system-settings-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(520px, 100%);
   padding: 22px 24px;
   border: 1px solid #dce9e4;
   border-radius: 16px;
   background: #ffffff;
-  box-shadow: 0 8px 26px rgba(20, 67, 51, 0.06);
+  box-shadow: 0 22px 65px rgba(9, 34, 25, 0.28);
 }
 
-.system-control-card.closed {
+.system-settings-dialog.closed {
   border-color: #f0c9c4;
-  background: #fffafa;
 }
 
-.system-control-content {
-  flex: 1;
-  min-width: 0;
+.system-settings-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
 .system-control-heading {
   display: flex;
   align-items: center;
-  gap: 14px;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
 .system-control-label {
@@ -1470,10 +1535,21 @@ body.reports-viewer-open {
   font-weight: 700;
 }
 
-.system-control-heading h2 {
+.system-settings-dialog-header h2 {
   margin: 0;
   color: #17231f;
   font-size: 18px;
+}
+
+.system-settings-close {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 9px;
+  background: #f0f4f2;
+  color: #53635d;
+  font-size: 23px;
+  line-height: 1;
 }
 
 .system-status-badge {
@@ -1497,13 +1573,13 @@ body.reports-viewer-open {
   background: #fdecea;
 }
 
-.system-control-card p {
-  margin: 10px 0 14px;
+.system-settings-dialog p {
+  margin: 0;
   color: #66756f;
   font-size: 14px;
 }
 
-.system-control-card label {
+.system-settings-dialog label {
   display: block;
   margin-bottom: 7px;
   color: #40514a;
@@ -1511,7 +1587,7 @@ body.reports-viewer-open {
   font-weight: 700;
 }
 
-.system-control-card textarea {
+.system-settings-dialog textarea {
   width: 100%;
   max-width: 650px;
   min-height: 68px;
@@ -1524,12 +1600,12 @@ body.reports-viewer-open {
   resize: vertical;
 }
 
-.system-control-card textarea:focus {
+.system-settings-dialog textarea:focus {
   border-color: #19875f;
   outline: 3px solid rgba(25, 135, 95, 0.12);
 }
 
-.system-control-card small {
+.system-settings-dialog small {
   display: block;
   min-height: 18px;
   margin-top: 7px;
@@ -1537,9 +1613,9 @@ body.reports-viewer-open {
 }
 
 .system-toggle-button {
-  flex: 0 0 auto;
-  min-width: 145px;
+  width: 100%;
   min-height: 46px;
+  margin-top: 14px;
   padding: 0 18px;
   border: 0;
   border-radius: 10px;
@@ -1796,21 +1872,25 @@ body.reports-viewer-open {
     width: 100%;
   }
 
-  .system-control-card {
-    align-items: stretch;
-    flex-direction: column;
-    padding: 18px 16px;
+  .dashboard-header-actions {
+    gap: 6px;
   }
 
-  .system-control-heading {
-    align-items: flex-start;
-    justify-content: space-between;
+  .system-settings-button,
+  .logout-button {
+    padding: 9px 10px;
+    font-size: 12px;
   }
 
-  .system-control-card textarea,
-  .system-toggle-button {
+  .system-settings-modal {
+    align-items: end;
+    padding: 0;
+  }
+
+  .system-settings-dialog {
     width: 100%;
-    max-width: none;
+    padding: 20px 16px;
+    border-radius: 18px 18px 0 0;
   }
 
   .admin-stats-grid {

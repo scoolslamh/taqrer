@@ -29,6 +29,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const userName = document.getElementById('userName');
   const userRole = document.getElementById('userRole');
   const logoutButton = document.getElementById('logoutButton');
+  const adminSystemSettingsButton =
+    document.getElementById(
+      'adminSystemSettingsButton'
+    );
 
   const schoolsCount = document.getElementById('schoolsCount');
   const averageProgress = document.getElementById('averageProgress');
@@ -2455,6 +2459,9 @@ document.getElementById(
     const badge = document.getElementById(
       'adminSystemStatusBadge'
     );
+    const headerStatus = document.getElementById(
+      'adminSystemHeaderStatus'
+    );
     const description = document.getElementById(
       'adminSystemStatusDescription'
     );
@@ -2474,6 +2481,18 @@ document.getElementById(
 
     if (badge) {
       badge.textContent = isOpen ? 'مفتوح' : 'مغلق';
+    }
+    if (headerStatus) {
+      headerStatus.textContent =
+        isOpen ? 'مفتوح' : 'مغلق';
+      headerStatus.classList.toggle(
+        'open',
+        isOpen
+      );
+      headerStatus.classList.toggle(
+        'closed',
+        !isOpen
+      );
     }
     if (description) {
       description.textContent = isOpen
@@ -2534,6 +2553,35 @@ document.getElementById(
     feedback.textContent = message;
     feedback.classList.toggle('error', isError);
     feedback.classList.toggle('hidden', !message);
+  }
+
+
+  function openAdminSystemSettings() {
+    const modal = document.getElementById(
+      'adminSystemSettingsModal'
+    );
+    if (!modal) {
+      return;
+    }
+    showAdminSystemFeedback('');
+    modal.classList.remove('hidden');
+    document.body.classList.add(
+      'system-settings-open'
+    );
+    document.getElementById(
+      'adminSystemClosedMessage'
+    )?.focus();
+  }
+
+
+  function closeAdminSystemSettings() {
+    document.getElementById(
+      'adminSystemSettingsModal'
+    )?.classList.add('hidden');
+    document.body.classList.remove(
+      'system-settings-open'
+    );
+    adminSystemSettingsButton?.focus();
   }
 
 
@@ -3512,6 +3560,32 @@ document.getElementById(
   );
 
 
+  adminSystemSettingsButton?.addEventListener(
+    'click',
+    openAdminSystemSettings
+  );
+
+  document.querySelectorAll(
+    '[data-close-system-settings]'
+  ).forEach(element => {
+    element.addEventListener(
+      'click',
+      closeAdminSystemSettings
+    );
+  });
+
+  document.addEventListener('keydown', event => {
+    if (
+      event.key === 'Escape' &&
+      !document.getElementById(
+        'adminSystemSettingsModal'
+      )?.classList.contains('hidden')
+    ) {
+      closeAdminSystemSettings();
+    }
+  });
+
+
   document.getElementById(
     'adminSystemToggleButton'
   )?.addEventListener('click', async event => {
@@ -3776,6 +3850,11 @@ renderSchools();
     const isAdmin =
       session.role === 'مدير';
 
+    adminSystemSettingsButton?.classList.toggle(
+      'hidden',
+      !isAdmin
+    );
+
     supervisorDashboardContent?.classList.toggle(
       'hidden',
       isAdmin
@@ -3969,6 +4048,7 @@ renderSchools();
         supervisorSchools = [];
         currentDashboardSession = null;
         clearAdminState();
+        closeAdminSystemSettings();
 
         const supervisorSchoolsList =
           document.getElementById(

@@ -7,6 +7,17 @@
 const SafetyAuth = (() => {
 
   const SESSION_KEY = 'safety_dashboard_session';
+  const SESSION_DURATION_MS =
+    30 * 24 * 60 * 60 * 1000;
+
+
+  function getPersistentStorage() {
+    if (typeof localStorage !== 'undefined') {
+      return localStorage;
+    }
+
+    return sessionStorage;
+  }
 
   /**
    * تنظيف السجل المدني
@@ -158,14 +169,26 @@ const SafetyAuth = (() => {
           user.phone,
 
         loginAt:
-          new Date().toISOString()
+          new Date().toISOString(),
+
+        expiresAt:
+          new Date(
+            Date.now() + SESSION_DURATION_MS
+          ).toISOString()
       };
 
 
-      sessionStorage.setItem(
+      getPersistentStorage().setItem(
         SESSION_KEY,
         JSON.stringify(session)
       );
+
+      if (
+        typeof localStorage !== 'undefined' &&
+        typeof sessionStorage !== 'undefined'
+      ) {
+        sessionStorage.removeItem(SESSION_KEY);
+      }
 
     } catch (error) {
 
@@ -186,10 +209,21 @@ const SafetyAuth = (() => {
 
     try {
 
-      const raw =
-        sessionStorage.getItem(
-          SESSION_KEY
-        );
+      const storage = getPersistentStorage();
+      let raw = storage.getItem(SESSION_KEY);
+
+      if (
+        !raw &&
+        typeof localStorage !== 'undefined' &&
+        typeof sessionStorage !== 'undefined'
+      ) {
+        raw = sessionStorage.getItem(SESSION_KEY);
+
+        if (raw) {
+          localStorage.setItem(SESSION_KEY, raw);
+          sessionStorage.removeItem(SESSION_KEY);
+        }
+      }
 
 
       if (!raw) {
@@ -222,6 +256,28 @@ const SafetyAuth = (() => {
         logout();
 
         return null;
+      }
+
+      const expiresAt = Date.parse(
+        session.expiresAt || ''
+      );
+
+      if (
+        Number.isFinite(expiresAt) &&
+        Date.now() >= expiresAt
+      ) {
+        logout();
+        return null;
+      }
+
+      if (!Number.isFinite(expiresAt)) {
+        session.expiresAt = new Date(
+          Date.now() + SESSION_DURATION_MS
+        ).toISOString();
+        storage.setItem(
+          SESSION_KEY,
+          JSON.stringify(session)
+        );
       }
 
 
@@ -295,9 +351,12 @@ const SafetyAuth = (() => {
 
     try {
 
-      sessionStorage.removeItem(
-        SESSION_KEY
-      );
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem(SESSION_KEY);
+      }
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.removeItem(SESSION_KEY);
+      }
 
     } catch (error) {
 

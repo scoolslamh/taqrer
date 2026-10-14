@@ -156,13 +156,24 @@
       </div>
 
 
-      <button
-        id="logoutButton"
-        class="logout-button"
-        type="button"
-      >
-        تسجيل الخروج
-      </button>
+      <div class="dashboard-header-actions">
+        <button
+          id="adminSystemSettingsButton"
+          class="system-settings-button hidden"
+          type="button"
+          aria-haspopup="dialog"
+        >
+          إعدادات النظام
+          <span id="adminSystemHeaderStatus" class="header-system-status open">مفتوح</span>
+        </button>
+        <button
+          id="logoutButton"
+          class="logout-button"
+          type="button"
+        >
+          تسجيل الخروج
+        </button>
+      </div>
 
     </header>
 
@@ -573,48 +584,27 @@
 
       <div id="adminDashboardBody" class="hidden">
 
-        <section
-          id="adminSystemControl"
-          class="system-control-card"
-          aria-labelledby="adminSystemControlTitle"
-        >
-          <div class="system-control-content">
-            <div class="system-control-heading">
+        <div id="adminSystemSettingsModal" class="system-settings-modal hidden" role="dialog" aria-modal="true" aria-labelledby="adminSystemControlTitle">
+          <div class="system-settings-backdrop" data-close-system-settings></div>
+          <section id="adminSystemControl" class="system-settings-dialog">
+            <div class="system-settings-dialog-header">
               <div>
                 <span class="system-control-label">حالة النظام</span>
                 <h2 id="adminSystemControlTitle">التحكم في دخول المدارس</h2>
               </div>
-              <span
-                id="adminSystemStatusBadge"
-                class="system-status-badge open"
-              >مفتوح</span>
+              <button class="system-settings-close" type="button" data-close-system-settings aria-label="إغلاق">×</button>
             </div>
-            <p id="adminSystemStatusDescription">
-              النظام متاح للمدارس وعمليات رفع التقارير.
-            </p>
+            <div class="system-control-heading">
+              <p id="adminSystemStatusDescription">النظام متاح للمدارس وعمليات رفع التقارير.</p>
+              <span id="adminSystemStatusBadge" class="system-status-badge open">مفتوح</span>
+            </div>
             <label for="adminSystemClosedMessage">رسالة الإغلاق للمدارس</label>
-            <textarea
-              id="adminSystemClosedMessage"
-              rows="2"
-              maxlength="300"
-              placeholder="مثال: تم إغلاق النظام لانتهاء فترة رفع التقارير."
-            ></textarea>
+            <textarea id="adminSystemClosedMessage" rows="3" maxlength="300" placeholder="مثال: تم إغلاق النظام لانتهاء فترة رفع التقارير."></textarea>
             <small id="adminSystemStatusMeta"></small>
-            <div
-              id="adminSystemStatusFeedback"
-              class="system-control-feedback hidden"
-              role="status"
-              aria-live="polite"
-            ></div>
-          </div>
-          <button
-            id="adminSystemToggleButton"
-            class="system-toggle-button close-system"
-            type="button"
-          >
-            إغلاق النظام
-          </button>
-        </section>
+            <div id="adminSystemStatusFeedback" class="system-control-feedback hidden" role="status" aria-live="polite"></div>
+            <button id="adminSystemToggleButton" class="system-toggle-button close-system" type="button">إغلاق النظام</button>
+          </section>
+        </div>
 
         <section
           class="stats-grid admin-stats-grid"
