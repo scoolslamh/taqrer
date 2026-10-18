@@ -326,6 +326,9 @@ let currentSchoolsFilter = 'all';
 let currentReportTypeFilter = 'all';
 let currentEvacuationPlanFilter = 'all';
 let currentEvacuationStatusFilter = 'all';
+let currentSchoolSearch = '';
+let dashboardRefreshInProgress = false;
+let lastDashboardRefreshAt = 0;
 
 const EVACUATION_PLAN_NUMBERS =
   [1, 2, 3, 4];
@@ -374,6 +377,39 @@ function escapeHTML(value) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+
+function normalizeSchoolSearch(value) {
+  return String(value || '')
+    .toLocaleLowerCase('ar')
+    .replace(/[أإآ]/g, 'ا')
+    .replace(/ة/g, 'ه')
+    .replace(/ى/g, 'ي')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+
+function schoolMatchesSearch(school, query) {
+  const normalizedQuery =
+    normalizeSchoolSearch(query);
+  if (!normalizedQuery) {
+    return true;
+  }
+  const statisticalNumbers = Array.isArray(
+    school?.statisticalNumbers
+  ) ? school.statisticalNumbers.join(' ') :
+    school?.statisticalNumbers || '';
+  return normalizeSchoolSearch([
+    school?.schoolName,
+    statisticalNumbers,
+    school?.governorate,
+    school?.city,
+    school?.supervisorName
+  ].filter(Boolean).join(' ')).includes(
+    normalizedQuery
+  );
 }
 
 
@@ -605,7 +641,13 @@ function matchesReportFilter(
 function getFilteredSchools() {
 
   return getGenerallyFilteredSchools()
-    .filter(matchesReportFilter);
+    .filter(matchesReportFilter)
+    .filter(school =>
+      schoolMatchesSearch(
+        school,
+        currentSchoolSearch
+      )
+    );
 }
 
 
@@ -2030,6 +2072,9 @@ function renderSchools() {
     getFilteredSchools();
 
   const reportFiltersActive =
+    Boolean(normalizeSchoolSearch(
+      currentSchoolSearch
+    )) ||
     currentReportTypeFilter !== 'all' ||
     (
       currentReportTypeFilter ===
@@ -2196,6 +2241,7 @@ function resetReportFilters() {
   currentReportTypeFilter = 'all';
   currentEvacuationPlanFilter = 'all';
   currentEvacuationStatusFilter = 'all';
+  currentSchoolSearch = '';
 
   if (reportTypeFilter) {
     reportTypeFilter.value = 'all';
@@ -2209,9 +2255,28 @@ function resetReportFilters() {
     evacuationStatusFilter.value = 'all';
   }
 
+  const searchField = document.getElementById(
+    'supervisorSchoolSearch'
+  );
+  if (searchField) {
+    searchField.value = '';
+  }
+
   syncReportFilterVisibility();
   renderSchools();
 }
+
+
+let supervisorSchoolSearchTimer = null;
+document.getElementById(
+  'supervisorSchoolSearch'
+)?.addEventListener('input', event => {
+  clearTimeout(supervisorSchoolSearchTimer);
+  supervisorSchoolSearchTimer = setTimeout(() => {
+    currentSchoolSearch = event.target.value;
+    renderSchools();
+  }, 120);
+});
 
 
 if (reportTypeFilter) {
@@ -2331,6 +2396,13 @@ document.getElementById(
         }
       }
     );
+
+    const searchField = document.getElementById(
+      'adminSchoolSearch'
+    );
+    if (searchField) {
+      searchField.value = '';
+    }
 
     document
       .querySelectorAll('.admin-school-filter')
@@ -3030,7 +3102,11 @@ document.getElementById(
       reportStatus:
         document.getElementById(
           'adminReportStatusFilter'
-        )?.value || 'all'
+        )?.value || 'all',
+      search:
+        document.getElementById(
+          'adminSchoolSearch'
+        )?.value || ''
     };
   }
 
@@ -3087,6 +3163,13 @@ document.getElementById(
         school.governorate !==
           governorateFilter
       ) {
+        return false;
+      }
+
+      if (!schoolMatchesSearch(
+        school,
+        filters.search
+      )) {
         return false;
       }
 
@@ -3463,6 +3546,7 @@ document.getElementById(
     }
 
     renderAdminDashboard(result.data || {});
+    markDashboardUpdated('admin');
   }
 
 
@@ -3490,6 +3574,17 @@ document.getElementById(
     clearTimeout(adminSearchTimer);
     adminSearchTimer = setTimeout(
       renderAdminSupervisors,
+      120
+    );
+  });
+
+  let adminSchoolSearchTimer = null;
+  document.getElementById(
+    'adminSchoolSearch'
+  )?.addEventListener('input', () => {
+    clearTimeout(adminSchoolSearchTimer);
+    adminSchoolSearchTimer = setTimeout(
+      renderAdminSchools,
       120
     );
   });
@@ -3872,6 +3967,14 @@ currentEvacuationPlanFilter =
 currentEvacuationStatusFilter =
   'all';
 
+currentSchoolSearch = '';
+
+const supervisorSearchField =
+  document.getElementById('supervisorSchoolSearch');
+if (supervisorSearchField) {
+  supervisorSearchField.value = '';
+}
+
 if (reportTypeFilter) {
   reportTypeFilter.value = 'all';
 }
@@ -3919,6 +4022,7 @@ updateSchoolFilterCounts();
  * عرض المدارس
  */
 renderSchools();
+markDashboardUpdated('supervisor');
 
 
     /*
@@ -3928,6 +4032,189 @@ renderSchools();
 
     return schools;
   }
+
+
+  function markDashboardUpdated(role) {
+    lastDashboardRefreshAt = Date.now();
+    const target = document.getElementById(
+      role === 'admin'
+        ? 'adminLastUpdated'
+        : 'supervisorLastUpdated'
+    );
+    if (target) {
+      target.textContent =
+        `آخر تحديث: ${new Date().toLocaleTimeString(
+          'ar-SA',
+          { hour: '2-digit', minute: '2-digit' }
+        )}`;
+    }
+  }
+
+
+  function setRefreshButtonState(loading) {
+    [
+      'supervisorRefreshButton',
+      'adminRefreshButton'
+    ].forEach(id => {
+      const button = document.getElementById(id);
+      if (!button) {
+        return;
+      }
+      button.disabled = loading;
+      button.textContent = loading
+        ? 'جاري التحديث...'
+        : 'تحديث البيانات';
+    });
+  }
+
+
+  async function refreshDashboardData() {
+    if (
+      dashboardRefreshInProgress ||
+      !currentDashboardSession ||
+      document.hidden
+    ) {
+      return;
+    }
+
+    dashboardRefreshInProgress = true;
+    setRefreshButtonState(true);
+
+    try {
+      const nationalId = getSupervisorNationalId(
+        currentDashboardSession
+      );
+      const isAdmin =
+        currentDashboardSession.role === 'مدير';
+
+      if (isAdmin) {
+        const filterIds = [
+          'adminSchoolSupervisorFilter',
+          'adminGovernorateFilter',
+          'adminReportTypeFilter',
+          'adminEvacuationPlanFilter',
+          'adminReportStatusFilter'
+        ];
+        const savedFilters = Object.fromEntries(
+          filterIds.map(id => [
+            id,
+            document.getElementById(id)?.value || 'all'
+          ])
+        );
+        const list = document.getElementById(
+          'adminSchoolsList'
+        );
+        const scrollTop = list?.scrollTop || 0;
+        const result = await SafetyAPI.getAdminDashboard(
+          nationalId
+        );
+        if (!result || result.success !== true) {
+          throw new Error(
+            result?.message || 'تعذر تحديث البيانات.'
+          );
+        }
+
+        const data = result.data || {};
+        adminSchools = Array.isArray(data.schools)
+          ? data.schools : [];
+        adminSupervisors = Array.isArray(data.supervisors)
+          ? data.supervisors : [];
+        adminSummary = data.summary || {};
+        adminSystemStatus = data.systemStatus ||
+          adminSystemStatus;
+        adminReportWindows = Array.isArray(
+          data.reportWindows
+        ) ? data.reportWindows : adminReportWindows;
+
+        populateAdminSchoolFilters();
+        Object.entries(savedFilters).forEach(
+          ([id, value]) => {
+            const field = document.getElementById(id);
+            if (field && Array.from(field.options).some(
+              option => option.value === value
+            )) {
+              field.value = value;
+            }
+          }
+        );
+        renderAdminStats();
+        renderAdminSystemStatus();
+        renderAdminReportWindows();
+        renderAdminSupervisors();
+        if (!adminSchoolsPanel?.classList.contains('hidden')) {
+          renderAdminSchools();
+          requestAnimationFrame(() => {
+            if (list) {
+              list.scrollTop = scrollTop;
+            }
+          });
+        }
+        markDashboardUpdated('admin');
+      } else {
+        const list = document.getElementById('schoolsList');
+        const scrollTop = list?.scrollTop || 0;
+        const result = await SafetyAPI.getSupervisorSchools(
+          nationalId
+        );
+        if (!result || result.success !== true) {
+          throw new Error(
+            result?.message || 'تعذر تحديث البيانات.'
+          );
+        }
+        const data = result.data || {};
+        supervisorSchools = Array.isArray(data.schools)
+          ? data.schools : [];
+        renderDashboardStats(
+          supervisorSchools,
+          data.totalSchools
+        );
+        updateSchoolFilterCounts();
+        renderSchools();
+        requestAnimationFrame(() => {
+          if (list) {
+            list.scrollTop = scrollTop;
+          }
+        });
+        markDashboardUpdated('supervisor');
+      }
+    } catch (error) {
+      console.error('Dashboard Refresh Error:', error);
+      const target = document.getElementById(
+        currentDashboardSession?.role === 'مدير'
+          ? 'adminLastUpdated'
+          : 'supervisorLastUpdated'
+      );
+      if (target) {
+        target.textContent =
+          'تعذر التحديث؛ ستتم المحاولة تلقائيًا.';
+      }
+    } finally {
+      dashboardRefreshInProgress = false;
+      setRefreshButtonState(false);
+    }
+  }
+
+
+  document.getElementById(
+    'supervisorRefreshButton'
+  )?.addEventListener('click', refreshDashboardData);
+  document.getElementById(
+    'adminRefreshButton'
+  )?.addEventListener('click', refreshDashboardData);
+
+  window.setInterval(
+    refreshDashboardData,
+    60 * 1000
+  );
+
+  document.addEventListener('visibilitychange', () => {
+    if (
+      !document.hidden &&
+      Date.now() - lastDashboardRefreshAt > 20 * 1000
+    ) {
+      refreshDashboardData();
+    }
+  });
 
 
   /*

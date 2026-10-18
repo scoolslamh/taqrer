@@ -826,6 +826,69 @@ button {
   padding: 24px;
 }
 
+.schools-list-scroll {
+  max-height: min(68vh, 780px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding-top: 8px;
+}
+
+.schools-list-controls {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 18px 24px 12px;
+}
+
+.schools-search-field {
+  flex: 1 1 420px;
+  max-width: 620px;
+}
+
+.schools-search-field label {
+  display: block;
+  margin-bottom: 7px;
+  color: #44534d;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.schools-search-field input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid #d7dfdc;
+  border-radius: 11px;
+  outline: none;
+  background: #fff;
+  color: #26342f;
+  font: inherit;
+}
+
+.schools-search-field input:focus {
+  border-color: #00865f;
+  box-shadow: 0 0 0 3px rgba(0, 134, 95, .1);
+}
+
+.schools-refresh-control {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+}
+
+.schools-refresh-control small {
+  min-height: 18px;
+  color: #71807a;
+  font-size: 12px;
+}
+
+.schools-refresh-control button:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
 
 /* بطاقة المدرسة */
 
@@ -1918,6 +1981,30 @@ body.system-settings-open {
 
 
 @media (max-width: 700px) {
+  .schools-list-controls {
+    align-items: stretch;
+    flex-direction: column;
+    margin-right: 16px;
+    margin-left: 16px;
+  }
+
+  .schools-search-field {
+    flex-basis: auto;
+    max-width: none;
+  }
+
+  .schools-refresh-control {
+    justify-items: stretch;
+  }
+
+  .schools-refresh-control small {
+    text-align: center;
+  }
+
+  .schools-list-scroll {
+    max-height: 70vh;
+  }
+
   .admin-page-heading,
   .admin-schools-header {
     align-items: stretch;

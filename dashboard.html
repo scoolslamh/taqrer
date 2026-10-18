@@ -521,9 +521,19 @@
 
 
 <!-- قائمة المدارس -->
+<div class="schools-list-controls">
+  <div class="schools-search-field">
+    <label for="supervisorSchoolSearch">البحث عن مدرسة</label>
+    <input id="supervisorSchoolSearch" type="search" placeholder="اسم المدرسة أو الرقم الإحصائي أو المدينة">
+  </div>
+  <div class="schools-refresh-control">
+    <button id="supervisorRefreshButton" class="reset-filters-button" type="button">تحديث البيانات</button>
+    <small id="supervisorLastUpdated" aria-live="polite"></small>
+  </div>
+</div>
 <div
   id="schoolsList"
-  class="schools-list"
+  class="schools-list schools-list-scroll"
   aria-live="polite"
 ></div>
 
@@ -871,6 +881,17 @@
             </button>
           </div>
 
+          <div class="schools-list-controls">
+            <div class="schools-search-field">
+              <label for="adminSchoolSearch">البحث عن مدرسة</label>
+              <input id="adminSchoolSearch" type="search" placeholder="اسم المدرسة أو الرقم الإحصائي أو المدينة">
+            </div>
+            <div class="schools-refresh-control">
+              <button id="adminRefreshButton" class="reset-filters-button" type="button">تحديث البيانات</button>
+              <small id="adminLastUpdated" aria-live="polite"></small>
+            </div>
+          </div>
+
           <div
             id="adminSchoolsEmpty"
             class="empty-state hidden"
@@ -881,7 +902,7 @@
 
           <div
             id="adminSchoolsList"
-            class="schools-list"
+            class="schools-list schools-list-scroll"
             aria-live="polite"
           ></div>
         </section>
