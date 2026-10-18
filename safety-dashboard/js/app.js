@@ -319,6 +319,7 @@ let adminSystemStatus = {
   updatedAt: '',
   updatedBy: ''
 };
+let adminReportWindows = [];
 let selectedAdminSupervisorId = null;
 let currentDashboardSession = null;
 let currentSchoolsFilter = 'all';
@@ -2359,6 +2360,7 @@ document.getElementById(
       updatedAt: '',
       updatedBy: ''
     };
+    adminReportWindows = [];
     selectedAdminSupervisorId = null;
 
     const supervisorsBody =
@@ -2556,6 +2558,48 @@ document.getElementById(
   }
 
 
+  function showAdminReportWindowsFeedback(
+    message,
+    isError = false
+  ) {
+    const feedback = document.getElementById(
+      'adminReportWindowsFeedback'
+    );
+    if (!feedback) {
+      return;
+    }
+    feedback.textContent = message;
+    feedback.classList.toggle('error', isError);
+    feedback.classList.toggle('hidden', !message);
+  }
+
+
+  function renderAdminReportWindows() {
+    const container = document.getElementById(
+      'adminReportWindows'
+    );
+    if (!container) {
+      return;
+    }
+    container.innerHTML = adminReportWindows.map(item => {
+      const isOpen = item.isOpen === true ||
+        item.status === 'OPEN';
+      return `
+        <div class="report-window-item">
+          <strong>${escapeHTML(item.label || '')}</strong>
+          <button
+            class="report-window-toggle ${isOpen ? 'open' : 'closed'}"
+            type="button"
+            data-report-window-key="${escapeHTML(item.key || '')}"
+            data-next-status="${isOpen ? 'CLOSED' : 'OPEN'}"
+            aria-label="${isOpen ? 'إغلاق' : 'فتح'} ${escapeHTML(item.label || '')}"
+          >${isOpen ? 'مفتوحة' : 'مغلقة'}</button>
+        </div>
+      `;
+    }).join('');
+  }
+
+
   function openAdminSystemSettings() {
     const modal = document.getElementById(
       'adminSystemSettingsModal'
@@ -2564,6 +2608,8 @@ document.getElementById(
       return;
     }
     showAdminSystemFeedback('');
+    showAdminReportWindowsFeedback('');
+    renderAdminReportWindows();
     modal.classList.remove('hidden');
     document.body.classList.add(
       'system-settings-open'
@@ -3372,10 +3418,14 @@ document.getElementById(
       updatedAt: '',
       updatedBy: ''
     };
+    adminReportWindows = Array.isArray(
+      data.reportWindows
+    ) ? data.reportWindows : [];
 
     populateAdminSchoolFilters();
     renderAdminStats();
     renderAdminSystemStatus();
+    renderAdminReportWindows();
     renderAdminSupervisors();
     showAdminSupervisors();
 
@@ -3655,6 +3705,59 @@ document.getElementById(
     showAdminSystemFeedback(
       result.message ||
       'تم تحديث حالة النظام.'
+    );
+  });
+
+
+  document.getElementById(
+    'adminReportWindows'
+  )?.addEventListener('click', async event => {
+    const button = event.target.closest(
+      '[data-report-window-key]'
+    );
+    if (!button || !currentDashboardSession) {
+      return;
+    }
+
+    const reportKey = button.dataset.reportWindowKey;
+    const nextStatus = button.dataset.nextStatus;
+    const item = adminReportWindows.find(
+      windowItem => windowItem.key === reportKey
+    );
+    const actionLabel = nextStatus === 'OPEN'
+      ? 'فتح'
+      : 'إغلاق';
+    if (!window.confirm(
+      `هل تريد ${actionLabel} ${item?.label || 'هذا التقرير'}؟`
+    )) {
+      return;
+    }
+
+    button.disabled = true;
+    showAdminReportWindowsFeedback(
+      `جاري ${actionLabel} التقرير...`
+    );
+    const result = await SafetyAPI.setReportWindowStatus(
+      getSupervisorNationalId(currentDashboardSession),
+      reportKey,
+      nextStatus
+    );
+    button.disabled = false;
+
+    if (!result || result.success !== true) {
+      showAdminReportWindowsFeedback(
+        result?.message || 'تعذر تحديث حالة التقرير.',
+        true
+      );
+      return;
+    }
+
+    adminReportWindows = Array.isArray(
+      result.data?.reportWindows
+    ) ? result.data.reportWindows : adminReportWindows;
+    renderAdminReportWindows();
+    showAdminReportWindowsFeedback(
+      result.message || 'تم تحديث حالة التقرير.'
     );
   });
 

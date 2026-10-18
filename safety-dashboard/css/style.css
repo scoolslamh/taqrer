@@ -1500,6 +1500,8 @@ body.system-settings-open {
   position: relative;
   z-index: 1;
   width: min(520px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
   padding: 22px 24px;
   border: 1px solid #dce9e4;
   border-radius: 16px;
@@ -1653,6 +1655,60 @@ body.system-settings-open {
 .system-control-feedback.error {
   color: #aa3d34;
 }
+
+.report-window-divider {
+  height: 1px;
+  margin: 22px 0 18px;
+  background: #e2e8f0;
+}
+
+.report-window-heading h3 {
+  margin: 4px 0 5px;
+  color: #0f172a;
+  font-size: 1rem;
+}
+
+.report-window-heading p {
+  margin: 0 0 14px;
+  font-size: .82rem;
+}
+
+.report-windows-list {
+  display: grid;
+  gap: 8px;
+}
+
+.report-window-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.report-window-item strong {
+  color: #1e293b;
+  font-size: .88rem;
+}
+
+.report-window-toggle {
+  min-width: 78px;
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.report-window-toggle.open { background: #059669; }
+.report-window-toggle.closed { background: #64748b; }
+.report-window-toggle:disabled { opacity: .55; cursor: wait; }
 
 .admin-stats-grid {
   grid-template-columns:

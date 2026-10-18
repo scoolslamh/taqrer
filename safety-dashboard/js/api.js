@@ -447,7 +447,10 @@ const SafetyAPI = (() => {
             message: '',
             updatedAt: '',
             updatedBy: ''
-          }
+          },
+        reportWindows: Array.isArray(
+          data.reportWindows
+        ) ? data.reportWindows : []
       }
     };
   }
@@ -474,6 +477,31 @@ const SafetyAPI = (() => {
       nationalId: cleanNationalId,
       status: status,
       message: String(message || '').trim()
+    });
+  }
+
+
+  async function setReportWindowStatus(
+    nationalId,
+    reportKey,
+    status
+  ) {
+    const cleanNationalId =
+      normalizeNationalId(nationalId);
+
+    if (!isValidNationalId(cleanNationalId)) {
+      return {
+        success: false,
+        error: 'INVALID_NATIONAL_ID',
+        message: 'تعذر التحقق من صلاحية المدير.'
+      };
+    }
+
+    return post({
+      action: 'setReportWindowStatus',
+      nationalId: cleanNationalId,
+      reportKey: String(reportKey || '').trim(),
+      status: String(status || '').trim()
     });
   }
 
@@ -532,6 +560,8 @@ const SafetyAPI = (() => {
     getAdminDashboard,
 
     setSystemStatus,
+
+    setReportWindowStatus,
 
     getReviewerSchoolReports
 

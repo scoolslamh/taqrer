@@ -126,6 +126,9 @@ function doPost(e) {
     if (action === 'setSystemStatus') {
       return setSystemStatus(data);
     }
+    if (action === 'setReportWindowStatus') {
+      return setReportWindowStatus(data);
+    }
     if (action === 'getReviewerSchoolReports') {
       return getReviewerSchoolReports(data);
     }
@@ -142,6 +145,14 @@ function doPost(e) {
       const systemStatus = readSystemStatus();
       if (!systemStatus.isOpen) {
         return systemClosedResponse(systemStatus);
+      }
+
+      const reportWindow =
+        getUploadReportWindow(action, data);
+      if (reportWindow && !reportWindow.isOpen) {
+        return reportWindowClosedResponse(
+          reportWindow
+        );
       }
     }
     /*
@@ -367,7 +378,10 @@ function getSchoolDashboard(e) {
           loginNumber
         ),
         reports: reports,
-        achievement: achievement
+        achievement: achievement,
+        reportWindows:
+          achievementContext.settings.reportWindows ||
+          readReportWindows()
       }
     });
 
@@ -6290,8 +6304,14 @@ function getSettingsSheet() {
 
 
 function readSystemStatus() {
-  const sheet = getSettingsSheet();
-  const values = sheet
+  return buildSystemStatus(
+    readSettingsValues()
+  );
+}
+
+
+function readSettingsValues() {
+  const values = getSettingsSheet()
     .getDataRange()
     .getDisplayValues();
   const settings = {};
@@ -6305,8 +6325,15 @@ function readSystemStatus() {
     }
   });
 
+  return settings;
+}
+
+
+function buildSystemStatus(settings) {
+  const values = settings || {};
+
   const status =
-    settings.SYSTEM_STATUS === 'CLOSED'
+    values.SYSTEM_STATUS === 'CLOSED'
       ? 'CLOSED'
       : 'OPEN';
 
@@ -6314,12 +6341,12 @@ function readSystemStatus() {
     status: status,
     isOpen: status === 'OPEN',
     message:
-      settings.SYSTEM_CLOSED_MESSAGE ||
+      values.SYSTEM_CLOSED_MESSAGE ||
       'النظام مغلق مؤقتًا. يرجى المحاولة لاحقًا.',
     updatedAt:
-      settings.SYSTEM_STATUS_UPDATED_AT || '',
+      values.SYSTEM_STATUS_UPDATED_AT || '',
     updatedBy:
-      settings.SYSTEM_STATUS_UPDATED_BY || ''
+      values.SYSTEM_STATUS_UPDATED_BY || ''
   };
 }
 
@@ -6336,6 +6363,186 @@ function systemClosedResponse(systemStatus) {
       systemStatus: status
     }
   });
+}
+
+
+const REPORT_WINDOW_DEFINITIONS = [
+  {
+    key: 'EVACUATION_1',
+    settingKey: 'REPORT_WINDOW_EVACUATION_1',
+    label: 'خطة الإخلاء الأولى',
+    defaultStatus: 'OPEN'
+  },
+  {
+    key: 'EVACUATION_2',
+    settingKey: 'REPORT_WINDOW_EVACUATION_2',
+    label: 'خطة الإخلاء الثانية',
+    defaultStatus: 'CLOSED'
+  },
+  {
+    key: 'EVACUATION_3',
+    settingKey: 'REPORT_WINDOW_EVACUATION_3',
+    label: 'خطة الإخلاء الثالثة',
+    defaultStatus: 'CLOSED'
+  },
+  {
+    key: 'EVACUATION_4',
+    settingKey: 'REPORT_WINDOW_EVACUATION_4',
+    label: 'خطة الإخلاء الرابعة',
+    defaultStatus: 'CLOSED'
+  },
+  {
+    key: 'TRAFFIC_WEEK',
+    settingKey: 'REPORT_WINDOW_TRAFFIC_WEEK',
+    label: 'تقرير أسبوع المرور',
+    defaultStatus: 'CLOSED'
+  },
+  {
+    key: 'CIVIL_DEFENSE',
+    settingKey: 'REPORT_WINDOW_CIVIL_DEFENSE',
+    label: 'تقرير اليوم العالمي للدفاع المدني',
+    defaultStatus: 'CLOSED'
+  }
+];
+
+
+function buildReportWindows(settings) {
+  const values = settings || {};
+  return REPORT_WINDOW_DEFINITIONS.map(
+    definition => {
+      const rawStatus = String(
+        values[definition.settingKey] ||
+        definition.defaultStatus
+      ).trim().toUpperCase();
+      const status = rawStatus === 'OPEN'
+        ? 'OPEN'
+        : 'CLOSED';
+      return {
+        key: definition.key,
+        label: definition.label,
+        status: status,
+        isOpen: status === 'OPEN'
+      };
+    }
+  );
+}
+
+
+function readReportWindows() {
+  return buildReportWindows(
+    readSettingsValues()
+  );
+}
+
+
+function getUploadReportWindow(action, data) {
+  let key = '';
+  if (action === 'uploadEvacuationReport') {
+    const planNumber = Number(
+      data && data.evacuationPlanNumber
+    );
+    if ([1, 2, 3, 4].includes(planNumber)) {
+      key = `EVACUATION_${planNumber}`;
+    }
+  } else if (action === 'uploadTrafficWeekReport') {
+    key = 'TRAFFIC_WEEK';
+  } else if (action === 'uploadCivilDefenseReport') {
+    key = 'CIVIL_DEFENSE';
+  }
+
+  if (!key) {
+    return null;
+  }
+
+  return readReportWindows().find(
+    item => item.key === key
+  ) || null;
+}
+
+
+function reportWindowClosedResponse(reportWindow) {
+  return jsonResponse({
+    success: false,
+    error: 'REPORT_WINDOW_CLOSED',
+    message:
+      `${reportWindow.label} خارج الإطار الزمني المعتمد.`,
+    data: {
+      reportWindow: reportWindow
+    }
+  });
+}
+
+
+function setReportWindowStatus(data) {
+  try {
+    const directory = readSupervisorsDirectory();
+    const authorization = validateAdminAccess(
+      data && data.nationalId,
+      directory
+    );
+    if (!authorization.success) {
+      return jsonResponse(authorization);
+    }
+
+    const reportKey = String(
+      data && data.reportKey || ''
+    ).trim().toUpperCase();
+    const status = String(
+      data && data.status || ''
+    ).trim().toUpperCase();
+    const definition = REPORT_WINDOW_DEFINITIONS.find(
+      item => item.key === reportKey
+    );
+    if (!definition || !['OPEN', 'CLOSED'].includes(status)) {
+      return jsonResponse({
+        success: false,
+        error: 'INVALID_REPORT_WINDOW',
+        message: 'حالة فترة التقرير المطلوبة غير صحيحة.'
+      });
+    }
+
+    const lock = typeof LockService !== 'undefined'
+      ? LockService.getScriptLock()
+      : null;
+    if (lock) {
+      lock.waitLock(20000);
+    }
+    try {
+      writeSystemSettings({
+        [definition.settingKey]: status
+      });
+      if (typeof CacheService !== 'undefined') {
+        CacheService.getScriptCache()
+          .remove('achievement-settings-v1');
+      }
+    } finally {
+      if (lock) {
+        lock.releaseLock();
+      }
+    }
+
+    const reportWindows = readReportWindows();
+    const reportWindow = reportWindows.find(
+      item => item.key === reportKey
+    );
+    return jsonResponse({
+      success: true,
+      message: reportWindow.isOpen
+        ? `تم فتح ${reportWindow.label} للمدارس.`
+        : `تم إغلاق ${reportWindow.label} للمدارس.`,
+      data: {
+        reportWindow: reportWindow,
+        reportWindows: reportWindows
+      }
+    });
+  } catch (error) {
+    console.error('setReportWindowStatus Error:', error);
+    return jsonResponse({
+      success: false,
+      error: 'SET_REPORT_WINDOW_FAILED',
+      message: 'تعذر تغيير حالة فترة التقرير.'
+    });
+  }
 }
 
 
@@ -6720,7 +6927,10 @@ function getAdminDashboard(e) {
       readAdminSchoolsTable();
     const schoolDirectory =
       readSchoolDirectory();
-    const systemStatus = readSystemStatus();
+    const controlSettings = readSettingsValues();
+    const systemStatus = buildSystemStatus(
+      controlSettings
+    );
     const dataReadAt = Date.now();
 
     const contextStartedAt = Date.now();
@@ -6885,6 +7095,9 @@ function getAdminDashboard(e) {
     );
 
     data.systemStatus = systemStatus;
+    data.reportWindows = buildReportWindows(
+      controlSettings
+    );
 
     const aggregatedAt = Date.now();
 
@@ -6979,7 +7192,8 @@ function parseAchievementSettings(values) {
         rawSettings.SYSTEM_STATUS_UPDATED_AT || '',
       updatedBy:
         rawSettings.SYSTEM_STATUS_UPDATED_BY || ''
-    }
+    },
+    reportWindows: buildReportWindows(rawSettings)
   };
 }
 
