@@ -4202,16 +4202,8 @@ markDashboardUpdated('supervisor');
     'adminRefreshButton'
   )?.addEventListener('click', refreshDashboardData);
 
-  window.setInterval(
-    refreshDashboardData,
-    60 * 1000
-  );
-
   document.addEventListener('visibilitychange', () => {
-    if (
-      !document.hidden &&
-      Date.now() - lastDashboardRefreshAt > 20 * 1000
-    ) {
+    if (!document.hidden) {
       refreshDashboardData();
     }
   });
