@@ -216,9 +216,9 @@ const firstSupervisor = result.data.supervisors.find(
   supervisor => supervisor.supervisorId === 'SUP001'
 );
 assert.strictEqual(firstSupervisor.totalSchools, 4);
-assert.strictEqual(firstSupervisor.averageAchievement, 70);
-assert.strictEqual(firstSupervisor.completedSchools, 1);
-assert.strictEqual(firstSupervisor.pendingSchools, 3);
+assert.strictEqual(firstSupervisor.averageAchievement, 58);
+assert.strictEqual(firstSupervisor.completedSchools, 0);
+assert.strictEqual(firstSupervisor.pendingSchools, 4);
 assert.strictEqual(firstSupervisor.achievementStatus, 'يحتاج متابعة');
 
 const emptySupervisor = result.data.supervisors.find(
@@ -232,10 +232,10 @@ assert.strictEqual(emptySupervisor.achievementStatus, 'يحتاج متابعة')
 
 assert.strictEqual(result.data.summary.totalSupervisors, 2);
 assert.strictEqual(result.data.summary.totalSchools, 5);
-assert.strictEqual(result.data.summary.completedSchools, 1);
-assert.strictEqual(result.data.summary.pendingSchools, 4);
+assert.strictEqual(result.data.summary.completedSchools, 0);
+assert.strictEqual(result.data.summary.pendingSchools, 5);
 assert.strictEqual(result.data.summary.unassignedSchools, 1);
-assert.strictEqual(result.data.summary.averageAchievement, 56);
+assert.strictEqual(result.data.summary.averageAchievement, 47);
 
 const schoolWithContacts = result.data.schools.find(
   school => school.schoolName === 'مدرسة 100'
@@ -452,5 +452,5 @@ assert.strictEqual(
 );
 
 console.log(
-  'Admin dashboard passed: authorization, system open/close, directory matching, average=70, global=56, unassigned=1, fixed sheet reads=9, supervisor regression'
+  'Admin dashboard passed: authorization, system open/close, directory matching, shelter targets included, average=58, global=47, supervisor regression'
 );

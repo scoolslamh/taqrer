@@ -149,7 +149,7 @@ const coldReads = displayReads;
 assert.strictEqual(first.success, true);
 assert.strictEqual(first.data.school.schoolName, 'مدرسة اختبار التحميل');
 assert.strictEqual(first.data.reports.length, 4);
-assert.strictEqual(first.data.achievement.percentage, 40);
+assert.strictEqual(first.data.achievement.percentage, 33);
 assert.strictEqual(coldReads, 6);
 
 displayReads = 0;
@@ -172,8 +172,8 @@ assert.match(
 );
 assert.strictEqual(
   (backendSource.match(/appendRowWithScriptLock\(/g) || []).length,
-  5,
-  'one helper declaration and four upload call sites expected'
+  6,
+  'one helper declaration and five upload call sites expected'
 );
 
 console.log(

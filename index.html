@@ -1270,6 +1270,16 @@ body.instructions-open {
 
           <div class="achievement-reports">
             <div class="achievement-report">
+              <div class="achievement-report-name">الاحتماء الفصل الأول</div>
+              <div id="achievementShelterFirstCount" class="achievement-report-count">0 من 1</div>
+              <div id="achievementShelterFirstStatus" class="achievement-report-status"></div>
+            </div>
+            <div class="achievement-report">
+              <div class="achievement-report-name">الاحتماء الفصل الثاني</div>
+              <div id="achievementShelterSecondCount" class="achievement-report-count">0 من 1</div>
+              <div id="achievementShelterSecondStatus" class="achievement-report-status"></div>
+            </div>
+            <div class="achievement-report">
               <div class="achievement-report-name">خطط الإخلاء</div>
               <div id="achievementEvacuationCount" class="achievement-report-count">0 من 0</div>
               <div id="achievementEvacuationStatus" class="achievement-report-status"></div>
@@ -1551,7 +1561,7 @@ body.instructions-open {
 
           <button class="report-type-btn" type="button"
             data-report-type="تقرير خطة إخلاء">
-            تقرير خطة إخلاء
+            تقرير خطة إخلاء/احتماء
           </button>
 
           <button class="report-type-btn" type="button"
@@ -1581,7 +1591,7 @@ body.instructions-open {
       >
 
         <h4 class="evacuation-form-title">
-          تقرير خطة إخلاء
+          تقرير خطة إخلاء/احتماء
         </h4>
 
         <p class="evacuation-form-description">
@@ -1592,14 +1602,14 @@ body.instructions-open {
 
           <div class="field">
             <label for="evacuationPlanNumber">
-              خطة الإخلاء
+              خطة الإخلاء/الاحتماء
             </label>
             <select
               id="evacuationPlanNumber"
               required
             >
               <option value="">
-                اختر خطة الإخلاء
+                اختر خطة الإخلاء/الاحتماء
               </option>
               <option value="1">
                 خطة الإخلاء الأولى
@@ -2859,6 +2869,7 @@ function getClosedReportWindowMessage(key) {
 
 
 function applyReportWindowAvailability() {
+  if (typeof syncShelterForm === 'function') syncShelterForm();
   const planSelect = document.getElementById(
     "evacuationPlanNumber"
   );
@@ -5119,6 +5130,8 @@ function renderAchievementReport(
 
 
 function renderAchievement(data) {
+  renderAchievementReport('achievementShelterFirstCount', 'achievementShelterFirstStatus', data.shelterFirst);
+  renderAchievementReport('achievementShelterSecondCount', 'achievementShelterSecondStatus', data.shelterSecond);
 
   const score = Math.floor(
     getAchievementNumber(data.score)
@@ -5757,5 +5770,6 @@ function setSaveLoading(
 
 </script>
 
+<script src="./shelter.js"></script>
 </body>
 </html>

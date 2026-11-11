@@ -3,6 +3,13 @@ const fs = require('fs');
 const vm = require('vm');
 
 const sheetRows = {
+  ShelterReports: [
+    ['الرقم الإحصائي المستخدم', 'الفصل الدراسي', 'حالة التقرير'],
+    ['123456', '1', 'مرفوع'],
+    ['123456', '1', 'مرفوع'],
+    ['654321', '2', 'مرفوع'],
+    ['999999', '2', 'مرفوع']
+  ],
   Schools: [
     ['الأرقام الإحصائية', 'اسم المدرسة', 'المحافظة'],
     ['123456, 654321', 'مدرسة اختبار', 'الرياض']
@@ -137,8 +144,13 @@ assert.deepStrictEqual(
   JSON.parse(JSON.stringify(batch)),
   JSON.parse(JSON.stringify(legacy))
 );
-assert.strictEqual(legacyReads, 6);
-assert.strictEqual(batchReads, 5);
+assert.strictEqual(legacyReads, 7);
+assert.strictEqual(batchReads, 6);
+assert.strictEqual(batch.maxScore, 12);
+assert.strictEqual(batch.shelter.completed, 2);
+assert.strictEqual(batch.shelter.uploaded, 3);
+assert.strictEqual(batch.shelterFirst.completed, 1);
+assert.strictEqual(batch.shelterSecond.completed, 1);
 assert.strictEqual(
   readsAfterNineInMemoryCalculations,
   readsBeforeNineInMemoryCalculations

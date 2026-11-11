@@ -30,6 +30,7 @@ const CONFIG = {
   TRAFFIC_WEEK_SHEET: 'TrafficWeekReports',
   // إعدادات مؤشر الإنجاز
   SETTINGS_SHEET: 'Settings',
+  SHELTER_SHEET: 'ShelterReports',
 
   SUPERVISORS_SHEET: 'Supervisors',
 };
@@ -125,6 +126,9 @@ function doPost(e) {
 
     if (action === 'setSystemStatus') {
       return setSystemStatus(data);
+    }
+    if (action === 'uploadShelterReport') {
+      return uploadShelterReport(data);
     }
     if (action === 'setReportWindowStatus') {
       return setReportWindowStatus(data);
@@ -2177,6 +2181,9 @@ function prepareReportUpload(action, data) {
 
 
 function getReportSheetForUploadAction(action) {
+  if (action === 'uploadShelterReport') {
+    return getShelterReportsSheet();
+  }
 
   if (action === 'uploadEvacuationReport') {
     return getReportsSheet();
@@ -4778,6 +4785,7 @@ function getSchoolReports(e) {
    * =====================================================
    */
   const reportSources = [
+    { sheetName: CONFIG.SHELTER_SHEET, defaultReportType: 'تقرير خطة احتماء', source: 'shelter', titleField: 'نوع التقرير' },
 
     /*
      * تقارير خطة الإخلاء
@@ -5026,6 +5034,7 @@ function getReviewerSchoolReports(e) {
     }
 
     const reportSources = [
+      { sheetName: CONFIG.SHELTER_SHEET, defaultReportType: 'تقرير خطة احتماء', source: 'shelter', titleField: 'نوع التقرير' },
       {
         sheetName: CONFIG.REPORTS_SHEET,
         defaultReportType: 'تقرير خطة إخلاء',
@@ -5374,6 +5383,7 @@ function getSchoolReportSourceConfigs(
     achievementContext?.sourceValues || {};
 
   return [
+    { sheetName: CONFIG.SHELTER_SHEET, defaultReportType: 'تقرير خطة احتماء', source: 'shelter', titleField: 'نوع التقرير', values: sourceValues.shelter },
     {
       sheetName: CONFIG.REPORTS_SHEET,
       defaultReportType:
@@ -6367,6 +6377,8 @@ function systemClosedResponse(systemStatus) {
 
 
 const REPORT_WINDOW_DEFINITIONS = [
+  { key: 'SHELTER_1', settingKey: 'REPORT_WINDOW_SHELTER_1', label: 'خطة الاحتماء الفصل الأول', defaultStatus: 'CLOSED' },
+  { key: 'SHELTER_2', settingKey: 'REPORT_WINDOW_SHELTER_2', label: 'خطة الاحتماء الفصل الثاني', defaultStatus: 'CLOSED' },
   {
     key: 'EVACUATION_1',
     settingKey: 'REPORT_WINDOW_EVACUATION_1',
@@ -6437,6 +6449,9 @@ function readReportWindows() {
 
 function getUploadReportWindow(action, data) {
   let key = '';
+  if (action === 'uploadShelterReport') {
+    key = `SHELTER_${Number(data.shelterSemester)}`;
+  }
   if (action === 'uploadEvacuationReport') {
     const planNumber = Number(
       data && data.evacuationPlanNumber
@@ -6500,6 +6515,8 @@ function setReportWindowStatus(data) {
         message: 'حالة فترة التقرير المطلوبة غير صحيحة.'
       });
     }
+
+    if (reportKey.startsWith('SHELTER_')) getShelterReportsSheet();
 
     const lock = typeof LockService !== 'undefined'
       ? LockService.getScriptLock()
@@ -7382,7 +7399,10 @@ function buildAchievementContext(options) {
       false
     );
 
+  const shelterValues = readShelterReportValues(spreadsheet);
   const context = {
+    shelterValues: shelterValues,
+    shelterBySchoolNumber: buildShelterAchievementIndex(shelterValues),
     settings: settings,
     evacuationBySchoolNumber:
       buildEvacuationAchievementIndex(
@@ -7407,11 +7427,13 @@ function buildAchievementContext(options) {
       Math.max(0, evacuationValues.length - 1) +
       Math.max(0, safetyMomentValues.length - 1) +
       Math.max(0, civilDefenseValues.length - 1) +
-      Math.max(0, trafficWeekValues.length - 1)
+      Math.max(0, trafficWeekValues.length - 1) +
+      Math.max(0, shelterValues.length - 1)
   };
 
   if (options?.includeSourceValues === true) {
     context.sourceValues = {
+      shelter: context.shelterValues,
       evacuation: evacuationValues,
       safetyMoment: safetyMomentValues,
       civilDefense: civilDefenseValues,
@@ -7501,6 +7523,9 @@ function calculateSchoolAchievementFromContext(
     ).filter(Boolean).length;
 
   const settings = context.settings;
+  const shelter = mergeShelterAchievements(
+    context.shelterBySchoolNumber || new Map(), uniqueSchoolNumbers
+  );
 
   const evacuationScore = Math.min(
     evacuationAchievement.completed,
@@ -7523,16 +7548,17 @@ function calculateSchoolAchievementFromContext(
   );
 
   const score =
+    // Each semester counts once, regardless of the procedure ratings.
     evacuationScore +
     safetyMomentScore +
     civilDefenseScore +
-    trafficWeekScore;
+    trafficWeekScore + shelter.completed;
 
   const maxScore =
     settings.evacuationTarget +
     settings.safetyMomentTarget +
     settings.civilDefenseTarget +
-    settings.trafficWeekTarget;
+    settings.trafficWeekTarget + 2;
 
   const percentage =
     maxScore > 0
@@ -7544,6 +7570,9 @@ function calculateSchoolAchievementFromContext(
     score: score,
     maxScore: maxScore,
     percentage: percentage,
+    shelter: shelter,
+    shelterFirst: { completed: shelter.plans[1] ? 1 : 0, target: 1 },
+    shelterSecond: { completed: shelter.plans[2] ? 1 : 0, target: 1 },
     evacuation: {
       completed: evacuationScore,
       uploaded: evacuationAchievement.uploaded,
@@ -7672,17 +7701,18 @@ function getSchoolAchievement(e) {
     );
 
 
+  const shelter = calculateShelterAchievement(readShelterReportValues(SpreadsheetApp.getActiveSpreadsheet()), schoolNumbers);
   const score =
     evacuationScore +
     safetyMomentScore +
     civilDefenseScore +
-    trafficWeekScore;
+    trafficWeekScore + shelter.completed;
 
   const maxScore =
     settings.evacuationTarget +
     settings.safetyMomentTarget +
     settings.civilDefenseTarget +
-    settings.trafficWeekTarget;
+    settings.trafficWeekTarget + 2;
 
   const percentage =
     maxScore > 0
@@ -7697,6 +7727,9 @@ function getSchoolAchievement(e) {
       score: score,
       maxScore: maxScore,
       percentage: percentage,
+    shelter: shelter,
+    shelterFirst: { completed: shelter.plans[1] ? 1 : 0, target: 1 },
+    shelterSecond: { completed: shelter.plans[2] ? 1 : 0, target: 1 },
 
       evacuation: {
   // عدد الخطط المختلفة المكتملة من الأربع
@@ -7818,17 +7851,18 @@ function calculateSchoolAchievementByNumber(schoolNumber) {
     settings.trafficWeekTarget
   );
 
+  const shelter = calculateShelterAchievement(readShelterReportValues(SpreadsheetApp.getActiveSpreadsheet()), schoolNumbers);
   const score =
     evacuationScore +
     safetyMomentScore +
     civilDefenseScore +
-    trafficWeekScore;
+    trafficWeekScore + shelter.completed;
 
   const maxScore =
     settings.evacuationTarget +
     settings.safetyMomentTarget +
     settings.civilDefenseTarget +
-    settings.trafficWeekTarget;
+    settings.trafficWeekTarget + 2;
 
   const percentage =
     maxScore > 0
@@ -7841,6 +7875,9 @@ function calculateSchoolAchievementByNumber(schoolNumber) {
     score: score,
     maxScore: maxScore,
     percentage: percentage,
+    shelter: shelter,
+    shelterFirst: { completed: shelter.plans[1] ? 1 : 0, target: 1 },
+    shelterSecond: { completed: shelter.plans[2] ? 1 : 0, target: 1 },
 
     evacuation: {
       completed: evacuationScore,
@@ -8154,6 +8191,156 @@ function countSchoolReportsForAchievement(
  * الرسالة التحفيزية
  * =========================================================
  */
+function readShelterReportValues(spreadsheet) {
+  const sheet = spreadsheet.getSheetByName(CONFIG.SHELTER_SHEET);
+  return sheet ? sheet.getDataRange().getDisplayValues() : [];
+}
+
+function calculateShelterAchievement(values, numbers) {
+  const plans = { 1: false, 2: false };
+  let uploaded = 0;
+  if (values.length > 1) {
+    const headers = values[0].map(value => String(value).trim());
+    const numberIndex = headers.indexOf('الرقم الإحصائي المستخدم');
+    const semesterIndex = headers.indexOf('الفصل الدراسي');
+    const statusIndex = headers.indexOf('حالة التقرير');
+    values.slice(1).forEach(row => {
+      if (numbers.includes(normalizeSchoolNumber(row[numberIndex])) &&
+          String(row[statusIndex]).trim() === 'مرفوع') {
+        const semester = Number(row[semesterIndex]);
+        if ([1, 2].includes(semester)) {
+          plans[semester] = true;
+          uploaded++;
+        }
+      }
+    });
+  }
+  return { plans: plans, uploaded: uploaded, completed: Object.values(plans).filter(Boolean).length, target: 2 };
+}
+
+function buildShelterAchievementIndex(values) {
+  const index = new Map();
+  if (values.length < 2) return index;
+  const headers = values[0].map(value => String(value).trim());
+  const numberIndex = headers.indexOf('الرقم الإحصائي المستخدم');
+  const semesterIndex = headers.indexOf('الفصل الدراسي');
+  const statusIndex = headers.indexOf('حالة التقرير');
+  values.slice(1).forEach(row => {
+    const number = normalizeSchoolNumber(row[numberIndex]);
+    const semester = Number(row[semesterIndex]);
+    if (!number || ![1, 2].includes(semester) || String(row[statusIndex]).trim() !== 'مرفوع') return;
+    if (!index.has(number)) index.set(number, { plans: { 1: false, 2: false }, uploaded: 0 });
+    const entry = index.get(number);
+    entry.plans[semester] = true;
+    entry.uploaded++;
+  });
+  return index;
+}
+
+function mergeShelterAchievements(index, numbers) {
+  const plans = { 1: false, 2: false };
+  let uploaded = 0;
+  Array.from(new Set(numbers)).forEach(number => {
+    const entry = index.get(number);
+    if (entry) {
+      uploaded += entry.uploaded;
+      [1, 2].forEach(semester => { plans[semester] = plans[semester] || entry.plans[semester]; });
+    }
+  });
+  return { plans: plans, uploaded: uploaded, completed: Object.values(plans).filter(Boolean).length, target: 2 };
+}
+
+function getShelterReportsSheet() {
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = spreadsheet.getSheetByName(CONFIG.SHELTER_SHEET);
+  if (sheet) return sheet;
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    sheet = spreadsheet.getSheetByName(CONFIG.SHELTER_SHEET);
+    if (!sheet) {
+      sheet = spreadsheet.insertSheet(CONFIG.SHELTER_SHEET);
+      const headers = ['Report_ID', 'الرقم الإحصائي المستخدم', 'الأرقام الإحصائية', 'اسم المدرسة', 'المحافظة', 'المدينة', 'نوع التقرير', 'الفصل الدراسي', 'تاريخ التنفيذ',
+        'توعية الإنذار المبكر', 'التدريب على الاحتماء', 'تحديد مواقع الاحتماء', 'فريق الاستجابة', 'جاهزية الوسائل والتواصل', 'توعية أولياء الأمور', 'تنفيذ التمرين الفرضي', 'التوعية بعد زوال الخطر',
+        'عدد المشاركين', 'زمن الاستجابة بالدقائق', 'زمن الاستجابة بالثواني', 'الملاحظات والإجراءات التحسينية', 'إقرار مدير المدرسة', 'اسم مدير المدرسة', 'جوال مدير المدرسة', 'اسم المنسق/ة', 'جوال المنسق/ة', 'الكادر', 'اسم الملف', 'ملف_ID', 'رابط الملف', 'مجلد التقرير_ID', 'تاريخ الرفع', 'حالة التقرير'];
+      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+      sheet.setFrozenRows(1);
+      sheet.setRightToLeft(true);
+      sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold').setBackground('#00865f').setFontColor('#ffffff');
+    }
+    return sheet;
+  } finally { lock.releaseLock(); }
+}
+
+// Run once after publishing to prepare the independent report sheet.
+function setupShelterReports() {
+  getShelterReportsSheet();
+}
+
+function uploadShelterReport(data) {
+  let reportFolder = null;
+  let file = null;
+  try {
+    const systemStatus = readSystemStatus();
+    if (!systemStatus.isOpen) return systemClosedResponse(systemStatus);
+    const semester = Number(data.shelterSemester);
+    if (![1, 2].includes(semester)) throw new Error('يرجى اختيار فصل الاحتماء.');
+    const windowItem = getUploadReportWindow('uploadShelterReport', data);
+    if (!windowItem || !windowItem.isOpen) return reportWindowClosedResponse(windowItem || { label: 'خطة الاحتماء' });
+    const loginNumber = normalizeSchoolNumber(data.loginNumber);
+    const result = findSchoolByNumber(loginNumber);
+    if (!result || !isSchoolActiveForAdmin(result.school)) throw new Error('تعذر التحقق من المدرسة النشطة.');
+    const school = result.school;
+    if (!school['اسم منسق الأمن والسلامة'] || !normalizeSaudiPhone(school['جوال منسق الأمن والسلامة']) || !school['الكادر']) throw new Error('يرجى استكمال بيانات المنسق والكادر وحفظها أولًا.');
+    const procedures = Array.isArray(data.procedures) ? data.procedures : [];
+    if (!sanitizeText(data.notes, 3000)) throw new Error('يرجى إدخال الملاحظات والإجراءات التحسينية.');
+    if (procedures.length !== 8 || procedures.some(value => !['تم', 'جزئيًا', 'لم يتم'].includes(value))) throw new Error('يرجى تحديد حالة الإجراءات الثمانية.');
+    const participants = Number(data.participants);
+    const minutes = Number(data.responseMinutes);
+    const seconds = Number(data.responseSeconds);
+    if ([data.participants, data.responseMinutes, data.responseSeconds].some(value => value === '' || value === null || value === undefined) ||
+        !Number.isInteger(participants) || participants < 1 || !Number.isInteger(minutes) || minutes < 0 || !Number.isInteger(seconds) || seconds < 0 || seconds > 59 || minutes * 60 + seconds < 1) throw new Error('يرجى إدخال عدد المشاركين وزمن الاستجابة بشكل صحيح.');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(data.executionDate || ''))) throw new Error('يرجى تحديد تاريخ التنفيذ.');
+    if (data.declaration !== true) throw new Error('يلزم إقرار مدير المدرسة بصحة البيانات.');
+    if (data.mimeType !== 'application/pdf' || !/\.pdf$/i.test(String(data.fileName || ''))) throw new Error('يرجى إرفاق ملف PDF واحد.');
+    const bytes = Utilities.base64Decode(String(data.base64Data || ''));
+    if (!bytes.length || bytes.length > 10 * 1024 * 1024 || bytes.slice(0, 5).map(value => String.fromCharCode(value & 255)).join('') !== '%PDF-') throw new Error('المرفق يجب أن يكون PDF صالحًا بحجم لا يتجاوز 10 ميجابايت.');
+    const attempt = prepareReportUpload('uploadShelterReport', data);
+    if (attempt.response) return attempt.response;
+    let folderId = String(school.Folder_ID || '').trim();
+    if (!folderId) {
+      const folderResult = JSON.parse(prepareSchoolFolder({ loginNumber: loginNumber }).getContent());
+      if (!folderResult.success) throw new Error(folderResult.message || 'تعذر تهيئة مجلد المدرسة.');
+      folderId = folderResult.data.folderId;
+    }
+    const typeFolder = getOrCreateChildFolder(DriveApp.getFolderById(folderId), 'خطط الاحتماء');
+    const label = semester === 1 ? 'خطة الاحتماء الفصل الأول' : 'خطة الاحتماء الفصل الثاني';
+    reportFolder = typeFolder.createFolder(label + '_' + attempt.reportId);
+    const safeName = sanitizeFileName(data.fileName);
+    file = reportFolder.createFile(Utilities.newBlob(bytes, 'application/pdf', safeName));
+    const sheet = getShelterReportsSheet();
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getDisplayValues()[0];
+    const record = {
+      'Report_ID': attempt.reportId, 'الرقم الإحصائي المستخدم': loginNumber, 'الأرقام الإحصائية': school['الأرقام الإحصائية'] || '',
+      'اسم المدرسة': school['اسم المدرسة'] || '', 'المحافظة': school['المحافظة'] || '', 'المدينة': school['المدينة'] || '',
+      'نوع التقرير': label, 'الفصل الدراسي': semester, 'تاريخ التنفيذ': data.executionDate,
+      'عدد المشاركين': participants, 'زمن الاستجابة بالدقائق': minutes, 'زمن الاستجابة بالثواني': seconds,
+      'الملاحظات والإجراءات التحسينية': sanitizeText(data.notes, 3000), 'إقرار مدير المدرسة': 'أقر بصحة البيانات وتنفيذ الإجراءات وفق دليل التوعية والسلامة للبيئة المدرسية',
+      'اسم مدير المدرسة': school['اسم مدير المدرسة'] || '', 'جوال مدير المدرسة': school['جوال مدير المدرسة'] || '',
+      'اسم المنسق/ة': school['اسم منسق الأمن والسلامة'] || '', 'جوال المنسق/ة': school['جوال منسق الأمن والسلامة'] || '', 'الكادر': school['الكادر'] || '',
+      'اسم الملف': safeName, 'ملف_ID': file.getId(), 'رابط الملف': file.getUrl(), 'مجلد التقرير_ID': reportFolder.getId(), 'تاريخ الرفع': new Date(), 'حالة التقرير': 'مرفوع'
+    };
+    headers.slice(9, 17).forEach((header, index) => { record[header] = procedures[index]; });
+    const writeResult = appendRowWithScriptLock(sheet, headers.map(header => record[header] === undefined ? '' : record[header]), { reportId: attempt.reportId, loginNumber: loginNumber });
+    discardDuplicateUploadResources(writeResult, file, reportFolder);
+    return jsonResponse({ success: true, message: 'تم رفع تقرير الاحتماء بنجاح.', data: { reportId: attempt.reportId, duplicate: Boolean(writeResult && writeResult.duplicate) } });
+  } catch (error) {
+    if (file) file.setTrashed(true);
+    if (reportFolder) reportFolder.setTrashed(true);
+    return jsonResponse({ success: false, error: 'SHELTER_UPLOAD_FAILED', message: String(error.message || 'تعذر رفع التقرير.') });
+  }
+}
+
 function getAchievementMessage(
   score,
   maxScore

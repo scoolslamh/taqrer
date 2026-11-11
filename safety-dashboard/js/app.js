@@ -5,6 +5,13 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+  ['reportTypeFilter', 'adminReportTypeFilter', 'adminSupervisorReportTypeFilter'].forEach(id => {
+    const select = document.getElementById(id);
+    if (select) {
+      select.add(new Option('خطة الاحتماء الفصل الأول', 'shelterFirst'));
+      select.add(new Option('خطة الاحتماء الفصل الثاني', 'shelterSecond'));
+    }
+  });
 
   /*
    * =====================================================
@@ -341,6 +348,9 @@ const EVACUATION_PLAN_LABELS = {
 };
 
 const REPORT_TYPE_LABELS = {
+  shelter: 'خطط الاحتماء',
+  shelterFirst: 'خطة الاحتماء الفصل الأول',
+  shelterSecond: 'خطة الاحتماء الفصل الثاني',
   safetyMoment: 'لحظة سلامة',
   civilDefense:
     'اليوم العالمي للدفاع المدني',
@@ -587,7 +597,7 @@ function isReportCompleted(
 
 function isAllReportsCompleted(school) {
 
-  return isAllEvacuationPlansCompleted(
+  return isReportCompleted(school, 'shelter') && isAllEvacuationPlansCompleted(
     school
   ) &&
     isReportCompleted(
@@ -944,6 +954,8 @@ function buildSchoolExportRows(
         options.supervisorName || '',
       achievementPercentage:
         `${getSchoolPercentage(school)}%`,
+      shelterFirst: achievement.shelter?.plans?.[1] ? 'تم الرفع' : 'لم يتم الرفع',
+      shelterSecond: achievement.shelter?.plans?.[2] ? 'تم الرفع' : 'لم يتم الرفع',
       evacuationProgress:
         formatExportProgress(
           achievement.evacuation
@@ -978,6 +990,8 @@ function buildSchoolExportRows(
 
 
 const SCHOOL_EXPORT_COLUMNS = [
+  { key: 'shelterFirst', header: 'الاحتماء الفصل الأول', width: 24 },
+  { key: 'shelterSecond', header: 'الاحتماء الفصل الثاني', width: 24 },
   { key: 'sequence', header: 'م', width: 7 },
   { key: 'schoolName', header: 'اسم المدرسة', width: 30 },
   { key: 'statisticalNumbers', header: 'الأرقام الإحصائية', width: 22 },
@@ -1397,6 +1411,8 @@ function createSchoolCard(school, index) {
 
 
       <div class="requirements-grid">
+        ${createRequirementHTML('الاحتماء الفصل الأول', achievement.shelterFirst)}
+        ${createRequirementHTML('الاحتماء الفصل الثاني', achievement.shelterSecond)}
 
         ${createRequirementHTML(
           'خطط الإخلاء',
@@ -1742,6 +1758,7 @@ function ensureReportsViewerModal() {
           <option value="safetyMoment">لحظة سلامة</option>
           <option value="civilDefense">الدفاع المدني</option>
           <option value="trafficWeek">أسبوع المرور</option>
+          <option value="shelter">خطط الاحتماء</option>
         </select>
       </div>
       <div id="reportsViewerState" class="reports-viewer-state">جاري تحميل التقارير...</div>
