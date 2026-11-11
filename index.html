@@ -1270,14 +1270,9 @@ body.instructions-open {
 
           <div class="achievement-reports">
             <div class="achievement-report">
-              <div class="achievement-report-name">الاحتماء الفصل الأول</div>
-              <div id="achievementShelterFirstCount" class="achievement-report-count">0 من 1</div>
-              <div id="achievementShelterFirstStatus" class="achievement-report-status"></div>
-            </div>
-            <div class="achievement-report">
-              <div class="achievement-report-name">الاحتماء الفصل الثاني</div>
-              <div id="achievementShelterSecondCount" class="achievement-report-count">0 من 1</div>
-              <div id="achievementShelterSecondStatus" class="achievement-report-status"></div>
+              <div class="achievement-report-name">تمارين خطة الاحتماء</div>
+              <div id="achievementShelterCount" class="achievement-report-count">0 من 2</div>
+              <div id="achievementShelterStatus" class="achievement-report-status"></div>
             </div>
             <div class="achievement-report">
               <div class="achievement-report-name">خطط الإخلاء</div>
@@ -5130,8 +5125,7 @@ function renderAchievementReport(
 
 
 function renderAchievement(data) {
-  renderAchievementReport('achievementShelterFirstCount', 'achievementShelterFirstStatus', data.shelterFirst);
-  renderAchievementReport('achievementShelterSecondCount', 'achievementShelterSecondStatus', data.shelterSecond);
+  renderAchievementReport('achievementShelterCount', 'achievementShelterStatus', data.shelter);
 
   const score = Math.floor(
     getAchievementNumber(data.score)
@@ -5767,6 +5761,49 @@ function setSaveLoading(
       ? '<span class="loader"></span> جاري الحفظ...'
       : 'حفظ البيانات';
 }
+
+// Restore the existing tab session only after checking current server data.
+document.addEventListener("DOMContentLoaded", async function restoreSchoolSession() {
+  let savedSchool;
+  try {
+    savedSchool = JSON.parse(sessionStorage.getItem("schoolData") || "null");
+  } catch (error) {
+    sessionStorage.removeItem("schoolData");
+    return;
+  }
+
+  const number = normalizeSchoolNumber(savedSchool?.loginNumber);
+  if (!number) return;
+
+  schoolNumber.value = number;
+  setLoginLoading(true);
+  try {
+    const response = await fetch(
+      `${API_URL}?action=getSchoolDashboard&number=${encodeURIComponent(number)}`,
+      { method: "GET", cache: "no-store" }
+    );
+    if (!response.ok) throw new Error("HTTP Error");
+    const result = await response.json();
+    if (!result.success || !result.data?.school) {
+      if (["SCHOOL_NOT_FOUND", "SCHOOL_INACTIVE", "NUMBER_REQUIRED"].includes(result.error)) {
+        sessionStorage.removeItem("schoolData");
+      }
+      showMessage(loginMessage, result.message || "تعذر استعادة جلسة المدرسة.", "error");
+      return;
+    }
+
+    currentSchool = result.data.school;
+    currentReportWindows = Array.isArray(result.data.reportWindows)
+      ? result.data.reportWindows : [];
+    applyReportWindowAvailability();
+    sessionStorage.setItem("schoolData", JSON.stringify(currentSchool));
+    openDashboard(currentSchool, result.data.reports, result.data.achievement);
+  } catch (error) {
+    showMessage(loginMessage, "تعذر استعادة الجلسة بسبب الاتصال. أعد تحديث الصفحة للمحاولة مجددًا.", "error");
+  } finally {
+    setLoginLoading(false);
+  }
+});
 
 </script>
 

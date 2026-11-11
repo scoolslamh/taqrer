@@ -34,8 +34,13 @@ shelterForm.innerHTML = `
     <h4>ثانيًا: نتائج التنفيذ</h4>
     <div class="report-form-grid">
       <div class="field"><label for="shelterParticipants">عدد المشاركين في التمرين الفرضي</label><input id="shelterParticipants" type="number" min="1" step="1" required></div>
-      <div class="field"><label for="shelterMinutes">زمن الاستجابة: دقائق</label><input id="shelterMinutes" type="number" min="0" step="1" required></div>
-      <div class="field"><label for="shelterSeconds">زمن الاستجابة: ثوانٍ</label><input id="shelterSeconds" type="number" min="0" max="59" step="1" required></div>
+      <fieldset style="border:1px solid #d7dfdc;border-radius:12px;padding:12px;min-width:0;margin:0">
+        <legend>زمن الاستجابة</legend>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+          <div class="field"><label for="shelterMinutes">الدقائق</label><select id="shelterMinutes" required><option value="">اختر</option>${Array.from({ length: 61 }, (_, value) => `<option value="${value}">${value}</option>`).join('')}</select></div>
+          <div class="field"><label for="shelterSeconds">الثواني</label><select id="shelterSeconds" required><option value="">اختر</option>${Array.from({ length: 60 }, (_, value) => `<option value="${value}">${value}</option>`).join('')}</select></div>
+        </div>
+      </fieldset>
     </div>
     <div class="field"><label for="shelterNotes">أبرز الملاحظات والإجراءات التحسينية</label><textarea id="shelterNotes" rows="3" maxlength="3000" required></textarea></div>
     <h4>ثالثًا: شواهد التنفيذ</h4>

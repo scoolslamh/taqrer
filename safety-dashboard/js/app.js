@@ -1312,18 +1312,18 @@ function createSchoolCard(school, index) {
       name: String(
         school?.principalName || ''
       ).trim(),
-      phone: String(
+      phone: normalizeContactPhone(
         school?.principalPhone || ''
-      ).trim()
+      )
     },
     {
       role: 'منسق الأمن والسلامة',
       name: String(
         school?.coordinatorName || ''
       ).trim(),
-      phone: String(
+      phone: normalizeContactPhone(
         school?.coordinatorPhone || ''
-      ).trim()
+      )
     }
   ].filter(contact => contact.name || contact.phone);
 
@@ -1411,8 +1411,7 @@ function createSchoolCard(school, index) {
 
 
       <div class="requirements-grid">
-        ${createRequirementHTML('الاحتماء الفصل الأول', achievement.shelterFirst)}
-        ${createRequirementHTML('الاحتماء الفصل الثاني', achievement.shelterSecond)}
+        ${createRequirementHTML('تمارين خطة الاحتماء', achievement.shelter)}
 
         ${createRequirementHTML(
           'خطط الإخلاء',
@@ -1528,7 +1527,7 @@ function normalizeContactPhone(value) {
   const arabicDigits = '٠١٢٣٤٥٦٧٨٩';
   const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
 
-  return String(value || '')
+  let phone = String(value || '')
     .replace(/[٠-٩]/g, digit =>
       String(arabicDigits.indexOf(digit))
     )
@@ -1536,6 +1535,16 @@ function normalizeContactPhone(value) {
       String(persianDigits.indexOf(digit))
     )
     .replace(/\D/g, '');
+
+  if (/^009665\d{8}$/.test(phone)) {
+    phone = '0' + phone.slice(5);
+  } else if (/^9665\d{8}$/.test(phone)) {
+    phone = '0' + phone.slice(3);
+  } else if (/^5\d{8}$/.test(phone)) {
+    phone = '0' + phone;
+  }
+
+  return phone;
 }
 
 
@@ -1626,7 +1635,7 @@ function openSchoolPhoneMenu(button) {
   menu.innerHTML = `
     <button type="button" data-phone-action="copy" role="menuitem">نسخ</button>
     <a href="https://wa.me/${whatsappPhone}" target="_blank" rel="noopener noreferrer" role="menuitem">واتساب</a>
-    <a href="tel:${phone}" role="menuitem">اتصال</a>
+    <a href="tel:${/^05\d{8}$/.test(phone) ? '+' + whatsappPhone : phone}" role="menuitem">اتصال</a>
   `;
 
   document.body.appendChild(menu);
@@ -1654,7 +1663,7 @@ function openSchoolPhoneMenu(button) {
 
   menu.style.left = `${left}px`;
   menu.style.top = `${Math.max(horizontalMargin, top)}px`;
-  menu.dataset.phone = rawPhone;
+  menu.dataset.phone = phone;
 
   activePhoneButton = button;
   button.setAttribute('aria-expanded', 'true');
