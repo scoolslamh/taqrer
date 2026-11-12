@@ -1597,14 +1597,14 @@ body.instructions-open {
 
           <div class="field">
             <label for="evacuationPlanNumber">
-              خطة الإخلاء/الاحتماء
+              اختر نوع الخطة
             </label>
             <select
               id="evacuationPlanNumber"
               required
             >
               <option value="">
-                اختر خطة الإخلاء/الاحتماء
+                اختر نوع الخطة
               </option>
               <option value="1">
                 خطة الإخلاء الأولى
@@ -2877,12 +2877,13 @@ function applyReportWindowAvailability() {
       const windowItem = getReportWindow(
         `EVACUATION_${planNumber}`
       );
-      option.disabled = Boolean(
+      const isClosed = Boolean(
         windowItem && !windowItem.isOpen
       );
+      option.disabled = false;
       option.textContent = option.textContent
         .replace(/ \(مغلقة\)$/, "") +
-        (option.disabled ? " (مغلقة)" : "");
+        (isClosed ? " (مغلقة)" : "");
     });
     if (planSelect.selectedOptions[0]?.disabled) {
       planSelect.value = "";
@@ -3785,7 +3786,7 @@ evacuationForm.addEventListener(
     ) {
       showMessage(
         evacuationMessage,
-        "يرجى اختيار خطة الإخلاء.",
+        "يرجى اختيار نوع الخطة قبل رفع التقرير.",
         "error"
       );
       return;

@@ -57,27 +57,45 @@ evacuationForm.after(shelterForm);
 function syncShelterForm() {
   const semester = Number(shelterPlanSelect.value.replace('shelter_', ''));
   const selected = shelterPlanSelect.value.startsWith('shelter_');
+  const planNumber = Number(shelterPlanSelect.value);
+  const validEvacuation = [1, 2, 3, 4].includes(planNumber);
+  const key = selected ? `SHELTER_${semester}` : validEvacuation ? `EVACUATION_${planNumber}` : '';
+  const message = key ? getClosedReportWindowMessage(key) : '';
+  const showEvacuationFields = validEvacuation && !message;
+  const showShelterFields = selected && !message && evacuationForm.classList.contains('show');
   evacuationForm.querySelectorAll('.field').forEach(field => {
-    if (!field.contains(shelterPlanSelect)) field.style.display = selected ? 'none' : '';
+    if (!field.contains(shelterPlanSelect)) field.style.display = showEvacuationFields ? '' : 'none';
   });
   evacuationForm.querySelectorAll('input,textarea,button[type="submit"]').forEach(field => {
-    field.disabled = selected;
-    field.hidden = selected;
+    field.disabled = !showEvacuationFields;
+    field.hidden = !showEvacuationFields;
   });
-  evacuationForm.querySelector('.declaration-box').style.display = selected ? 'none' : '';
-  evacuationSubmitButton.style.display = selected ? 'none' : '';
-  shelterForm.classList.toggle('show', selected && evacuationForm.classList.contains('show'));
-  if (selected) {
+  evacuationForm.querySelector('.declaration-box').style.display = showEvacuationFields ? '' : 'none';
+  evacuationForm.querySelector('.report-submit-actions').style.display = showEvacuationFields ? '' : 'none';
+  evacuationSubmitButton.style.display = showEvacuationFields ? '' : 'none';
+  evacuationForm.querySelector('.evacuation-form-description').textContent = key
+    ? 'أدخل بيانات الخطة وأرفق التقرير بصيغة PDF.'
+    : 'اختر نوع الخطة من القائمة لعرض الحقول المطلوبة.';
+  clearMessage(evacuationMessage);
+  if (message) showMessage(evacuationMessage, message, 'error');
+  shelterForm.classList.toggle('show', showShelterFields);
+  document.getElementById('shelterFields').disabled = !showShelterFields;
+  if (showShelterFields) {
     const item = getReportWindow(`SHELTER_${semester}`);
-    const message = getClosedReportWindowMessage(`SHELTER_${semester}`);
     document.getElementById('shelterTitle').textContent = item?.label || 'تقرير خطة الاحتماء';
-    document.getElementById('shelterFields').disabled = Boolean(message);
-    showMessage(document.getElementById('shelterClosedMessage'), message, 'error');
+    clearMessage(document.getElementById('shelterClosedMessage'));
   }
 }
 shelterPlanSelect.addEventListener('change', syncShelterForm);
 evacuationCancelButton.addEventListener('click', syncShelterForm);
-document.querySelectorAll('.report-type-btn').forEach(button => button.addEventListener('click', syncShelterForm));
+document.querySelectorAll('.report-type-btn').forEach(button => button.addEventListener('click', () => {
+  if (button.dataset.reportType === 'تقرير خطة إخلاء') {
+    shelterPlanSelect.value = '';
+    clearMessage(document.getElementById('shelterMessage'));
+  }
+  syncShelterForm();
+}));
+syncShelterForm();
 document.getElementById('shelterCancel').addEventListener('click', () => {
   shelterForm.reset();
   shelterPlanSelect.value = '';
